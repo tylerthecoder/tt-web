@@ -1,0 +1,42 @@
+{
+  "name": "tylertracy-website",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "start:prod": "yarn && yarn build && yarn start"
+  },
+  "dependencies": {
+    "@tailwindcss/typography": "^0.5.10",
+    "autoprefixer": "^10.4.0",
+    "framer-motion": "^6.2.3",
+    "next": "^14.0.4",
+    "postcss": "^8.3.11",
+    "react": "^18.2.0",
+    "react-date-picker": "^9.0.0",
+    "react-dom": "^18.2.0",
+    "react-flip-move": "^3.0.4",
+    "sharp": "^0.30.4",
+    "tailwindcss": "^3.0.24",
+    "tt-services": "file:../tt-services",
+    "turbo": "^1.10.16",
+    "rehype-katex": "^6.0.2",
+    "rehype-stringify": "^9.0.3",
+    "remark": "^14.0.2",
+    "remark-html": "^15.0.1",
+    "remark-math": "^5.1.1",
+    "remark-parse": "^10.0.1",
+    "remark-rehype": "^10.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "20.12.8",
+    "@types/react": "^18.2.21",
+    "@types/react-modal": "^3.13.1",
+    "eslint": "8.29.0",
+    "eslint-config-next": "^14.0.0",
+    "typescript": "^5.2.2"
+  }
+}
