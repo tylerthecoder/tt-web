@@ -14,5 +14,9 @@ export function RandomBackground() {
     () => backgrounds[Math.floor(Math.random() * backgrounds.length)],
     []
   );
-  return <Background />;
+  return (
+    <div className="fixed top-0 bottom-0 left-0 right-0 pointer-events-none -z-1">
+      <Background />
+    </div>
+  );
 }

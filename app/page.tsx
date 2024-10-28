@@ -1,5 +1,4 @@
 "use client";
-import useTypeyText from "../utils/hooks/useTypyText";
 import headshotPic from "../public/headshot.webp";
 import { CrazyImage } from "../components/CrazyImage";
 import Image from "next/image";
@@ -9,8 +8,14 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import Head from "next/head";
 import { RandomBackground } from "../components/Backgrounds/RandomBackground";
+import { Bubblegum_Sans } from 'next/font/google'
+import useTypeyText from "../hooks/useTypyText";
 
-
+const bubblegum = Bubblegum_Sans({
+  weight: "400",
+  subsets: ["latin"],
+  display: "swap",
+});
 
 
 const RESUME_URL = "https://files.tylertracy.com/resume.pdf";
@@ -27,7 +32,7 @@ const Subtitle = () => {
 
   return (
     <div>
-      <p className="text-white text-center text-xl h-8">
+      <p className={`text-white text-center text-xl h-8 ${bubblegum.className}`}>
         {typedText}
         {cursor && <span className="w-0"> | </span>}
       </p>
@@ -85,11 +90,9 @@ const Home = () => {
         <title>Tyler Tracy</title>
       </Head>
 
-      <div className="w-full h-screen flex md:flex-row flex-col">
-        <div className="fixed top-0 bottom-0 left-0 right-0 pointer-events-none -z-1">
-          {showBg && <RandomBackground />}
-          {!showBg && <div className="bg-black w-full h-full"></div>}
-        </div>
+      <RandomBackground />
+
+      <div className="w-full h-full flex md:flex-row flex-col">
         <div className="md:w-[300px] w-full md:border-2 border-white rounded-2xl m-2 p-2">
           <div className="flex justify-center z-0">
             <CrazyImage
@@ -143,9 +146,9 @@ const Home = () => {
         </div>
         <div className="md:overflow-y-auto w-full">
           <div className="flex-grow my-2 max-w-[800px] mx-auto ">
-            <h1 className="text-6xl text-white text-center"> Hi, I'm Tyler </h1>
+            <h1 className={`text-6xl text-white text-center ${bubblegum.className}`}> Hi, I'm Tyler </h1>
             <Subtitle />
-            <article className="mt-4 mx-3 prose lg:prose-2xl prose-neutral prose-invert">
+            <article className={`mt-4 mx-3 prose lg:prose-2xl prose-neutral prose-invert ${bubblegum.className}`}>
               <h2> Quick Facts </h2>
               <ul>
                 <li> MATS fellow at Redwood Research </li>

@@ -1,7 +1,7 @@
 import { NextPage } from "next";
 import FullHeaderPage from "../views/FullHeaderPage";
 import Head from "next/head";
-import useTypeyText from "../utils/hooks/useTypyText";
+import useTypeyText from "../hooks/useTypyText";
 
 const Panel: NextPage = () => {
   const { typedText: welcomeMessage, cursor } = useTypeyText("Welcome Tylord");

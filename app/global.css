@@ -11,14 +11,6 @@ body,
   height: 100%;
 }
 
-.body-text {
-  font-family: "DM Sans", sans-serif;
-}
-
-.fun-text {
-  font-family: "DM Sans", sans-serif;
-}
-
 * {
   box-sizing: border-box;
 }

@@ -9,14 +9,6 @@ export type CurrentSong = {
   imageUrl: string;
 };
 
-export type Creation = {
-  name: string;
-  description: string;
-  link: string;
-  type: string;
-  img: string;
-};
-
 export type SearchTrack = {
   trackName: string;
   imgUrl: string;
@@ -27,12 +19,6 @@ export type SearchTrack = {
 class ApiClass {
   async getCurrentSong(): Promise<CurrentSong> {
     const res = await fetch(`${SERVER_URL}/me/listening-to`);
-    const data = await res.json();
-    return data;
-  }
-
-  async getCreations(): Promise<Creation[]> {
-    const res = await fetch(`${SERVER_URL}/me/creations`);
     const data = await res.json();
     return data;
   }

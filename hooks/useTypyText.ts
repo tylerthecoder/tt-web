@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
-import { wait } from "../time";
 
+export async function wait(ms: number) {
+	await new Promise<void>(r => {
+		setTimeout(() => {
+			r()
+		}, ms)
+	})
+}
 
 export default function useTypeyText(text: string) {
 	const [typedText, setTypedText] = useState('');

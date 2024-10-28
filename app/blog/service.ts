@@ -7,6 +7,7 @@ import { remark } from "remark";
 import html from "remark-html";
 import remarkMath from "remark-math";
 import remarkRehype from "remark-rehype";
+import { TylersThingsService } from "../tt-service";
 
 export default async function markdownToHtml(markdown: string) {
   const result = await remark()
@@ -22,24 +23,15 @@ export default async function markdownToHtml(markdown: string) {
 
 export class BlogServiceClass {
 
-  private tylersThings: TylersThings | null = null;
-
-  private async getTylersThings() {
-    if (!this.tylersThings) {
-      this.tylersThings = await TylersThings.make();
-    }
-    return this.tylersThings;
-  }
-
   async getBlogs() {
-    const tylersThings = await this.getTylersThings();
+    const tylersThings = await TylersThingsService.get();
     const blogs = await tylersThings.notes.getPublishedNotes();
     console.log("Fetched blogs", blogs);
     return blogs;
   }
 
   async getBlog(id: string) {
-    const tylersThings = await this.getTylersThings();
+    const tylersThings = await TylersThingsService.get();
     const blog = await tylersThings.notes.getNoteById(id);
     if (!blog) {
       throw new Error(`Blog with id ${id} not found`);

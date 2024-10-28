@@ -8,16 +8,6 @@ class MyDocument extends Document {
     return (
       <Html>
         <Head>
-          <link rel="preconnect" href="https://fonts.googleapis.com" />
-          <link
-            rel="preconnect"
-            href="https://fonts.gstatic.com"
-            crossOrigin={"anonymous"}
-          />
-          <link
-            href="https://fonts.googleapis.com/css2?family=Bubblegum+Sans&family=DM+Sans:wght@500&display=swap"
-            rel="stylesheet"
-          />
           <link rel="icon" href="/pi.png" sizes="any" />
         </Head>
         <body>
