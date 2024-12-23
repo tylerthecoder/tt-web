@@ -1,6 +1,6 @@
 import Image from "next/legacy/image";
-import API, { Creation } from "../../services/api";
-import { TylersThingsService } from "../tt-service";
+import { TylersThingsService,  } from "../tt-service";
+import { Creation } from "tt-services";
 
 interface IProjectProps {
 	creation: Creation;
