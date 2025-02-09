@@ -21,7 +21,7 @@
     "react-flip-move": "^3.0.4",
     "sharp": "^0.30.4",
     "tailwindcss": "^3.0.24",
-    "tt-services": "file:../tt-services",
+    "tt-services": "github:tylerthecoder/tt-services",
     "turbo": "^1.10.16",
     "rehype-katex": "^6.0.2",
     "rehype-stringify": "^9.0.3",
