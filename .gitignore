@@ -2,8 +2,6 @@
 .env
 google-keys.json
 
-bun.lockb
-
 # dependencies
 /node_modules
 /.pnp
