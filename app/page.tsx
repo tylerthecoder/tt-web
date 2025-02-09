@@ -10,6 +10,7 @@ import Head from "next/head";
 import { RandomBackground } from "../components/Backgrounds/RandomBackground";
 import { Bubblegum_Sans } from 'next/font/google'
 import useTypeyText from "../hooks/useTypyText";
+import { useRouter } from "next/navigation";
 
 const bubblegum = Bubblegum_Sans({
   weight: "400",
@@ -74,6 +75,7 @@ const HomButton = (props: {
 const Home = () => {
   const showBg = true;
   const [currentSong, setCurrentSong] = useState<CurrentSong | null>(null);
+  const router = useRouter();
 
   const fetchData = async () => {
     const song = await API.getCurrentSong();
@@ -83,6 +85,10 @@ const Home = () => {
   useEffect(() => {
     fetchData();
   }, []);
+
+  const handleNameDoubleClick = () => {
+    router.push('/login');
+  };
 
   return (
     <div>
@@ -146,7 +152,12 @@ const Home = () => {
         </div>
         <div className="md:overflow-y-auto w-full">
           <div className="flex-grow my-2 max-w-[800px] mx-auto ">
-            <h1 className={`text-6xl text-white text-center ${bubblegum.className}`}> Hi, I'm Tyler </h1>
+            <h1
+              className={`text-6xl text-white text-center ${bubblegum.className}`}
+              onDoubleClick={handleNameDoubleClick}
+            >
+              Hi, I'm Tyler
+            </h1>
             <Subtitle />
             <article className={`mt-4 mx-3 prose lg:prose-2xl prose-neutral prose-invert ${bubblegum.className}`}>
               <h2> Quick Facts </h2>

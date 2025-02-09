@@ -10,8 +10,14 @@
     "start:prod": "yarn && yarn build && yarn start"
   },
   "dependencies": {
+    "@milkdown/core": "^7.6.2",
+    "@milkdown/ctx": "^7.6.2",
+    "@milkdown/preset-commonmark": "^7.6.2",
+    "@milkdown/react": "^7.6.2",
+    "@milkdown/theme-nord": "^7.6.2",
     "@tailwindcss/typography": "^0.5.10",
     "autoprefixer": "^10.4.0",
+    "bcrypt": "^5.1.1",
     "framer-motion": "^6.2.3",
     "next": "^14.0.4",
     "postcss": "^8.3.11",
@@ -28,10 +34,11 @@
     "remark-rehype": "^10.1.0",
     "sharp": "^0.30.4",
     "tailwindcss": "^3.0.24",
-    "tt-services": "github:tylerthecoder/tt-services",
+    "tt-services": "github:tylertracy/tt-services",
     "turbo": "^1.10.16"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
     "@types/node": "20.12.8",
     "@types/react": "^18.2.21",
     "@types/react-modal": "^3.13.1",
