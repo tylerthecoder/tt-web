@@ -14,10 +14,7 @@ export async function login(formData: FormData): Promise<{ success: boolean, err
 
     try {
         console.log(ADMIN_PASSWORD, password);
-        const isValid = await bcrypt.compare(password, ADMIN_PASSWORD);
-        console.log(isValid);
-
-        if (!isValid) {
+        if (ADMIN_PASSWORD !== password) {
             return { success: false, error: 'Invalid password' };
         }
 
