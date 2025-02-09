@@ -1,7 +1,4 @@
-import { TylersThings } from "tt-services";
-
-
-import rehypeKatex from "rehype-katex";
+// import rehypeKatex from "rehype-katex";
 import rehypeStringify from "rehype-stringify";
 import { remark } from "remark";
 import html from "remark-html";
@@ -14,7 +11,7 @@ export default async function markdownToHtml(markdown: string) {
     .use(html)
     .use(remarkMath)
     .use(remarkRehype)
-    .use(rehypeKatex)
+    // .use(rehypeKatex)
     .use(rehypeStringify)
     .process(markdown);
 
