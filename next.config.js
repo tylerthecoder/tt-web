@@ -5,4 +5,5 @@ module.exports = {
     domains: ["i.scdn.co", "files.tylertracy.com"]
   },
   output: "standalone",
+  transpilePackages: ["tt-services"],
 };

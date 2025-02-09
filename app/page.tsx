@@ -151,7 +151,7 @@ const Home = () => {
             <article className={`mt-4 mx-3 prose lg:prose-2xl prose-neutral prose-invert ${bubblegum.className}`}>
               <h2> Quick Facts </h2>
               <ul>
-                <li> MATS fellow at Redwood Research </li>
+                <li> Member of Technical Staff at Redwood Research </li>
                 <li>
                   Working on AI control
                 </li>
