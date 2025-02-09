@@ -3,13 +3,10 @@
 import { cookies } from 'next/headers';
 import bcrypt from 'bcrypt';
 
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
-if (!ADMIN_PASSWORD) {
-    throw new Error('ADMIN_PASSWORD is not defined');
-}
-
 export async function login(formData: FormData): Promise<{ success: boolean, error?: string }> {
     const password = formData.get('password') as string;
+
+    const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
     if (!ADMIN_PASSWORD) {
         throw new Error('ADMIN_PASSWORD is not defined');
