@@ -15,6 +15,7 @@ const NavBar = () => {
 				<>
 					<NavItem label="Panel" href="/panel" />
 					<NavItem label="Notes" href="/notes" />
+					<NavItem label="Lists" href="/lists" />
 				</>
 			)}
 		</ul>

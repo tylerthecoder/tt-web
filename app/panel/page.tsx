@@ -4,6 +4,7 @@ import Image from "next/image";
 import { WeeklyTodos } from './weekly-todos';
 import { MilkdownEditorWrapper } from "./markdown-editor";
 import { getCurrentWeek } from './actions';
+import { AgeCounter } from '../components/age-counter';
 
 const bubblegum = Bubblegum_Sans({
     weight: "400",
@@ -47,22 +48,27 @@ const ROCKET_URL = "https://app.rocketmoney.com";
 
 export default async function PanelPage() {
     const week = await getCurrentWeek();
+    const weekStart = new Date(week.startDate);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekEnd.getDate() + 6);
+
+    const formatDate = (date: Date) => {
+        return date.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric'
+        });
+    };
 
     return (
         <div className="flex flex-col min-h-screen">
-            <div className="flex flex-wrap justify-center p-4 bg-gray-800 bg-opacity-50">
-                <PanelButton
-                    text="Github"
-                    href={GITHUB_URL}
-                    iconSrc="/github.png"
-                    iconAlt="Github logo"
-                />
-                <PanelButton
-                    text="Rocket Money"
-                    href={ROCKET_URL}
-                    iconSrc="/money.png"
-                    iconAlt="Rocket Money logo"
-                />
+            <div className="p-4 bg-gray-800 bg-opacity-50">
+                <div className="flex justify-between items-center">
+                    <h1 className="text-2xl text-white">
+                        Week of {formatDate(weekStart)} - {formatDate(weekEnd)}
+                    </h1>
+                    <AgeCounter />
+                </div>
             </div>
 
             <div className="flex flex-col lg:flex-row flex-grow p-4 gap-4">

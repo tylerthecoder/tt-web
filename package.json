@@ -18,6 +18,7 @@
     "@tailwindcss/typography": "^0.5.10",
     "autoprefixer": "^10.4.0",
     "bcrypt": "^5.1.1",
+    "date-fns": "^4.1.0",
     "framer-motion": "^6.2.3",
     "next": "^14.0.4",
     "postcss": "^8.3.11",
@@ -34,7 +35,7 @@
     "remark-rehype": "^10.1.0",
     "sharp": "^0.30.4",
     "tailwindcss": "^3.0.24",
-    "tt-services": "github:tylerthecoder/tt-services",
+    "tt-services": "file:../tt-services",
     "turbo": "^1.10.16"
   },
   "devDependencies": {

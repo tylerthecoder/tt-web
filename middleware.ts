@@ -2,9 +2,10 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
-    // Protect both panel and notes routes
+    // Protect panel, notes, and lists routes
     if (!request.nextUrl.pathname.startsWith('/panel') &&
-        !request.nextUrl.pathname.startsWith('/notes')) {
+        !request.nextUrl.pathname.startsWith('/notes') &&
+        !request.nextUrl.pathname.startsWith('/lists')) {
         return NextResponse.next();
     }
 
@@ -18,5 +19,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-    matcher: ['/panel/:path*', '/notes/:path*']
+    matcher: ['/panel/:path*', '/notes/:path*', '/lists/:path*']
 };

@@ -14,7 +14,15 @@ export default async function NotesPage() {
 
     return (
         <div className="min-h-screen bg-gray-900 text-white p-8">
-            <h1 className="text-4xl font-bold mb-8">Notes</h1>
+            <div className="flex justify-between items-center mb-8">
+                <h1 className="text-4xl font-bold">Notes</h1>
+                <Link
+                    href="/notes/create"
+                    className="bg-blue-500 px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+                >
+                    Create Note
+                </Link>
+            </div>
 
             <div className="grid gap-4">
                 {notes.map((note) => (
