@@ -2,7 +2,7 @@
 module.exports = {
   reactStrictMode: true,
   images: {
-    domains: ["i.scdn.co", "files.tylertracy.com"]
+    domains: ["i.scdn.co", "files.tylertracy.com"],
   },
   output: "standalone",
   transpilePackages: ["tt-services"],
