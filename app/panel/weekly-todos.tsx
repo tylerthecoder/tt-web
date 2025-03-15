@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { Week, WeekTodo } from "tt-services";
-import { addTodo, getCurrentWeek, toggleTodo, updateTodoContent } from "./actions";
+import { addTodo, getCurrentWeek, deleteTodo, toggleTodo, updateTodoContent } from "./actions";
 
 export function WeeklyTodos() {
     const [week, setWeek] = useState<Week | null>(null);
@@ -35,6 +35,12 @@ export function WeeklyTodos() {
         setWeek(updatedWeek);
         setEditingTodoId(null);
         setEditContent("");
+    };
+
+    const handleDeleteTodo = async (todoId: string) => {
+        if (!week) return;
+        const updatedWeek = await deleteTodo(week.id, todoId);
+        setWeek(updatedWeek);
     };
 
     const startEditing = (todo: WeekTodo) => {
@@ -101,14 +107,22 @@ export function WeeklyTodos() {
                                 </button>
                             </div>
                         ) : (
-                            <div
-                                className="flex-grow text-white cursor-pointer"
-                                onClick={() => startEditing(todo)}
-                            >
-                                <span className={todo.checked ? "line-through text-gray-400" : ""}>
-                                    {todo.content}
-                                </span>
-                            </div>
+                            <>
+                                <div
+                                    className="flex-grow text-white cursor-pointer"
+                                    onClick={() => startEditing(todo)}
+                                >
+                                    <span className={todo.checked ? "line-through text-gray-400" : ""}>
+                                        {todo.content}
+                                    </span>
+                                </div>
+                                <button
+                                    onClick={() => handleDeleteTodo(todo.id)}
+                                    className="px-2 py-1 text-red-500 hover:text-red-400"
+                                >
+                                    Delete
+                                </button>
+                            </>
                         )}
                     </div>
                 ))}

@@ -1,25 +1,26 @@
 import { cookies } from 'next/headers';
-import NavItem from "./navitem";
+import NavbarClient from './NavbarClient';
 
+export default function Navbar() {
+	// This runs on the server
+	const cookieStore = cookies();
+	const isLoggedIn = cookieStore.get('session')?.value === 'authenticated';
 
+	// Define navigation items on the server
+	const navItems = [
+		{ label: "Home", href: "/" },
+		{ label: "Projects", href: "/projects" },
+		{ label: "Blog", href: "/blog" }
+	];
 
-const NavBar = () => {
-	const isLoggedIn = cookies().get('session')?.value === 'authenticated';
+	if (isLoggedIn) {
+		navItems.push({ label: "Panel", href: "/panel" });
+		navItems.push({ label: "Notes", href: "/notes" });
+		navItems.push({ label: "Lists", href: "/lists" });
+	}
 
-	return <nav className="flex z-10 bg-gray-950">
-		<ul className="flex border-b-2 border-black w-full">
-			<NavItem label="Home" href="/" />
-			<NavItem label="Projects" href="/projects" />
-			<NavItem label="Blog" href="/blog" />
-			{isLoggedIn && (
-				<>
-					<NavItem label="Panel" href="/panel" />
-					<NavItem label="Notes" href="/notes" />
-					<NavItem label="Lists" href="/lists" />
-				</>
-			)}
-		</ul>
-	</nav>
+	// Pass navigation items and auth status to the client component
+	return <NavbarClient
+		navItems={navItems}
+	/>;
 }
-
-export default NavBar

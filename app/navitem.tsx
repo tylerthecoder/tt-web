@@ -1,4 +1,5 @@
 "use client"
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -7,20 +8,15 @@ interface NavItemProps {
     href: string;
 }
 
-const NavItem = (props: NavItemProps) => {
+export default function NavItem({ label, href }: NavItemProps) {
     const pathname = usePathname();
-    const isActive = pathname === props.href;
+    const isActive = pathname === href;
 
-    let className = "p-5 cursor-pointer text-white hover:bg-red-500";
-    if (isActive) {
-        className += " border-b-2 border-red-500"
-    }
-
-    return <Link href={props.href} >
-        <li className={className}>
-            {props.label}
-        </li>
-    </Link>
+    return (
+        <Link href={href} className="text-white no-underline">
+            <li className={`list-none px-6 py-3 hover:bg-gray-800 ${isActive ? "bg-gray-800 font-bold border-b-4 border-red-500 hover:border-b-4 hover:border-red-500" : "hover:bg-gray-800 hover:border-b-4"}`}>
+                {label}
+            </li>
+        </Link>
+    );
 }
-
-export default NavItem;

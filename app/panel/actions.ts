@@ -1,7 +1,6 @@
 'use server'
 
-import { DatabaseSingleton } from "tt-services/src/connections/mongo";
-import { TylersThings } from "tt-services";
+import { DatabaseSingleton, TylersThings } from "tt-services";
 
 async function getServices() {
     const db = await DatabaseSingleton.getInstance();
@@ -28,6 +27,12 @@ export async function updateTodoContent(weekId: string, todoId: string, content:
     return services.weekly.updateTodoContent(weekId, todoId, content);
 }
 
+export async function getNote(noteId: string) {
+    const db = await DatabaseSingleton.getInstance();
+    const services = await TylersThings.make(db);
+    return services.notes.getNoteById(noteId);
+}
+
 export async function getNoteContent(noteId: string) {
     const db = await DatabaseSingleton.getInstance();
     const services = await TylersThings.make(db);
@@ -41,4 +46,9 @@ export async function updateNoteContent(noteId: string, content: string) {
     const services = await TylersThings.make(db);
     await services.notes.updateNote(noteId, { content });
     console.log("Updated note content", noteId, content);
+}
+
+export async function deleteTodo(weekId: string, todoId: string) {
+    const services = await getServices();
+    return services.weekly.deleteTodo(weekId, todoId);
 }
