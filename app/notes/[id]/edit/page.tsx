@@ -15,9 +15,8 @@ export default async function NoteEditPage({ params }: { params: { id: string } 
     }
 
     return (
-        <div className="min-h-screen bg-gray-900 text-white p-8">
+        <div className="min-h-screen bg-gray-900 text-white">
             <div className="mb-8">
-                <h1 className="text-4xl font-bold">{note.title}</h1>
                 <div className="flex gap-2 mt-4">
                     {note.tags?.map((tag) => (
                         <span

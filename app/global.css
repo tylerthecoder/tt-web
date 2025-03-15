@@ -38,3 +38,16 @@ body,
     display: contents;
   }
 }
+
+/* Milkdown */
+.milkdown {
+  height: 100%;
+  overflow: auto;
+}
+
+
+@media (max-width: 768px) {
+  .milkdown .ProseMirror {
+    padding: 5px !important;
+  }
+}

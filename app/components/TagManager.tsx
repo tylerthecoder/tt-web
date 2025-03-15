@@ -27,7 +27,7 @@ export function TagManager({
 
     useEffect(() => {
         setCurrentTags(tags);
-    }, [tags]);
+    }, []);
 
     useEffect(() => {
         if (isAddingTag && inputRef.current) {

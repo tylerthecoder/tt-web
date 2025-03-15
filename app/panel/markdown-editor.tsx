@@ -6,7 +6,7 @@ import { listenerCtx } from '@milkdown/plugin-listener';
 import "@milkdown/crepe/theme/common/style.css";
 import "@milkdown/crepe/theme/frame.css";
 import { useEffect, useState, useRef } from 'react';
-import { getNoteContent, updateNoteContent } from './actions';
+import { getNote, getNoteContent, updateNoteContent } from './actions';
 
 interface EditorProps {
     noteId: string;
@@ -18,7 +18,7 @@ const CrepeEditor: React.FC<EditorProps> = ({ noteId, initialContent, onSyncChan
     const updateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const pendingContentRef = useRef<string | null>(null);
     const isUpdatingRef = useRef(false);
-
+    const rootRef = useRef<HTMLDivElement>(null);
     const updateContent = async (content: string) => {
         if (isUpdatingRef.current) {
             // If currently updating, store the latest content
@@ -47,7 +47,7 @@ const CrepeEditor: React.FC<EditorProps> = ({ noteId, initialContent, onSyncChan
 
     const { get } = useEditor((root) => {
         return new Crepe({
-            root,
+            root: rootRef.current,
             defaultValue: initialContent,
         });
     });
@@ -83,7 +83,7 @@ const CrepeEditor: React.FC<EditorProps> = ({ noteId, initialContent, onSyncChan
     }, [get, noteId]);
 
     return (
-        <div className="h-full">
+        <div ref={rootRef} className="flex flex-col h-full">
             <Milkdown />
         </div>
     );
@@ -91,13 +91,15 @@ const CrepeEditor: React.FC<EditorProps> = ({ noteId, initialContent, onSyncChan
 
 export const MilkdownEditorWrapper: React.FC<{ noteId: string }> = ({ noteId }) => {
     const [content, setContent] = useState<string>('');
+    const [title, setTitle] = useState<string>('');
     const [loading, setLoading] = useState(true);
     const [isSyncing, setIsSyncing] = useState(false);
 
     useEffect(() => {
-        getNoteContent(noteId).then((content) => {
-            console.log("Setting content", content);
-            setContent(content);
+        getNote(noteId).then((note) => {
+            console.log("Setting content", note);
+            setContent(note?.content || '');
+            setTitle(note?.title || '');
             setLoading(false);
         });
     }, [noteId]);
@@ -108,7 +110,10 @@ export const MilkdownEditorWrapper: React.FC<{ noteId: string }> = ({ noteId }) 
 
     return (
         <div className="h-full">
-            <div className="h-6 flex items-center justify-end px-4 bg-gray-700">
+            <div className="flex items-center justify-between px-4 py-2 bg-gray-700">
+                <h1 className="text-3xl text-gray-300 font-medium truncate">
+                    {title}
+                </h1>
                 <div className="flex items-center space-x-2">
                     {isSyncing ? (
                         <>

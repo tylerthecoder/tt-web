@@ -27,6 +27,12 @@ export async function updateTodoContent(weekId: string, todoId: string, content:
     return services.weekly.updateTodoContent(weekId, todoId, content);
 }
 
+export async function getNote(noteId: string) {
+    const db = await DatabaseSingleton.getInstance();
+    const services = await TylersThings.make(db);
+    return services.notes.getNoteById(noteId);
+}
+
 export async function getNoteContent(noteId: string) {
     const db = await DatabaseSingleton.getInstance();
     const services = await TylersThings.make(db);
