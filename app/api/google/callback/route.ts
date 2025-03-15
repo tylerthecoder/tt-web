@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
         const token = await services.google.getTokens(code);
 
         // Store the userId in a cookie so we can identify the user
-        const response = NextResponse.redirect(new URL('/google/docs', url.origin));
+        const response = NextResponse.redirect(new URL('/notes', url.origin));
         response.cookies.set('googleUserId', token.userId, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
