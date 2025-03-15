@@ -1,0 +1,1 @@
+// This file is being deleted as part of the refactor to server components

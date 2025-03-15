@@ -26,6 +26,7 @@
     "react-date-picker": "^9.0.0",
     "react-dom": "^18.2.0",
     "react-flip-move": "^3.0.4",
+    "react-icons": "^5.5.0",
     "rehype-katex": "^6.0.2",
     "rehype-stringify": "^9.0.3",
     "remark": "^14.0.2",
@@ -35,7 +36,7 @@
     "remark-rehype": "^10.1.0",
     "sharp": "^0.30.4",
     "tailwindcss": "^3.0.24",
-    "tt-services": "github:tylerthecoder/tt-services",
+    "tt-services": "file:../tt-services",
     "turbo": "^1.10.16"
   },
   "devDependencies": {
