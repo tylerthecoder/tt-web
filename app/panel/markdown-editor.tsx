@@ -89,7 +89,7 @@ const CrepeEditor: React.FC<EditorProps> = ({ noteId, initialContent, onSyncChan
     );
 };
 
-export const MilkdownEditorWrapper: React.FC<{ noteId: string }> = ({ noteId }) => {
+export const MilkdownEditorWrapper: React.FC<{ noteId: string, hideTitle?: boolean }> = ({ noteId, hideTitle = false }) => {
     const [content, setContent] = useState<string>('');
     const [title, setTitle] = useState<string>('');
     const [loading, setLoading] = useState(true);
@@ -111,9 +111,11 @@ export const MilkdownEditorWrapper: React.FC<{ noteId: string }> = ({ noteId }) 
     return (
         <div className="h-full">
             <div className="flex items-center justify-between px-4 py-2 bg-gray-700">
-                <h1 className="text-3xl text-gray-300 font-medium truncate">
-                    {title}
-                </h1>
+                {!hideTitle && (
+                    <h1 className="text-3xl text-gray-300 font-medium truncate">
+                        {title}
+                    </h1>
+                )}
                 <div className="flex items-center space-x-2">
                     {isSyncing ? (
                         <>
@@ -128,7 +130,7 @@ export const MilkdownEditorWrapper: React.FC<{ noteId: string }> = ({ noteId }) 
                     )}
                 </div>
             </div>
-            <div className="h-[calc(100%-1.5rem)] bg-gray-800 rounded-lg overflow-hidden">
+            <div className="h-[calc(100%-1.5rem)] bg-gray-800 overflow-hidden">
                 <MilkdownProvider>
                     <CrepeEditor
                         noteId={noteId}

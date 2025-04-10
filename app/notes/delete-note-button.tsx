@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaTrash, FaSpinner } from 'react-icons/fa';
+import { deleteNote as deleteNoteAction } from './actions';
 
 interface DeleteNoteButtonProps {
     noteId: string;
@@ -10,9 +11,8 @@ interface DeleteNoteButtonProps {
 }
 
 export function DeleteNoteButton({ noteId, title }: DeleteNoteButtonProps) {
-    const [isDeleting, setIsDeleting] = useState(false);
+    const [isPending, startTransition] = useTransition();
     const [showConfirm, setShowConfirm] = useState(false);
-    const router = useRouter();
 
     const handleDeleteClick = () => {
         setShowConfirm(true);
@@ -23,24 +23,17 @@ export function DeleteNoteButton({ noteId, title }: DeleteNoteButtonProps) {
     };
 
     const handleConfirmDelete = async () => {
-        setIsDeleting(true);
-        try {
-            const response = await fetch(`/api/notes/${noteId}`, {
-                method: 'DELETE',
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to delete note');
+        startTransition(async () => {
+            try {
+                await deleteNoteAction(noteId);
+                setShowConfirm(false);
+            } catch (error) {
+                console.error('Error deleting note:', error);
             }
-
-            router.refresh();
-            setShowConfirm(false);
-        } catch (error) {
-            console.error('Error deleting note:', error);
-        } finally {
-            setIsDeleting(false);
-        }
+        });
     };
+
+    const isDeleting = isPending;
 
     return (
         <>
@@ -48,6 +41,7 @@ export function DeleteNoteButton({ noteId, title }: DeleteNoteButtonProps) {
                 onClick={handleDeleteClick}
                 className="py-1 px-3 border border-red-700 rounded text-sm text-red-400 hover:bg-red-900/30 transition-colors flex items-center"
                 aria-label="Delete note"
+                disabled={isDeleting}
             >
                 <FaTrash className="mr-1" size={12} />
                 Delete
@@ -70,7 +64,7 @@ export function DeleteNoteButton({ noteId, title }: DeleteNoteButtonProps) {
                             </button>
                             <button
                                 onClick={handleConfirmDelete}
-                                className="py-2 px-4 border border-red-700 bg-red-900/30 rounded text-red-300 hover:bg-red-900 transition-colors flex items-center"
+                                className="py-2 px-4 border border-red-700 bg-red-900/30 rounded text-red-300 hover:bg-red-900 transition-colors flex items-center min-w-[110px] justify-center"
                                 disabled={isDeleting}
                             >
                                 {isDeleting ? (

@@ -27,6 +27,7 @@
     "react-dom": "^18.2.0",
     "react-flip-move": "^3.0.4",
     "react-icons": "^5.5.0",
+    "react-markdown": "^10.1.0",
     "rehype-katex": "^6.0.2",
     "rehype-stringify": "^9.0.3",
     "remark": "^14.0.2",

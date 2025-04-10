@@ -1,0 +1,55 @@
+# Project Structure & Conventions for tt-web
+
+# General
+
+- Framework: Next.js (App Router)
+- Package Manager: bun
+- Styling: Tailwind CSS
+- State Management: Primarily React state (`useState`, `useReducer`), Server Actions for mutations.
+
+# Key Directories
+
+- `app/`: Main application code using Next.js App Router conventions.
+  - `app/api/`: API route handlers (Used less frequently, prefer Server Actions).
+  - `app/components/`: Shared React components (client and server).
+  - `app/notes/`: Features related to notes (list, view, create, edit, delete).
+  - `app/blog/`: Features related to blog posts.
+  - `app/panel/`: User dashboard/panel area.
+  - `app/login/`: Login page and related logic.
+  - `app/google/`: Google integration features (Auth, Docs).
+  - Each route directory (e.g., `app/notes`, `app/notes/[id]`) may contain:
+    - `page.tsx`: The main UI component for the route.
+    - `layout.tsx`: Shared layout for the route and its children.
+    - `loading.tsx`: Skeleton loading UI (uses Tailwind `animate-pulse`).
+    - `actions.ts`: Server Actions for data mutations specific to the route.
+    - `route.ts`: API route handlers (within `app/api/...`).
+- `tt-services/`: Likely contains backend service logic, database interactions (e.g., `NotesService`, `TylersThings`, `DatabaseSingleton`). Treat as a separate service layer.
+
+# Coding Conventions & Patterns
+
+- Use Server Actions (`actions.ts` with `'use server'`) for data mutations (create, update, delete) instead of separate API routes where possible.
+- Use `revalidatePath` or `revalidateTag` within Server Actions to update cached data after mutations.
+- Client components (`'use client'`) should handle user interactions, stateful logic (like modals, transitions), and browser APIs.
+- Server components should handle data fetching and rendering.
+- Use `loading.tsx` files within route directories for skeleton loading UIs, matching the style of existing ones (Tailwind `animate-pulse`).
+- Use `react-markdown` and `remark-gfm` for rendering Markdown content.
+- Date formatting often uses `date-fns`.
+- Icons are typically from `react-icons`.
+
+# Dependencies/Tools
+
+- `next`: Framework
+- `react`: UI Library
+- `tailwindcss`: CSS Framework
+- `bun`: Package manager & runtime
+- `date-fns`: Date utility library
+- `react-icons`: Icon library
+- `react-markdown`, `remark-gfm`: Markdown rendering
+- `tt-services`: Internal service layer (likely connects to MongoDB via `DatabaseSingleton`).
+
+# Things to Avoid
+
+- Creating new API routes (`app/api/.../route.ts`) for simple data mutations; prefer Server Actions.
+- Direct database access from components; use the `tt-services` layer.
+- Inconsistent styling; adhere to Tailwind CSS and existing component styles.
+- Adding borders/padding on hover states that cause layout shifts (use transparent borders as placeholders).

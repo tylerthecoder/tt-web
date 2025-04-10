@@ -5,6 +5,8 @@ import { WeeklyTodos } from './weekly-todos';
 import { MilkdownEditorWrapper } from "./markdown-editor";
 import { getCurrentWeek } from './actions';
 import { AgeCounter } from '../components/age-counter';
+import { WeeklyProgress } from './weekly-progress';
+import { CountdownTimer } from '../components/countdown-timer';
 
 const bubblegum = Bubblegum_Sans({
     weight: "400",
@@ -52,22 +54,18 @@ export default async function PanelPage() {
     const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekEnd.getDate() + 6);
 
-    const formatDate = (date: Date) => {
-        return date.toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric'
-        });
-    };
-
     return (
         <div className="flex flex-col min-h-screen">
             <div className="p-4 bg-gray-800 bg-opacity-50">
                 <div className="flex justify-between items-center">
-                    <h1 className="text-2xl text-white">
-                        Week of {formatDate(weekStart)} - {formatDate(weekEnd)}
-                    </h1>
-                    <AgeCounter />
+                    <WeeklyProgress
+                        startDate={week.startDate}
+                        endDate={weekEnd.toISOString()}
+                    />
+                    <div className="flex flex-col items-end">
+                        <AgeCounter />
+                        <CountdownTimer />
+                    </div>
                 </div>
             </div>
 
@@ -76,7 +74,7 @@ export default async function PanelPage() {
                     <WeeklyTodos />
                 </div>
                 <div className="w-full lg:w-2/3 min-h-[500px] lg:min-h-0">
-                    <MilkdownEditorWrapper noteId={week.noteId} />
+                    <MilkdownEditorWrapper noteId={week.noteId} hideTitle={true} />
                 </div>
             </div>
         </div>

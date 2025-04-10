@@ -29,7 +29,7 @@ const TYLERCRAFT_URL =
   "https://craft.tylertracy.com/?worldId=0.9484798532361967";
 
 const Subtitle = () => {
-  const { typedText, cursor } = useTypeyText("Full Stack Developer");
+  const { typedText, cursor } = useTypeyText("AI Safety Researcher");
 
   return (
     <div>
