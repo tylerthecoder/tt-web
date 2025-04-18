@@ -1,12 +1,13 @@
 import { Bubblegum_Sans } from 'next/font/google';
 import Link from "next/link";
 import Image from "next/image";
-import { WeeklyTodos } from './weekly-todos';
-import { MilkdownEditorWrapper } from "./markdown-editor";
 import { getCurrentWeek } from './actions';
 import { AgeCounter } from '../components/age-counter';
 import { WeeklyProgress } from './weekly-progress';
 import { CountdownTimer } from '../components/countdown-timer';
+import { PanelTabsClient } from './PanelTabsClient';
+import { DatabaseSingleton } from 'tt-services/src/connections/mongo';
+import { TylersThings } from 'tt-services/src/lib';
 
 const bubblegum = Bubblegum_Sans({
     weight: "400",
@@ -50,13 +51,17 @@ const ROCKET_URL = "https://app.rocketmoney.com";
 
 export default async function PanelPage() {
     const week = await getCurrentWeek();
+    const db = await DatabaseSingleton.getInstance();
+    const tt = await TylersThings.make(db);
+    const jots = await tt.jots.getAllJots();
+
     const weekStart = new Date(week.startDate);
     const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekEnd.getDate() + 6);
 
     return (
-        <div className="flex flex-col min-h-screen">
-            <div className="p-4 bg-gray-800 bg-opacity-50">
+        <div className="flex flex-col h-screen">
+            <div className="p-4 bg-gray-800 bg-opacity-50 flex-shrink-0">
                 <div className="flex justify-between items-center">
                     <WeeklyProgress
                         startDate={week.startDate}
@@ -69,13 +74,8 @@ export default async function PanelPage() {
                 </div>
             </div>
 
-            <div className="flex flex-col lg:flex-row flex-grow p-4 gap-4">
-                <div className="w-full lg:w-1/3 min-h-[300px] lg:min-h-0">
-                    <WeeklyTodos />
-                </div>
-                <div className="w-full lg:w-2/3 min-h-[500px] lg:min-h-0">
-                    <MilkdownEditorWrapper noteId={week.noteId} hideTitle={true} />
-                </div>
+            <div className="flex-grow overflow-hidden">
+                <PanelTabsClient week={week} initialJots={jots} />
             </div>
         </div>
     );

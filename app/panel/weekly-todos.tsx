@@ -51,7 +51,7 @@ export function WeeklyTodos() {
     if (!week) return <div>Loading...</div>;
 
     return (
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-2xl mx-auto mt-4">
             <h2 className={`text-3xl text-white mb-6 text-center`}>Weekly Todos</h2>
 
             <form onSubmit={handleAddTodo} className="mb-6">

@@ -16,6 +16,7 @@
     "@milkdown/react": "^7.6.2",
     "@milkdown/theme-nord": "^7.6.2",
     "@tailwindcss/typography": "^0.5.10",
+    "@vercel/analytics": "^1.5.0",
     "autoprefixer": "^10.4.0",
     "bcrypt": "^5.1.1",
     "date-fns": "^4.1.0",

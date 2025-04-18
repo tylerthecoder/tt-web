@@ -6,7 +6,6 @@ export default function Navbar() {
 	const cookieStore = cookies();
 	const isLoggedIn = cookieStore.get('session')?.value === 'authenticated';
 
-	// Define navigation items on the server
 	const navItems = [
 		{ label: "Home", href: "/" },
 		{ label: "Projects", href: "/projects" },
@@ -19,7 +18,6 @@ export default function Navbar() {
 		navItems.push({ label: "Lists", href: "/lists" });
 	}
 
-	// Pass navigation items and auth status to the client component
 	return <NavbarClient
 		navItems={navItems}
 	/>;

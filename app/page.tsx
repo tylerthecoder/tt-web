@@ -27,6 +27,7 @@ const X_URL = "https://twitter.com/tylertracy321";
 const BLOG_URL = "https://tylertracy.com/blog";
 const TYLERCRAFT_URL =
   "https://craft.tylertracy.com/?worldId=0.9484798532361967";
+const GOOGLE_SCHOLAR_URL = "https://scholar.google.com/citations?user=gdsMjNwAAAAJ&hl=en";
 
 const Subtitle = () => {
   const { typedText, cursor } = useTypeyText("AI Safety Researcher");
@@ -99,7 +100,7 @@ const Home = () => {
       <RandomBackground />
 
       <div className="w-full h-full flex md:flex-row flex-col">
-        <div className="md:w-[300px] w-full md:border-2 border-white rounded-2xl m-2 p-2">
+        <div className="md:w-[300px] w-full md:border-r-2 border-white mx-2 px-2">
           <div className="flex justify-center z-0">
             <CrazyImage
               src={headshotPic}
@@ -148,6 +149,12 @@ const Home = () => {
               iconSrc="/3d.png"
               iconAlt="Tylercraft Icon"
             />
+            <HomButton
+              text="Google Scholar"
+              href={GOOGLE_SCHOLAR_URL}
+              iconSrc="/scholar.png"
+              iconAlt="Google Scholar icon"
+            />
           </div>
         </div>
         <div className="md:overflow-y-auto w-full">
@@ -162,14 +169,18 @@ const Home = () => {
             <article className={`mt-4 mx-3 prose lg:prose-2xl prose-neutral prose-invert ${bubblegum.className}`}>
               <h2> Quick Facts </h2>
               <ul>
-                <li> Member of Technical Staff at Redwood Research </li>
+                <li> Member of Technical Staff at <a href="https://redwoodresearch.org" target="_blank" rel="noopener noreferrer">Redwood Research</a> </li>
                 <li>
-                  Working on AI control
+                  Working on High-Stakes AI Control research
+                </li>
+                <li>
+                  Was a software engineer, realized AI was a big deal, quit my job, now I'm here
                 </li>
               </ul>
 
               <h2> Core beliefs </h2>
               <ul>
+                <li> AI is the most important invention of humanity and will have dramatic consequences on the future of the universe</li>
                 <li>We should aim to increase understanding in the universe</li>
                 <li>
                   All software and information that does not pose an existential
@@ -188,7 +199,7 @@ const Home = () => {
                   Maximize the amount of experience that I have (live forever)
                 </li>
                 <li>Prevent AI from taking over the world</li>
-                <li> Build the ultimate productivty workflow </li>
+                <li> Build the ultimate productivity workflow </li>
               </ul>
 
               <h2> Hot Takes </h2>
