@@ -1,8 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { DatabaseSingleton } from 'tt-services/src/connections/mongo';
-import { TylersThings } from 'tt-services/src/lib';
+import { TylersThings, DatabaseSingleton } from 'tt-services';
 
 export async function createJotAction(formData: FormData) {
     const text = formData.get('jotText') as string;

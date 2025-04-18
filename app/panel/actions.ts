@@ -2,7 +2,6 @@
 
 import { DatabaseSingleton, TylersThings } from "tt-services";
 import { revalidatePath } from 'next/cache';
-import { Week } from 'tt-services/src/services/WeeklyService';
 
 async function getServices() {
     const db = await DatabaseSingleton.getInstance();
