@@ -1,0 +1,26 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+# Daily Notes Feature
+
+This feature allows viewing and managing daily notes within the main user panel.
+
+## Service Layer (`tt-services`)
+
+- The core logic resides in [tt-services/src/services/DailyNoteService.ts](mdc:tt-web/tt-services/src/services/DailyNoteService.ts).
+- This service handles fetching today's note (creating it if it doesn't exist) and retrieving metadata for all daily notes.
+- It relies on the base [tt-services/src/services/NotesService.ts](mdc:tt-web/tt-services/src/services/NotesService.ts) for storage and retrieval, identifying daily notes via the `daily-note` tag.
+- The `DailyNoteService` is aggregated with other services in [tt-services/src/lib.ts](mdc:tt-web/tt-services/src/lib.ts).
+
+## UI Layer (`tt-web`)
+
+- The UI is integrated into the main panel section (`app/panel`).
+- **Data Fetching:** The initial data (today's note, all metadata) is fetched server-side in [tt-web/app/panel/page.tsx](mdc:tt-web/tt-web/app/panel/page.tsx).
+- **Tab Management:** The [tt-web/app/panel/PanelTabsClient.tsx](mdc:tt-web/tt-web/app/panel/PanelTabsClient.tsx) manages the different tabs in the panel, including the "Daily Note" tab, and passes down the necessary data.
+- **Viewing/Navigation:** The [tt-web/app/panel/DailyNoteViewer.tsx](mdc:tt-web/tt-web/app/panel/DailyNoteViewer.tsx) component is responsible for:
+    - Displaying the current daily note using [tt-web/app/panel/markdown-editor.tsx](mdc:tt-web/tt-web/app/panel/markdown-editor.tsx).
+    - Providing Previous/Next day navigation buttons.
+    - Showing a sidebar list of past daily notes for quick selection.
+- **Server Actions:** When navigating between notes (via buttons or list), the `getNote` server action in [tt-web/app/panel/actions.ts](mdc:tt-web/tt-web/app/panel/actions.ts) is called to fetch the full note content.

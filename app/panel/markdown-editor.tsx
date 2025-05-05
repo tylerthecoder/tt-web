@@ -6,7 +6,7 @@ import { listenerCtx } from '@milkdown/plugin-listener';
 import "@milkdown/crepe/theme/common/style.css";
 import "@milkdown/crepe/theme/frame.css";
 import { useEffect, useState, useRef } from 'react';
-import { getNote, getNoteContent, updateNoteContent } from './actions';
+import { getNote, updateNoteContent } from './actions';
 
 interface EditorProps {
     noteId: string;

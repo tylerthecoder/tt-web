@@ -3,25 +3,31 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { WeeklyTodos } from './weekly-todos';
 import { MilkdownEditorWrapper } from "./markdown-editor";
-import { JotsViewer } from './JotsViewer'; // Corrected import name
+import { JotsViewer } from './JotsViewer';
 import { Week } from 'tt-services/src/services/WeeklyService';
 import { Jot } from 'tt-services/src/services/JotsService';
-import { FaListAlt, FaEdit, FaStickyNote } from 'react-icons/fa'; // Added FaStickyNote
+import { FaListAlt, FaEdit, FaStickyNote, FaCalendarDay } from 'react-icons/fa';
+import { DailyNote } from 'tt-services/src/services/DailyNoteService';
+import { NoteMetadata } from 'tt-services/src/services/NotesService';
+import { DailyNoteViewer } from './DailyNoteViewer';
 
-type Tab = 'todos' | 'editor' | 'jots';
+type Tab = 'todos' | 'editor' | 'jots' | 'daily';
 
 interface PanelTabsClientProps {
     week: Week;
     initialJots: Jot[];
+    initialDailyNote: DailyNote;
+    allDailyNotesMetadata: NoteMetadata[];
 }
 
-export function PanelTabsClient({ week, initialJots }: PanelTabsClientProps) {
-    const [activeTab, setActiveTab] = useState<Tab>('editor');
+export function PanelTabsClient({ week, initialJots, initialDailyNote, allDailyNotesMetadata }: PanelTabsClientProps) {
+    const [activeTab, setActiveTab] = useState<Tab>('daily');
 
     const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
-        { id: 'editor', label: 'Weekly Note (n)', icon: <FaEdit /> },
+        { id: 'daily', label: 'Daily Note (d)', icon: <FaCalendarDay /> },
         { id: 'todos', label: 'Weekly Todos (t)', icon: <FaListAlt /> },
-        { id: 'jots', label: 'Jots (j)', icon: <FaStickyNote /> }, // Added Jots tab
+        { id: 'jots', label: 'Jots (j)', icon: <FaStickyNote /> },
+        { id: 'editor', label: 'Weekly Note (n)', icon: <FaEdit /> },
     ];
 
     // Memoize the keydown handler
@@ -42,6 +48,9 @@ export function PanelTabsClient({ week, initialJots }: PanelTabsClientProps) {
                 break;
             case 'j':
                 setActiveTab('jots');
+                break;
+            case 'd':
+                setActiveTab('daily');
                 break;
             default:
                 break;
@@ -77,22 +86,24 @@ export function PanelTabsClient({ week, initialJots }: PanelTabsClientProps) {
                 ))}
             </div>
 
-            {/* Tab Content Area */}
             <div className="flex-grow overflow-hidden">
-                {/* Weekly Todos Tab - Hidden if not active */}
                 <div className={`h-full ${activeTab !== 'todos' ? 'hidden' : ''}`}>
                     <WeeklyTodos />
                 </div>
 
-                {/* Weekly Note Editor Tab - Hidden if not active */}
                 <div className={`h-full ${activeTab !== 'editor' ? 'hidden' : ''}`}>
-                    {/* Ensure editor has enough height to function correctly */}
                     <MilkdownEditorWrapper noteId={week.noteId} hideTitle={true} />
                 </div>
 
-                {/* Jots Tab - Hidden if not active */}
                 <div className={`h-full ${activeTab !== 'jots' ? 'hidden' : ''}`}>
                     <JotsViewer initialJots={initialJots} />
+                </div>
+
+                <div className={`h-full ${activeTab !== 'daily' ? 'hidden' : ''}`}>
+                    <DailyNoteViewer
+                        initialNote={initialDailyNote}
+                        allNotesMetadata={allDailyNotesMetadata}
+                    />
                 </div>
             </div>
         </div>
