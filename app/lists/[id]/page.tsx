@@ -9,8 +9,9 @@ async function getList(id: string) {
     return services.lists.getListById(id);
 }
 
-export default async function ListPage({ params }: { params: { id: string } }) {
-    const list = await getList(params.id);
+export default async function ListPage({ params }: { params: Promise<{ id: string }> }) {
+    const resolvedParams = await params;
+    const list = await getList(resolvedParams.id);
     if (!list) return <div>List not found</div>;
 
     return (

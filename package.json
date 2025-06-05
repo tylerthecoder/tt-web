@@ -21,7 +21,7 @@
     "bcrypt": "^5.1.1",
     "date-fns": "^4.1.0",
     "framer-motion": "^6.2.3",
-    "next": "^14.0.4",
+    "next": "^15.0.0",
     "postcss": "^8.3.11",
     "react": "^18.2.0",
     "react-date-picker": "^9.0.0",
@@ -47,7 +47,7 @@
     "@types/react": "^18.2.21",
     "@types/react-modal": "^3.13.1",
     "eslint": "8.29.0",
-    "eslint-config-next": "^14.0.0",
+    "eslint-config-next": "^15.0.0",
     "typescript": "^5.2.2"
   }
 }

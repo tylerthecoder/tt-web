@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-export default function GoogleAuthPage() {
+function GoogleAuthContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const [error, setError] = useState<string | null>(null);
@@ -67,5 +67,13 @@ export default function GoogleAuthPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function GoogleAuthPage() {
+    return (
+        <Suspense fallback={<div className="container max-w-lg py-10">Loading...</div>}>
+            <GoogleAuthContent />
+        </Suspense>
     );
 }

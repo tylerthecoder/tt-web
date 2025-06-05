@@ -19,8 +19,9 @@ async function getNote(id: string) {
     }
 }
 
-export default async function NoteViewPage({ params }: { params: { id: string } }) {
-    const note = await getNote(params.id);
+export default async function NoteViewPage({ params }: { params: Promise<{ id: string }> }) {
+    const resolvedParams = await params;
+    const note = await getNote(resolvedParams.id);
 
     if (!note) {
         notFound(); // Use Next.js notFound helper
