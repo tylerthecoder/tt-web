@@ -19,7 +19,7 @@ export async function login(formData: FormData): Promise<{ success: boolean, err
         }
 
         // Set a simple session cookie
-        cookies().set('session', 'authenticated', {
+        (await cookies()).set('session', 'authenticated', {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',

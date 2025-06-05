@@ -9,7 +9,7 @@ import { DatabaseSingleton, TylersThings } from 'tt-services';
 export async function syncGoogleDoc(docId: string) {
     try {
         // Check authentication
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const userId = cookieStore.get('googleUserId')?.value;
 
         if (!userId) {

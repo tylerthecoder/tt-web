@@ -8,8 +8,9 @@ async function getNote(id: string) {
     return services.notes.getNoteById(id);
 }
 
-export default async function NoteEditPage({ params }: { params: { id: string } }) {
+export default async function NoteEditPage({ params }: { params: Promise<{ id: string }> }) {
+    const resolvedParams = await params;
     return (
-        <MilkdownEditorWrapper noteId={params.id} />
+        <MilkdownEditorWrapper noteId={resolvedParams.id} />
     );
 }

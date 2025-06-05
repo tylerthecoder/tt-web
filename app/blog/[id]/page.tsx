@@ -6,13 +6,14 @@ import { format } from 'date-fns'; // Using format for a specific date string
 import { FaCalendarAlt } from 'react-icons/fa';
 
 type Props = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
 export async function generateMetadata(
-  { params }: Props,
+  props: Props,
   _parent: ResolvingMetadata
 ): Promise<Metadata> {
+  const params = await props.params;
   const blog = await BlogService.getBlog(params.id);
 
   if ("error" in blog) {
@@ -26,7 +27,8 @@ export async function generateMetadata(
   };
 }
 
-export default async function Page({ params }: Props) {
+export default async function Page(props: Props) {
+  const params = await props.params;
   const blog = await BlogService.getBlog(params.id);
 
   if ("error" in blog) {

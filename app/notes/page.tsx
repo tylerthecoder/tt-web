@@ -32,12 +32,12 @@ async function tryCatch<T>(fn: () => Promise<T>): Promise<{ success: boolean, da
 }
 
 
-export default async function NotesPage({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
+export default async function NotesPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
     const db = await DatabaseSingleton.getInstance();
     const services = await TylersThings.make(db);
 
     // Get Google user ID from cookies
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const userId = cookieStore.get('googleUserId')?.value;
 
     // Fetch all regular notes
@@ -94,10 +94,11 @@ export default async function NotesPage({ searchParams }: { searchParams: { [key
         return new Date(b.modifiedTime).getTime() - new Date(a.modifiedTime).getTime();
     });
 
-    // Get the search parameters to pass to client
-    const initialSearch = typeof searchParams.search === 'string' ? searchParams.search : '';
-    const initialShownTags = typeof searchParams.shownTags === 'string' ? searchParams.shownTags.split(',').filter(Boolean) : [];
-    const initialHiddenTags = typeof searchParams.hiddenTags === 'string' ? searchParams.hiddenTags.split(',').filter(Boolean) : [];
+    // Await searchParams and get the search parameters to pass to client
+    const resolvedSearchParams = await searchParams;
+    const initialSearch = typeof resolvedSearchParams.search === 'string' ? resolvedSearchParams.search : '';
+    const initialShownTags = typeof resolvedSearchParams.shownTags === 'string' ? resolvedSearchParams.shownTags.split(',').filter(Boolean) : [];
+    const initialHiddenTags = typeof resolvedSearchParams.hiddenTags === 'string' ? resolvedSearchParams.hiddenTags.split(',').filter(Boolean) : [];
 
     // remove _id from displayItems
     displayItems.forEach(item => {
