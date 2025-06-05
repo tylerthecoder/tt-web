@@ -5,7 +5,7 @@ import { DailyNote } from 'tt-services/src/services/DailyNoteService';
 import { NoteMetadata } from 'tt-services/src/services/NotesService';
 import { MilkdownEditorWrapper } from './markdown-editor';
 import { getNote as getNoteAction } from './actions';
-import { FaArrowLeft, FaArrowRight, FaSpinner } from 'react-icons/fa';
+import { FaArrowLeft, FaArrowRight, FaSpinner, FaBars, FaTimes } from 'react-icons/fa';
 import { format, parseISO } from 'date-fns';
 
 interface DailyNoteViewerProps {
@@ -17,6 +17,7 @@ export function DailyNoteViewer({ initialNote, allNotesMetadata }: DailyNoteView
     const [currentNote, setCurrentNote] = useState<DailyNote | null>(initialNote);
     const [isPending, startTransition] = useTransition();
     const [currentIndex, setCurrentIndex] = useState<number>(-1);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     // Find the index of the initial note
     useEffect(() => {
@@ -35,6 +36,10 @@ export function DailyNoteViewer({ initialNote, allNotesMetadata }: DailyNoteView
                 setCurrentNote(note as DailyNote); // Adjust type if necessary
                 const index = allNotesMetadata.findIndex(meta => meta.id === noteId);
                 setCurrentIndex(index);
+                // Close sidebar on mobile after selection
+                if (window.innerWidth < 768) {
+                    setSidebarOpen(false);
+                }
             } else {
                 // Handle error - note not found?
                 console.error("Daily note not found:", noteId);
@@ -72,10 +77,31 @@ export function DailyNoteViewer({ initialNote, allNotesMetadata }: DailyNoteView
     const isNextDisabled = isPending || currentIndex <= 0;
 
     return (
-        <div className="flex h-full bg-gray-900 text-white">
+        <div className="flex h-full bg-gray-900 text-white relative">
+            {/* Mobile Sidebar Overlay */}
+            {sidebarOpen && (
+                <div
+                    className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+                    onClick={() => setSidebarOpen(false)}
+                />
+            )}
+
             {/* Sidebar List */}
-            <div className="w-1/4 border-r border-gray-700 overflow-y-auto flex flex-col">
-                <h2 className="text-lg font-semibold p-3 border-b border-gray-700 sticky top-0 bg-gray-900 z-10">Past Notes</h2>
+            <div className={`
+                ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+                md:translate-x-0 md:relative fixed left-0 top-0 h-full z-50
+                w-80 md:w-1/4 border-r border-gray-700 overflow-y-auto flex flex-col bg-gray-900
+                transition-transform duration-300 ease-in-out
+            `}>
+                <div className="flex items-center justify-between p-3 border-b border-gray-700 sticky top-0 bg-gray-900 z-10">
+                    <h2 className="text-lg font-semibold">Past Notes</h2>
+                    <button
+                        onClick={() => setSidebarOpen(false)}
+                        className="p-1 text-gray-400 hover:text-white md:hidden"
+                    >
+                        <FaTimes />
+                    </button>
+                </div>
                 <ul className="flex-grow">
                     {allNotesMetadata.map((meta, index) => (
                         <li key={meta.id}>
@@ -94,19 +120,27 @@ export function DailyNoteViewer({ initialNote, allNotesMetadata }: DailyNoteView
             </div>
 
             {/* Main Content Area */}
-            <div className="w-3/4 flex flex-col overflow-hidden">
+            <div className="flex-1 flex flex-col overflow-hidden">
                 {currentNote ? (
                     <>
                         {/* Header with Navigation */}
                         <div className="flex justify-between items-center p-3 border-b border-gray-700 flex-shrink-0">
-                            <button
-                                onClick={() => handleNavigate('prev')}
-                                disabled={isPrevDisabled}
-                                className="p-2 rounded hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                            >
-                                <FaArrowLeft />
-                            </button>
-                            <h2 className="text-xl font-semibold">
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => setSidebarOpen(true)}
+                                    className="p-2 rounded hover:bg-gray-700 md:hidden"
+                                >
+                                    <FaBars />
+                                </button>
+                                <button
+                                    onClick={() => handleNavigate('prev')}
+                                    disabled={isPrevDisabled}
+                                    className="p-2 rounded hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    <FaArrowLeft />
+                                </button>
+                            </div>
+                            <h2 className="text-xl font-semibold text-center flex-1">
                                 {formatDate(currentNote.date)}
                                 {isPending && <FaSpinner className="animate-spin inline ml-2" />}
                             </h2>
@@ -130,7 +164,13 @@ export function DailyNoteViewer({ initialNote, allNotesMetadata }: DailyNoteView
                         </div>
                     </>
                 ) : (
-                    <div className="flex items-center justify-center h-full text-gray-500">
+                    <div className="flex flex-col items-center justify-center h-full text-gray-500">
+                        <button
+                            onClick={() => setSidebarOpen(true)}
+                            className="mb-4 p-3 rounded bg-gray-700 hover:bg-gray-600 md:hidden"
+                        >
+                            <FaBars className="text-xl" />
+                        </button>
                         {isPending ? <FaSpinner className="animate-spin text-4xl" /> : 'Select a note'}
                     </div>
                 )}

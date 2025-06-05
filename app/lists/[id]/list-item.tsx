@@ -48,7 +48,7 @@ export function ListItem({ item, listId }: ListItemProps) {
                     onChange={() => toggleItemCheck(listId, item.id)}
                     className="w-5 h-5 rounded"
                 />
-                <span className={item.checked ? "line-through text-gray-500" : ""}>
+                <span className={item.checked ? "line-through text-gray-500" : "text-white"}>
                     {item.content}
                 </span>
                 <div className="ml-auto flex items-center gap-2">
