@@ -7,6 +7,7 @@ import "@milkdown/crepe/theme/common/style.css";
 import "@milkdown/crepe/theme/frame.css";
 import { useEffect, useState, useRef } from 'react';
 import { getNote, updateNoteContent } from './actions';
+import { Note } from 'tt-services/src/services/NotesService';
 
 interface EditorProps {
     noteId: string;
@@ -90,16 +91,14 @@ const CrepeEditor: React.FC<EditorProps> = ({ noteId, initialContent, onSyncChan
 };
 
 export const MilkdownEditorWrapper: React.FC<{ noteId: string, hideTitle?: boolean }> = ({ noteId, hideTitle = false }) => {
-    const [content, setContent] = useState<string>('');
-    const [title, setTitle] = useState<string>('');
+    const [note, setNote] = useState<Note | null>(null);
     const [loading, setLoading] = useState(true);
     const [isSyncing, setIsSyncing] = useState(false);
 
     useEffect(() => {
         getNote(noteId).then((note) => {
             console.log("Setting content", note);
-            setContent(note?.content || '');
-            setTitle(note?.title || '');
+            setNote(note);
             setLoading(false);
         });
     }, [noteId]);
@@ -108,33 +107,51 @@ export const MilkdownEditorWrapper: React.FC<{ noteId: string, hideTitle?: boole
         return <div className="h-full flex items-center justify-center">Loading editor...</div>;
     }
 
+    if (!note) {
+        return <div className="h-full flex items-center justify-center">Note not found</div>;
+    }
+
     return (
-        <div className="h-full">
-            <div className="flex items-center justify-between px-4 py-2 bg-gray-700">
+        <div className="h-full overflow-hidden">
+            <div className="flex items-start justify-between px-3 md:px-4 py-2 bg-gray-700">
                 {!hideTitle && (
-                    <h1 className="text-3xl text-gray-300 font-medium truncate">
-                        {title}
-                    </h1>
+                    <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3 flex-1 min-w-0">
+                        <h1 className="text-xl md:text-3xl text-gray-300 font-medium truncate">
+                            {note.title}
+                        </h1>
+                        {note.tags && note.tags.length > 0 && (
+                            <div className="flex gap-1 flex-wrap">
+                                {note.tags.map((tag) => (
+                                    <span
+                                        key={tag}
+                                        className="bg-blue-600 px-2 py-0.5 rounded-full text-xs font-medium text-white"
+                                    >
+                                        {tag}
+                                    </span>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 )}
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 flex-shrink-0 ml-2">
                     {isSyncing ? (
                         <>
                             <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
-                            <span className="text-sm text-gray-300">Syncing...</span>
+                            <span className="text-xs md:text-sm text-gray-300">Syncing...</span>
                         </>
                     ) : (
                         <>
                             <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                            <span className="text-sm text-gray-300">Saved</span>
+                            <span className="text-xs md:text-sm text-gray-300">Saved</span>
                         </>
                     )}
                 </div>
             </div>
-            <div className="h-[calc(100%-1.5rem)] bg-gray-800 overflow-hidden">
+            <div className="bg-gray-800 overflow-hidden h-full">
                 <MilkdownProvider>
                     <CrepeEditor
                         noteId={noteId}
-                        initialContent={content}
+                        initialContent={note.content}
                         onSyncChange={setIsSyncing}
                     />
                 </MilkdownProvider>
