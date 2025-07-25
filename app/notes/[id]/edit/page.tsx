@@ -6,7 +6,7 @@ export default async function NoteEditPage({ params }: { params: Promise<{ id: s
     return (
         // <NoteEditor noteId={resolvedParams.id} />
         // <TTNoteEditor noteId={resolvedParams.id} />
-        // <MilkdownEditor noteId={resolvedParams.id} />
-        <MilkdownEditorWrapper />
+        <MilkdownEditor noteId={resolvedParams.id} />
+        // <MilkdownEditorWrapper />
     );
 }

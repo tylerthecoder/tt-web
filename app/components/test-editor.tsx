@@ -1,3 +1,5 @@
+"use client";
+
 import { Crepe } from "@milkdown/crepe";
 import { Milkdown, MilkdownProvider, useEditor } from "@milkdown/react";
 
