@@ -5,9 +5,64 @@ import { Crepe } from '@milkdown/crepe';
 import { listenerCtx } from '@milkdown/plugin-listener';
 import "@milkdown/crepe/theme/common/style.css";
 import "@milkdown/crepe/theme/frame.css";
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { getNote, updateNoteContent } from './actions';
 import { Note } from 'tt-services/src/services/NotesService';
+
+export const useUpdateNoteContent = (noteId: string, debounceMs: number = 1000) => {
+    const [isSyncing, setIsSyncing] = useState(false);
+    const updateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const pendingContentRef = useRef<string | null>(null);
+    const isUpdatingRef = useRef(false);
+
+    const updateContent = useCallback(async (content: string) => {
+        if (isUpdatingRef.current) {
+            // If currently updating, store the latest content
+            pendingContentRef.current = content;
+            return;
+        }
+
+        try {
+            isUpdatingRef.current = true;
+            setIsSyncing(true);
+            await updateNoteContent(noteId, content);
+        } finally {
+            isUpdatingRef.current = false;
+            setIsSyncing(false);
+            // Check if there's pending content to update
+            if (pendingContentRef.current !== null) {
+                const pendingContent = pendingContentRef.current;
+                pendingContentRef.current = null;
+                updateContent(pendingContent);
+            }
+        }
+    }, [noteId]);
+
+    const debouncedUpdate = useCallback((content: string) => {
+        setIsSyncing(true);
+
+        // Clear any existing timeout
+        if (updateTimeoutRef.current) {
+            clearTimeout(updateTimeoutRef.current);
+        }
+
+        // Schedule new update
+        updateTimeoutRef.current = setTimeout(() => {
+            updateContent(content);
+        }, debounceMs);
+    }, [updateContent, debounceMs]);
+
+    // Cleanup on unmount
+    useEffect(() => {
+        return () => {
+            if (updateTimeoutRef.current) {
+                clearTimeout(updateTimeoutRef.current);
+            }
+        };
+    }, []);
+
+    return { updateNote: debouncedUpdate, isSyncing };
+};
 
 interface EditorProps {
     noteId: string;
@@ -16,35 +71,13 @@ interface EditorProps {
 }
 
 const CrepeEditor: React.FC<EditorProps> = ({ noteId, initialContent, onSyncChange }) => {
-    const updateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-    const pendingContentRef = useRef<string | null>(null);
-    const isUpdatingRef = useRef(false);
     const rootRef = useRef<HTMLDivElement>(null);
-    const updateContent = async (content: string) => {
-        if (isUpdatingRef.current) {
-            // If currently updating, store the latest content
-            pendingContentRef.current = content;
-            console.log("Adding pending content");
-            return;
-        }
+    const { updateNote, isSyncing } = useUpdateNoteContent(noteId);
 
-        try {
-            isUpdatingRef.current = true;
-            onSyncChange(true);
-            console.log("Saving note content");
-            await updateNoteContent(noteId, content);
-        } finally {
-            isUpdatingRef.current = false;
-            onSyncChange(false);
-            console.log("Done saving note content");
-            // Check if there's pending content to update
-            if (pendingContentRef.current !== null) {
-                const pendingContent = pendingContentRef.current;
-                pendingContentRef.current = null;
-                updateContent(pendingContent);
-            }
-        }
-    };
+    // Sync the isSyncing state with the parent component
+    useEffect(() => {
+        onSyncChange(isSyncing);
+    }, [isSyncing, onSyncChange]);
 
     const { get } = useEditor((root) => {
         return new Crepe({
@@ -61,27 +94,11 @@ const CrepeEditor: React.FC<EditorProps> = ({ noteId, initialContent, onSyncChan
             ctx.get(listenerCtx)
                 .markdownUpdated((ctx, markdown, prevMarkdown) => {
                     if (markdown !== prevMarkdown) {
-                        onSyncChange(true);
-
-                        // Clear any existing timeout
-                        if (updateTimeoutRef.current) {
-                            clearTimeout(updateTimeoutRef.current);
-                        }
-
-                        // Schedule new update
-                        updateTimeoutRef.current = setTimeout(() => {
-                            updateContent(markdown);
-                        }, 1000);
+                        updateNote(markdown);
                     }
                 });
         });
-
-        return () => {
-            if (updateTimeoutRef.current) {
-                clearTimeout(updateTimeoutRef.current);
-            }
-        };
-    }, [get, noteId]);
+    }, [get, updateNote]);
 
     return (
         <div ref={rootRef} className="flex flex-col h-full">
@@ -90,21 +107,28 @@ const CrepeEditor: React.FC<EditorProps> = ({ noteId, initialContent, onSyncChan
     );
 };
 
-export const MilkdownEditorWrapper: React.FC<{ noteId: string, hideTitle?: boolean }> = ({ noteId, hideTitle = false }) => {
+export const useNote = (noteId: string) => {
     const [note, setNote] = useState<Note | null>(null);
     const [loading, setLoading] = useState(true);
-    const [isSyncing, setIsSyncing] = useState(false);
 
     useEffect(() => {
         getNote(noteId).then((note) => {
-            console.log("Setting content", note);
             setNote(note);
             setLoading(false);
         });
     }, [noteId]);
 
+    console.log("note", note, noteId, loading);
+
+    return { note, loading };
+}
+
+export const NoteEditor: React.FC<{ noteId: string, hideTitle?: boolean }> = ({ noteId, hideTitle = false }) => {
+    const { note, loading } = useNote(noteId);
+    const [isSyncing, setIsSyncing] = useState(false);
+
     if (loading) {
-        return <div className="h-full flex items-center justify-center">Loading editor...</div>;
+        return <div className="h-full flex items-center justify-center">Loading note...</div>;
     }
 
     if (!note) {

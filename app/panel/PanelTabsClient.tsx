@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { WeeklyTodos } from './weekly-todos';
-import { MilkdownEditorWrapper } from "./markdown-editor";
+import { NoteEditor } from "./markdown-editor";
 import { JotsViewer } from './JotsViewer';
 import { ListsViewer } from './ListsViewer';
 import { Week } from 'tt-services/src/services/WeeklyService';
@@ -104,7 +104,7 @@ export function PanelTabsClient({ week, initialJots, initialDailyNote, allDailyN
                 </div>
 
                 <div className={`absolute inset-0 ${activeTab !== 'editor' ? 'hidden' : ''}`}>
-                    <MilkdownEditorWrapper noteId={week.noteId} hideTitle={true} />
+                    <NoteEditor noteId={week.noteId} hideTitle={true} />
                 </div>
 
                 <div className={`absolute inset-0 ${activeTab !== 'jots' ? 'hidden' : ''}`}>

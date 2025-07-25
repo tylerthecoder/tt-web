@@ -31,7 +31,9 @@ export async function updateTodoContent(weekId: string, todoId: string, content:
 export async function getNote(noteId: string) {
     const db = await DatabaseSingleton.getInstance();
     const services = await TylersThings.make(db);
-    return services.notes.getNoteById(noteId);
+    const note = await services.notes.getNoteById(noteId);
+    console.log("getNote: Note", note);
+    return note;
 }
 
 export async function getNoteContent(noteId: string) {

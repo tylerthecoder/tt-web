@@ -1,16 +1,12 @@
-import { DatabaseSingleton } from "tt-services/src/connections/mongo";
-import { TylersThings } from "tt-services";
-import { MilkdownEditorWrapper } from "../../../panel/markdown-editor";
-
-async function getNote(id: string) {
-    const db = await DatabaseSingleton.getInstance();
-    const services = await TylersThings.make(db);
-    return services.notes.getNoteById(id);
-}
+import { MilkdownEditor } from "@/components/milkdown-note-editor";
+import { MilkdownEditorWrapper } from "@/components/test-editor";
 
 export default async function NoteEditPage({ params }: { params: Promise<{ id: string }> }) {
     const resolvedParams = await params;
     return (
-        <MilkdownEditorWrapper noteId={resolvedParams.id} />
+        // <NoteEditor noteId={resolvedParams.id} />
+        // <TTNoteEditor noteId={resolvedParams.id} />
+        // <MilkdownEditor noteId={resolvedParams.id} />
+        <MilkdownEditorWrapper />
     );
 }

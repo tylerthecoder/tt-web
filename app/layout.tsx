@@ -12,12 +12,12 @@ export default async function RootLayout({
 }) {
 
   return (
-    <html>
+    <html className="dark">
       <head>
         <link rel="icon" href="/pi.png" sizes="any" />
       </head>
 
-      <body className="flex flex-col bg-gray-900 w-full h-full">
+      <body className="flex flex-col bg-background text-foreground w-full h-full">
         <Script
           strategy="lazyOnload"
           id="google-anal"
