@@ -30,8 +30,6 @@ export default async function NoteViewPage({ params }: { params: Promise<{ id: s
 
     const lastModified = note.updatedAt || note.createdAt || new Date().toISOString();
 
-    console.log("NoteViewPage: note", note);
-
     return (
         <div className="min-h-screen bg-gray-900 text-white p-8">
             <div className="max-w-4xl mx-auto">
