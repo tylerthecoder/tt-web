@@ -3,7 +3,7 @@
 import React, { useState, useTransition, useCallback, useEffect } from 'react';
 import { DailyNote } from 'tt-services/src/services/DailyNoteService';
 import { NoteMetadata } from 'tt-services/src/services/NotesService';
-import { MilkdownEditorWrapper } from './markdown-editor';
+import { MilkdownEditor } from '@/components/milkdown-note-editor';
 import { getNote as getNoteAction } from './actions';
 import { FaArrowLeft, FaArrowRight, FaSpinner, FaBars, FaTimes } from 'react-icons/fa';
 import { format, parseISO } from 'date-fns';
@@ -160,7 +160,7 @@ export function DailyNoteViewer({ initialNote, allNotesMetadata }: DailyNoteView
                                     <FaSpinner className="animate-spin text-4xl" />
                                 </div>
                             )}
-                            <MilkdownEditorWrapper noteId={currentNote.id} hideTitle={true} key={currentNote.id} />
+                            <MilkdownEditor noteId={currentNote.id} hideTitle={true} key={currentNote.id} />
                         </div>
                     </>
                 ) : (
