@@ -1,11 +1,12 @@
 import { DatabaseSingleton } from "tt-services/src/connections/mongo";
-import { TylersThings } from "tt-services";
+import { Note, TylersThings } from "tt-services";
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { FaArrowLeft, FaEdit } from 'react-icons/fa';
 import { formatDistance } from 'date-fns';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
 
 async function getNote(id: string) {
     try {
@@ -28,6 +29,8 @@ export default async function NoteViewPage({ params }: { params: Promise<{ id: s
     }
 
     const lastModified = note.updatedAt || note.createdAt || new Date().toISOString();
+
+    console.log("NoteViewPage: note", note);
 
     return (
         <div className="min-h-screen bg-gray-900 text-white p-8">
@@ -71,9 +74,9 @@ export default async function NoteViewPage({ params }: { params: Promise<{ id: s
                 </div>
 
 
-                <div className="prose prose-invert prose-lg max-w-none bg-gray-800 p-6 rounded-lg shadow-inner">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {note.content || '*No content*'}
+                <div className="prose prose-invert prose-lg max-w-none bg-gray-800 p-6 rounded-lg shadow-inner prose-ul:m-0">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} >
+                        {note.content}
                     </ReactMarkdown>
                 </div>
             </div>
