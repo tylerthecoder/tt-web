@@ -3,8 +3,8 @@
 import { Milkdown, MilkdownProvider, useEditor } from '@milkdown/react';
 import { Crepe } from '@milkdown/crepe';
 import { listenerCtx } from '@milkdown/plugin-listener';
-import "@milkdown/crepe/theme/common/style.css";
-import "@milkdown/crepe/theme/frame.css";
+// import "@milkdown/crepe/theme/common/style.css";
+// import "@milkdown/crepe/theme/frame.css";
 import { useEffect, useState, useRef } from 'react';
 import { getNote, updateNoteContent } from './actions';
 import { Note } from 'tt-services/src/services/NotesService';

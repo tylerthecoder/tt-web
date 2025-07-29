@@ -6,4 +6,7 @@ module.exports = {
   },
   output: "standalone",
   transpilePackages: ["tt-services"],
+  experimental: {
+    scrollRestoration: false,
+  },
 };

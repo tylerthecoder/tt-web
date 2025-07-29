@@ -1,6 +1,15 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme {
+  --font-terminal: "VT323";
+  
+  --color-vibage: #f97316;
+  --color-vibage-dark: #ea580c;
+  --color-terminal: #41FF00;
+  
+  --z-index-minus-1: -1;
+}
 
 html,
 body,
