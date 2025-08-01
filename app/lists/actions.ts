@@ -3,8 +3,10 @@
 import { DatabaseSingleton } from "tt-services/src/connections/mongo";
 import { TylersThings } from "tt-services";
 import { revalidatePath } from "next/cache";
+import { requireAuth } from '../utils/auth';
 
 export async function createList(name: string) {
+    await requireAuth();
     const db = await DatabaseSingleton.getInstance();
     const services = await TylersThings.make(db);
     const list = await services.lists.createList(name);
@@ -13,6 +15,7 @@ export async function createList(name: string) {
 }
 
 export async function addItemToList(listId: string, content: string) {
+    await requireAuth();
     const db = await DatabaseSingleton.getInstance();
     const services = await TylersThings.make(db);
     await services.lists.addItemToList(listId, content);
@@ -20,6 +23,7 @@ export async function addItemToList(listId: string, content: string) {
 }
 
 export async function toggleItemCheck(listId: string, itemId: string) {
+    await requireAuth();
     const db = await DatabaseSingleton.getInstance();
     const services = await TylersThings.make(db);
     await services.lists.toggleItemCheck(listId, itemId);
@@ -27,6 +31,7 @@ export async function toggleItemCheck(listId: string, itemId: string) {
 }
 
 export async function addNoteToItem(listId: string, itemId: string, noteId: string) {
+    await requireAuth();
     const db = await DatabaseSingleton.getInstance();
     const services = await TylersThings.make(db);
     await services.lists.addNoteToItem(listId, itemId, noteId);
@@ -34,6 +39,7 @@ export async function addNoteToItem(listId: string, itemId: string, noteId: stri
 }
 
 export async function deleteListItem(listId: string, itemId: string) {
+    await requireAuth();
     const db = await DatabaseSingleton.getInstance();
     const services = await TylersThings.make(db);
     await services.lists.deleteItem(listId, itemId);

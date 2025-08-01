@@ -1,35 +1,32 @@
 'use server'
 
 import { cookies } from 'next/headers';
-import bcrypt from 'bcrypt';
+import { redirect } from 'next/navigation';
 
-export async function login(formData: FormData): Promise<{ success: boolean, error?: string }> {
-    const password = formData.get('password') as string;
-
-    const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
-
-    if (!ADMIN_PASSWORD) {
-        throw new Error('ADMIN_PASSWORD is not defined');
-    }
-
+export async function logout() {
     try {
-        console.log(ADMIN_PASSWORD, password);
-        if (ADMIN_PASSWORD !== password) {
-            return { success: false, error: 'Invalid password' };
-        }
-
-        // Set a simple session cookie
-        (await cookies()).set('session', 'authenticated', {
+        const cookieStore = await cookies();
+        
+        // Clear the session cookie
+        cookieStore.set('session', '', {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
-            maxAge: 60 * 60 * 24 * 7, // 1 week
+            maxAge: 0, // Expire immediately
             path: '/',
         });
-
-        return { success: true };
+        
+        // Clear the Google userId cookie
+        cookieStore.set('googleUserId', '', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 0, // Expire immediately
+            path: '/',
+        });
+        
+        redirect('/login');
     } catch (error) {
-        console.error('Login error:', error);
-        return { success: false, error: 'Internal server error' };
+        console.error('Logout error:', error);
+        redirect('/login');
     }
 }

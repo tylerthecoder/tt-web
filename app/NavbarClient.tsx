@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react';
 import NavItem from "./navitem";
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { FaBars, FaTimes } from 'react-icons/fa';
+import { FaBars, FaTimes, FaSignOutAlt } from 'react-icons/fa';
+import { logout } from './login/actions';
 
 interface NavItem {
     label: string;
@@ -13,9 +14,10 @@ interface NavItem {
 
 interface NavbarClientProps {
     navItems: NavItem[];
+    isLoggedIn: boolean;
 }
 
-const NavbarClient = ({ navItems }: NavbarClientProps) => {
+const NavbarClient = ({ navItems, isLoggedIn }: NavbarClientProps) => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
     const pathname = usePathname();
@@ -58,6 +60,10 @@ const NavbarClient = ({ navItems }: NavbarClientProps) => {
         setIsMobileMenuOpen(!isMobileMenuOpen);
     };
 
+    const handleLogout = async () => {
+        await logout();
+    };
+
     return (
         <>
             <nav className="flex z-20 bg-gray-950 relative">
@@ -66,6 +72,18 @@ const NavbarClient = ({ navItems }: NavbarClientProps) => {
                     {navItems.map(item => (
                         <NavItem key={item.href} label={item.label} href={item.href} />
                     ))}
+                    {isLoggedIn && (
+                        <li className="ml-auto">
+                            <button
+                                onClick={handleLogout}
+                                className="flex items-center gap-2 px-4 py-3 text-white hover:bg-gray-800 transition-colors"
+                                title="Logout"
+                            >
+                                <FaSignOutAlt />
+                                <span>Logout</span>
+                            </button>
+                        </li>
+                    )}
                 </ul>
 
                 {/* Mobile Navbar */}
@@ -101,6 +119,15 @@ const NavbarClient = ({ navItems }: NavbarClientProps) => {
                                 {item.label}
                             </Link>
                         ))}
+                        {isLoggedIn && (
+                            <button
+                                onClick={handleLogout}
+                                className="flex items-center gap-2 text-white py-4 text-xl border-b border-gray-800 hover:text-red-400 transition-colors"
+                            >
+                                <FaSignOutAlt />
+                                <span>Logout</span>
+                            </button>
+                        )}
                     </div>
                 </div>
             )}
