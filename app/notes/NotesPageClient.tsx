@@ -5,8 +5,7 @@ import Link from 'next/link';
 import { NoteCard } from "../components/NoteCard";
 import { GoogleDocCard } from "../components/GoogleDocCard";
 import { NotesFilter } from "../components/NotesFilter";
-import { Note } from "tt-services/src/services/NotesService";
-import { GoogleNote } from "tt-services/src/services/GoogleNoteService";
+import { Note, GoogleNote } from "tt-services/src/services/notes";
 import { FaThLarge, FaList } from 'react-icons/fa';
 
 export type LayoutMode = 'grid' | 'list';

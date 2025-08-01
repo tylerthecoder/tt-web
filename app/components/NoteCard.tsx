@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { formatDistance } from 'date-fns';
-import { Note } from 'tt-services/src/services/NotesService';
+import { Note } from 'tt-services/src/services/notes';
 import { DeleteNoteButton } from '../notes/delete-note-button';
 import { FaFileAlt, FaEye, FaEdit } from 'react-icons/fa';
 import { TagManager } from './TagManager';
