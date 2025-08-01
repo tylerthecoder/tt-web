@@ -20,5 +20,6 @@ export default async function Navbar() {
 
 	return <NavbarClient
 		navItems={navItems}
+		isLoggedIn={isLoggedIn}
 	/>;
 }
