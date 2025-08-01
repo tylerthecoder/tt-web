@@ -1,4 +1,4 @@
-import { getNote, updateNoteContent } from '@/panel/actions';
+import { assignGoogleDocIdToNote, getNote, updateNoteContent, pullContentFromGoogleDoc } from '@/panel/actions';
 import { Note } from 'tt-services';
 import { useEffect, useState, useRef, useCallback } from 'react';
 
@@ -53,3 +53,40 @@ export const useUpdateNoteContent = (noteId: string, debounceMs: number = 1000) 
 
     return { updateNote: debouncedUpdate, isSyncing };
 };
+
+
+export const useAssignGoogleDocIdToNote = (noteId: string) => {
+    const [isAssigning, setIsAssigning] = useState(false);
+
+    const assignGoogleDocId = useCallback(async (googleDocId: string) => {
+        setIsAssigning(true);
+        await assignGoogleDocIdToNote(noteId, googleDocId);
+        setIsAssigning(false);
+    }, [noteId]);
+
+    return { assignGoogleDocId, isAssigning };
+}
+
+export const usePullFromGoogleDoc = (noteId: string) => {
+    const [isPulling, setIsPulling] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const pullContent = useCallback(async () => {
+        setIsPulling(true);
+        setError(null);
+        try {
+            const updatedNote = await pullContentFromGoogleDoc(noteId);
+            // Refresh the page to show the updated content
+            window.location.reload();
+            return updatedNote;
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Failed to pull content from Google Doc';
+            setError(errorMessage);
+            throw err;
+        } finally {
+            setIsPulling(false);
+        }
+    }, [noteId]);
+
+    return { pullContent, isPulling, error };
+}

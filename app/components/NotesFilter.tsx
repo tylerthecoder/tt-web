@@ -3,8 +3,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FaSearch, FaTimes, FaCheck, FaBan } from 'react-icons/fa';
-import { Note } from 'tt-services/src/services/NotesService';
-import { GoogleNote } from 'tt-services/src/services/GoogleNoteService';
+import { Note, GoogleNote } from 'tt-services/src/services/notes';
 
 // Type for tag filter states
 type TagFilterState = 'none' | 'shown' | 'hidden';

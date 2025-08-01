@@ -4,10 +4,10 @@ import React, { useState } from 'react';
 import { formatDistance } from 'date-fns';
 import { useRouter } from 'next/navigation';
 import { syncGoogleDoc } from '../google/docs/actions';
-import { GoogleNote } from 'tt-services/src/services/GoogleNoteService';
 import { FaGoogle, FaExternalLinkAlt, FaSync, FaCheck } from 'react-icons/fa';
 import { TagManager } from './TagManager';
 import { LayoutMode } from '../notes/NotesPageClient';
+import { GoogleNote } from 'tt-services/src/client-index';
 
 interface GoogleDocCardProps {
     id: string;

@@ -3,8 +3,7 @@ import { TylersThings } from "tt-services";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { NotesPageClient } from "./NotesPageClient.tsx";
-import { Note } from "tt-services/src/services/NotesService";
-import { GoogleNote } from "tt-services/src/services/GoogleNoteService";
+import { Note, GoogleNote } from "tt-services/src/services/notes";
 
 // Helper type to represent either a note or a Google Doc
 type DisplayItem = {
