@@ -2,6 +2,7 @@
 
 import { DatabaseSingleton, TylersThings } from "tt-services";
 import { revalidatePath } from 'next/cache';
+import { cookies } from 'next/headers';
 
 async function getServices() {
     const db = await DatabaseSingleton.getInstance();
@@ -75,5 +76,39 @@ export async function deleteJotAction(jotId: string) {
     } catch (error) {
         console.error('Failed to delete jot:', error);
         return { error: 'Failed to delete jot. Please try again.' };
+    }
+}
+
+export async function assignGoogleDocIdToNote(noteId: string, googleDocId: string) {
+    const db = await DatabaseSingleton.getInstance();
+    const services = await TylersThings.make(db);
+    const note = await services.notes.getNoteById(noteId);
+    if (!note) {
+        throw new Error('Note not found');
+    }
+    return services.googleNotes.assignGoogleDocIdToNote(note, googleDocId);
+}
+
+export async function pullContentFromGoogleDoc(noteId: string) {
+    try {
+        // Check authentication
+        const cookieStore = await cookies();
+        const userId = cookieStore.get('googleUserId')?.value;
+
+        if (!userId) {
+            throw new Error('Not authenticated with Google');
+        }
+
+        const db = await DatabaseSingleton.getInstance();
+        const services = await TylersThings.make(db);
+
+        // Pull content from Google Doc and save to note
+        await services.googleNotes.saveContentFromGoogleDoc(noteId, userId);
+
+        // Return the updated note
+        return services.notes.getNoteById(noteId);
+    } catch (error) {
+        console.error('Error pulling content from Google Doc:', error);
+        throw error;
     }
 }

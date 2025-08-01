@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { toggleItemCheck, addNoteToItem, deleteListItem } from "../actions";
 import { createNote } from "../../notes/actions";
-import { NoteEditor } from "../../panel/markdown-editor";
+import { MilkdownEditor } from '@/components/milkdown-note-editor';
 import type { ListItem as ListItemType } from "tt-services";
 import { formatDistanceToNow } from "date-fns";
 
@@ -83,7 +83,7 @@ export function ListItem({ item, listId }: ListItemProps) {
             </div>
             {isExpanded && item.noteId && (
                 <div className="mt-4 h-[300px]">
-                    <NoteEditor noteId={item.noteId} />
+                    <MilkdownEditor noteId={item.noteId} />
                 </div>
             )}
         </div>

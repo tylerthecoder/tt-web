@@ -7,15 +7,19 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "start:prod": "yarn && yarn build && yarn start"
+    "start:prod": "bun install && bun run build && bun run start",
+    "link-services": "bun scripts/link-services.ts"
+  },
+  "overrides": {
+    "prosemirror-model": "^1.18.1"
   },
   "dependencies": {
     "@milkdown/crepe": "^7.15.1",
     "@milkdown/ctx": "^7.6.2",
     "@milkdown/react": "^7.15.1",
+    "@tailwindcss/postcss": "^4.1.11",
     "@tailwindcss/typography": "^0.5.10",
     "@vercel/analytics": "^1.5.0",
-    "autoprefixer": "^10.4.0",
     "bcrypt": "^5.1.1",
     "caniuse-lite": "^1.0.30001727",
     "class-variance-authority": "^0.7.1",
@@ -32,6 +36,7 @@
     "react-icons": "^5.5.0",
     "react-markdown": "^10.1.0",
     "rehype-katex": "^6.0.2",
+    "rehype-raw": "^7.0.0",
     "rehype-stringify": "^9.0.3",
     "remark": "^14.0.2",
     "remark-gfm": "^4.0.1",
@@ -42,9 +47,9 @@
     "sharp": "^0.30.4",
     "tailwind-merge": "^3.3.1",
     "tailwind-scrollbar-hide": "^4.0.0",
-    "tailwindcss": "^3.0.24",
+    "tailwindcss": "^4.1.11",
     "tailwindcss-animate": "^1.0.7",
-    "tt-services": "link:tt-services",
+    "tt-services": "github:tylerthecoder/tt-services#52f22cd78dd70398ae2ef869e7013a6c9eb164cd",
     "turbo": "^1.10.16"
   },
   "devDependencies": {

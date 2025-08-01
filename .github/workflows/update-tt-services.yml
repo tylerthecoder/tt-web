@@ -1,0 +1,115 @@
+name: Update tt-services dependency
+
+on:
+  schedule:
+    # Run every day at 6 AM UTC
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+    # Allow manual triggering
+  pull_request:
+    # Run on pull requests for testing
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  update-tt-services:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+          ref: ${{ github.head_ref || github.ref_name }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Get latest commit hash from tt-services
+        id: get-commit
+        run: |
+          LATEST_COMMIT=$(curl -s https://api.github.com/repos/tylerthecoder/tt-services/commits/main | jq -r '.sha')
+          echo "latest_commit=$LATEST_COMMIT" >> $GITHUB_OUTPUT
+          echo "Latest tt-services commit: $LATEST_COMMIT"
+
+      - name: Check current tt-services version in package.json
+        id: check-current
+        run: |
+          CURRENT_VERSION=$(node -p "require('./package.json').dependencies['tt-services']")
+          echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          echo "Current tt-services version: $CURRENT_VERSION"
+
+      - name: Update package.json if needed
+        id: update-package
+        run: |
+          LATEST_COMMIT="${{ steps.get-commit.outputs.latest_commit }}"
+          CURRENT_VERSION="${{ steps.check-current.outputs.current_version }}"
+          NEW_VERSION="github:tylerthecoder/tt-services#$LATEST_COMMIT"
+
+          echo "Comparing versions:"
+          echo "Current: $CURRENT_VERSION"
+          echo "New: $NEW_VERSION"
+
+          if [ "$CURRENT_VERSION" != "$NEW_VERSION" ]; then
+            echo "Updating tt-services dependency..."
+
+            # Create a backup
+            cp package.json package.json.bak
+
+            # Update the dependency using jq
+            jq --arg version "$NEW_VERSION" '.dependencies["tt-services"] = $version' package.json > package.json.tmp
+            mv package.json.tmp package.json
+
+            echo "updated=true" >> $GITHUB_OUTPUT
+            echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+            # Show the diff
+            echo "Changes made:"
+            diff package.json.bak package.json || true
+          else
+            echo "No update needed - already using latest commit"
+            echo "updated=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit and push changes
+        if: steps.update-package.outputs.updated == 'true'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+          # Ensure we're on the correct branch
+          BRANCH_NAME="${{ github.head_ref || github.ref_name }}"
+          echo "Current branch: $(git branch --show-current)"
+          echo "Target branch: $BRANCH_NAME"
+
+          # If we're in detached HEAD, create/checkout the branch
+          if [ -z "$(git branch --show-current)" ]; then
+            git checkout -B "$BRANCH_NAME"
+          fi
+
+          git add package.json
+          git commit -m "chore: update tt-services to latest commit ${{ steps.get-commit.outputs.latest_commit }}"
+          git push origin "$BRANCH_NAME"
+
+      - name: Create summary
+        run: |
+          echo "## Update Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.update-package.outputs.updated }}" == "true" ]; then
+            echo "✅ **Updated tt-services dependency**" >> $GITHUB_STEP_SUMMARY
+            echo "- Previous: \`${{ steps.check-current.outputs.current_version }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "- New: \`${{ steps.update-package.outputs.new_version }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "- Commit: [\`${{ steps.get-commit.outputs.latest_commit }}\`](https://github.com/tylerthecoder/tt-services/commit/${{ steps.get-commit.outputs.latest_commit }})" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "ℹ️ **No update needed** - already using latest commit" >> $GITHUB_STEP_SUMMARY
+            echo "- Current: \`${{ steps.check-current.outputs.current_version }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "- Latest: \`github:tylerthecoder/tt-services#${{ steps.get-commit.outputs.latest_commit }}\`" >> $GITHUB_STEP_SUMMARY
+          fi

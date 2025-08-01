@@ -25,7 +25,7 @@ export async function syncGoogleDoc(docId: string) {
         const services = await TylersThings.make(db);
 
         // Create or update the Google Note
-        const note = await services.googleNotes.createGoogleNote(userId, docId);
+        const note = await services.googleNotes.createGoogleNoteFromGoogleDocId(userId, docId);
 
         return { success: true, note };
     } catch (error) {
