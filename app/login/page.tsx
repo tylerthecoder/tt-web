@@ -16,6 +16,8 @@ export default function LoginPage() {
     const searchParams = useSearchParams();
 
     useEffect(() => {
+        if (!searchParams) return;
+        
         const errorParam = searchParams.get('error');
         if (errorParam) {
             switch (errorParam) {

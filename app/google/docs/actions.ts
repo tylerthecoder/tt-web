@@ -2,13 +2,16 @@
 
 import { cookies } from 'next/headers';
 import { DatabaseSingleton, TylersThings } from 'tt-services';
+import { requireAuth } from '../../utils/auth';
 
 /**
  * Server action to sync a Google Doc with our notes system
  */
 export async function syncGoogleDoc(docId: string) {
+    await requireAuth();
+    
     try {
-        // Check authentication
+        // Check Google authentication
         const cookieStore = await cookies();
         const userId = cookieStore.get('googleUserId')?.value;
 

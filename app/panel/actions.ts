@@ -3,6 +3,7 @@
 import { DatabaseSingleton, TylersThings } from "tt-services";
 import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
+import { requireAuth } from '../utils/auth';
 
 async function getServices() {
     const db = await DatabaseSingleton.getInstance();
@@ -10,32 +11,38 @@ async function getServices() {
 }
 
 export async function getCurrentWeek() {
+    await requireAuth();
     const services = await getServices();
     return services.weekly.getCurrentWeek();
 }
 
 export async function addTodo(weekId: string, content: string) {
+    await requireAuth();
     const services = await getServices();
     return services.weekly.addTodo(weekId, content);
 }
 
 export async function toggleTodo(weekId: string, todoId: string, checked: boolean) {
+    await requireAuth();
     const services = await getServices();
     return services.weekly.toggleTodo(weekId, todoId, checked);
 }
 
 export async function updateTodoContent(weekId: string, todoId: string, content: string) {
+    await requireAuth();
     const services = await getServices();
     return services.weekly.updateTodoContent(weekId, todoId, content);
 }
 
 export async function getNote(noteId: string) {
+    await requireAuth();
     const db = await DatabaseSingleton.getInstance();
     const services = await TylersThings.make(db);
     return services.notes.getNoteById(noteId);
 }
 
 export async function getNoteContent(noteId: string) {
+    await requireAuth();
     const db = await DatabaseSingleton.getInstance();
     const services = await TylersThings.make(db);
     const note = await services.notes.getNoteById(noteId);
@@ -44,6 +51,7 @@ export async function getNoteContent(noteId: string) {
 }
 
 export async function updateNoteContent(noteId: string, content: string) {
+    await requireAuth();
     const db = await DatabaseSingleton.getInstance();
     const services = await TylersThings.make(db);
     await services.notes.updateNote(noteId, { content });
@@ -51,11 +59,14 @@ export async function updateNoteContent(noteId: string, content: string) {
 }
 
 export async function deleteTodo(weekId: string, todoId: string) {
+    await requireAuth();
     const services = await getServices();
     return services.weekly.deleteTodo(weekId, todoId);
 }
 
 export async function deleteJotAction(jotId: string) {
+    await requireAuth();
+    
     if (!jotId || typeof jotId !== 'string') {
         return { error: 'Invalid Jot ID.' };
     }
@@ -78,6 +89,7 @@ export async function deleteJotAction(jotId: string) {
 }
 
 export async function assignGoogleDocIdToNote(noteId: string, googleDocId: string) {
+    await requireAuth();
     const db = await DatabaseSingleton.getInstance();
     const services = await TylersThings.make(db);
     const note = await services.notes.getNoteById(noteId);
@@ -88,8 +100,10 @@ export async function assignGoogleDocIdToNote(noteId: string, googleDocId: strin
 }
 
 export async function pullContentFromGoogleDoc(noteId: string) {
+    await requireAuth();
+    
     try {
-        // Check authentication
+        // Check Google authentication
         const cookieStore = await cookies();
         const userId = cookieStore.get('googleUserId')?.value;
 
