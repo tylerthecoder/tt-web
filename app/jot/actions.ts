@@ -2,8 +2,11 @@
 
 import { revalidatePath } from 'next/cache';
 import { TylersThings, DatabaseSingleton } from 'tt-services';
+import { requireAuth } from '../utils/auth';
 
 export async function createJotAction(formData: FormData) {
+    await requireAuth(); // Add authentication check
+    
     const text = formData.get('jotText') as string;
 
     if (!text || typeof text !== 'string' || text.trim().length === 0) {
