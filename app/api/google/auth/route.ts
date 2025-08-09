@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
         const db = await DatabaseSingleton.getInstance();
         const services = await TylersThings.make(db);
 
-        const authUrl = services.google.getAuthUrl(req.nextUrl.origin);
+        const authUrl = services.google.getAuthUrl();
 
         // Redirect the user to Google's OAuth consent screen
         return NextResponse.redirect(authUrl);
