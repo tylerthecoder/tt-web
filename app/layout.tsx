@@ -2,6 +2,7 @@ import NavBar from "./navbar";
 import "./global.css";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/react";
+import { CommandMenuProvider } from "./components/CommandMenuProvider";
 
 const analyticsId = "G-B5KCWMNFJE";
 
@@ -35,8 +36,10 @@ export default async function RootLayout({
                 `}
         </Script>
 
-        <NavBar />
-        <div className="flex-grow">{children}</div>
+        <CommandMenuProvider>
+          <NavBar />
+          <div className="flex-grow">{children}</div>
+        </CommandMenuProvider>
         <Analytics />
       </body>
     </html>
