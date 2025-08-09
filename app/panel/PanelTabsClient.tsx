@@ -10,7 +10,7 @@ import { Jot } from 'tt-services/src/services/JotsService';
 import { List } from 'tt-services/src/services/ListsService';
 import { FaListAlt, FaEdit, FaStickyNote, FaCalendarDay, FaList } from 'react-icons/fa';
 import { DailyNote } from 'tt-services/src/services/DailyNoteService';
-import { NoteMetadata } from 'tt-services/src/services/NotesService';
+import { NoteMetadata } from 'tt-services/src/client-index';
 import { DailyNoteViewer } from './DailyNoteViewer';
 
 type Tab = 'todos' | 'editor' | 'jots' | 'daily' | 'lists';

@@ -3,20 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { NoteCard } from "../components/NoteCard";
-import { GoogleDocCard } from "../components/GoogleDocCard";
+import { UntrackedGoogleDocCard } from "../components/untrack-google-doc-card.tsx";
 import { NotesFilter } from "../components/NotesFilter";
-import { Note, GoogleNote } from "tt-services/src/services/notes";
 import { FaThLarge, FaList } from 'react-icons/fa';
+import { DisplayItem } from './page.tsx';
 
 export type LayoutMode = 'grid' | 'list';
-
-type DisplayItem = {
-    id: string;
-    title: string;
-    modifiedTime: string;
-    type: 'note' | 'google-doc';
-    originalItem: Note | GoogleNote | any; // The original item data
-};
 
 interface NotesPageClientProps {
     displayItems: DisplayItem[];
@@ -104,15 +96,8 @@ export function NotesPageClient({
                                     layout="grid"
                                 />
                             ) : (
-                                <GoogleDocCard
-                                    id={item.originalItem.id}
-                                    name={item.originalItem.name}
-                                    webViewLink={item.originalItem.webViewLink}
-                                    createdTime={item.originalItem.createdTime}
-                                    modifiedTime={item.originalItem.modifiedTime}
-                                    isSynced={item.originalItem.isSynced}
-                                    syncedDoc={item.originalItem.syncedDoc}
-                                    availableTags={availableTags}
+                                <UntrackedGoogleDocCard
+                                    doc={item.originalItem}
                                     layout="grid"
                                 />
                             )}
@@ -130,15 +115,8 @@ export function NotesPageClient({
                                     layout="list"
                                 />
                             ) : (
-                                <GoogleDocCard
-                                    id={item.originalItem.id}
-                                    name={item.originalItem.name}
-                                    webViewLink={item.originalItem.webViewLink}
-                                    createdTime={item.originalItem.createdTime}
-                                    modifiedTime={item.originalItem.modifiedTime}
-                                    isSynced={item.originalItem.isSynced}
-                                    syncedDoc={item.originalItem.syncedDoc}
-                                    availableTags={availableTags}
+                                <UntrackedGoogleDocCard
+                                    doc={item.originalItem}
                                     layout="list"
                                 />
                             )}

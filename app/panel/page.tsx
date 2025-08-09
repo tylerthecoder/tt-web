@@ -6,7 +6,7 @@ import { PanelTabsClient } from './PanelTabsClient';
 import { DatabaseSingleton } from 'tt-services/src/connections/mongo';
 import { TylersThings } from 'tt-services/src/lib';
 import { DailyNote } from 'tt-services/src/services/DailyNoteService';
-import { NoteMetadata } from 'tt-services/src/services/NotesService';
+import { NoteMetadata } from 'tt-services/src/client-index';
 
 export default async function PanelPage() {
     const week = await getCurrentWeek();

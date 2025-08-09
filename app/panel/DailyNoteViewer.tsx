@@ -2,7 +2,7 @@
 
 import React, { useState, useTransition, useCallback, useEffect } from 'react';
 import { DailyNote } from 'tt-services/src/services/DailyNoteService';
-import { NoteMetadata } from 'tt-services/src/services/NotesService';
+import { NoteMetadata } from 'tt-services/src/client-index';
 import { MilkdownEditor } from '@/components/milkdown-note-editor';
 import { getNote as getNoteAction } from './actions';
 import { FaArrowLeft, FaArrowRight, FaSpinner, FaBars, FaTimes } from 'react-icons/fa';

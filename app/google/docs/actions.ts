@@ -4,9 +4,9 @@ import { cookies } from 'next/headers';
 import { DatabaseSingleton, TylersThings } from 'tt-services';
 
 /**
- * Server action to sync a Google Doc with our notes system
+ * Server action to track a Google Doc with our notes system
  */
-export async function syncGoogleDoc(docId: string) {
+export async function trackGoogleDoc(docId: string) {
     try {
         // Check authentication
         const cookieStore = await cookies();
@@ -20,11 +20,9 @@ export async function syncGoogleDoc(docId: string) {
             return { success: false, error: 'Document ID is required' };
         }
 
-        // Get all services through TylersThings
         const db = await DatabaseSingleton.getInstance();
         const services = await TylersThings.make(db);
 
-        // Create or update the Google Note
         const note = await services.googleNotes.createGoogleNoteFromGoogleDocId(userId, docId);
 
         return { success: true, note };
