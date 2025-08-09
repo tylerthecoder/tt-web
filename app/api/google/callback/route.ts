@@ -9,12 +9,12 @@ export async function GET(req: NextRequest) {
 
         if (error) {
             console.error('Google auth error:', error);
-            return NextResponse.redirect(new URL('/google/auth?error=' + error, url.origin));
+            return NextResponse.redirect(new URL('/login?error=' + error, url.origin));
         }
 
         if (!code) {
             console.error('No code parameter received');
-            return NextResponse.redirect(new URL('/google/auth?error=no_code', url.origin));
+            return NextResponse.redirect(new URL('/login?error=no_code', url.origin));
         }
 
         // Get the service through TylersThings
@@ -25,10 +25,11 @@ export async function GET(req: NextRequest) {
         const token = await services.google.getTokens(code);
 
         // Store the userId in a cookie so we can identify the user
-        const response = NextResponse.redirect(new URL('/notes', url.origin));
+        const response = NextResponse.redirect(new URL('/panel', url.origin));
         response.cookies.set('googleUserId', token.userId, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
             maxAge: 30 * 24 * 60 * 60, // 30 days
             path: '/',
         });
@@ -36,6 +37,6 @@ export async function GET(req: NextRequest) {
         return response;
     } catch (error) {
         console.error('Error in Google callback:', error);
-        return NextResponse.redirect(new URL('/google/auth?error=callback_failed', req.url));
+        return NextResponse.redirect(new URL('/login?error=callback_failed', req.url));
     }
 }

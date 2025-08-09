@@ -9,9 +9,9 @@ export async function middleware(request: NextRequest) {
         return NextResponse.next();
     }
 
-    const session = request.cookies.get('session');
+    const googleUserId = request.cookies.get('googleUserId');
 
-    if (!session || session.value !== 'authenticated') {
+    if (!googleUserId || !googleUserId.value) {
         return NextResponse.redirect(new URL('/login', request.url));
     }
 
