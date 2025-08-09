@@ -3,9 +3,12 @@
 import { DatabaseSingleton } from "tt-services/src/connections/mongo";
 import { TylersThings } from "tt-services";
 import { revalidatePath } from "next/cache";
+import { requireAuth } from "../utils/auth";
 
 
 export async function deleteNote(noteId: string) {
+    await requireAuth(); // Add authentication check
+    
     const db = await DatabaseSingleton.getInstance();
     const services = await TylersThings.make(db);
     await services.notes.softDeleteNote(noteId);
@@ -13,6 +16,8 @@ export async function deleteNote(noteId: string) {
 }
 
 export async function createNote(title: string) {
+    await requireAuth(); // Add authentication check
+    
     const db = await DatabaseSingleton.getInstance();
     const services = await TylersThings.make(db);
     const note = await services.notes.createNote({
@@ -25,6 +30,8 @@ export async function createNote(title: string) {
 }
 
 export async function addTagToNote(noteId: string, tag: string) {
+    await requireAuth(); // Add authentication check
+    
     const db = await DatabaseSingleton.getInstance();
     const services = await TylersThings.make(db);
 
@@ -40,6 +47,8 @@ export async function addTagToNote(noteId: string, tag: string) {
 }
 
 export async function removeTagFromNote(noteId: string, tag: string) {
+    await requireAuth(); // Add authentication check
+    
     const db = await DatabaseSingleton.getInstance();
     const services = await TylersThings.make(db);
 
