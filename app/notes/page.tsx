@@ -1,34 +1,27 @@
 import { DatabaseSingleton } from "tt-services/src/connections/mongo";
 import { TylersThings } from "tt-services";
-import Link from "next/link";
 import { cookies } from "next/headers";
 import { NotesPageClient } from "./NotesPageClient.tsx";
-import { Note, GoogleNote } from "tt-services/src/services/notes";
+import { NoteMetadata, isGoogleNoteMetadata } from "tt-services/src/client-index";
+import { drive_v3 } from "googleapis/build/src/apis/drive/v3";
 
-// Helper type to represent either a note or a Google Doc
-type DisplayItem = {
+export type NoteDisplayItem = {
     id: string;
     title: string;
     modifiedTime: string;
-    type: 'note' | 'google-doc';
-    originalItem: Note | GoogleNote | any; // The original item data
+    type: 'note';
+    originalItem: NoteMetadata;
 };
 
-// Helper function to check if an item is a Google Note
-const isGoogleNote = (item: any): boolean => {
-    return item.googleDocId !== undefined;
+export type GoogleDocDisplayItem = {
+    id: string;
+    title: string;
+    modifiedTime: string;
+    type: 'google-doc';
+    originalItem: drive_v3.Schema$File;
 };
 
-
-async function tryCatch<T>(fn: () => Promise<T>): Promise<{ success: boolean, data: T | null, error: any | null }> {
-    try {
-        const data = await fn();
-        return { success: true, data, error: null };
-    } catch (error) {
-        console.error(error);
-        return { success: false, data: null, error };
-    }
-}
+export type DisplayItem = NoteDisplayItem | GoogleDocDisplayItem;
 
 
 export default async function NotesPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
@@ -40,27 +33,30 @@ export default async function NotesPage({ searchParams }: { searchParams: Promis
     const userId = cookieStore.get('googleUserId')?.value;
 
     // Fetch all regular notes
-    const [notes, googleNotes, allTags, googleDocs] = await Promise.all([
+    const [notes, allTags, googleDocs] = await Promise.all([
         services.notes.getAllNotesMetadata(),
-        services.googleNotes.getAllGoogleNotes(),
         services.notes.getAllTags(),
         userId ? services.google.getUserDocs(userId) : []
     ]);
 
-    // Create a map of Google Notes by their Google Doc ID for easy lookup
-    const googleNotesByDocId = new Map();
-    googleNotes.forEach(note => {
-        if (note.googleDocId) {
-            googleNotesByDocId.set(note.googleDocId, note);
+    // Filter out Google notes that are already in the system
+    const notTrackedGoogleNotes = googleDocs.filter(doc => {
+        for (const note of notes) {
+            if (!isGoogleNoteMetadata(note)) {
+                continue;
+            }
+            if (note.googleDocId === doc.id) {
+                return false;
+            }
         }
+        return true;
     });
 
     // Build combined list of items to display
     const displayItems: DisplayItem[] = [];
 
-    // Add regular notes (excluding Google Notes since they'll be handled with their corresponding Google Doc)
+    // Add regular notes (includes tracked Google notes that are already in the system)
     notes
-        .filter(note => !isGoogleNote(note))
         .forEach(note => {
             displayItems.push({
                 id: note.id,
@@ -71,20 +67,14 @@ export default async function NotesPage({ searchParams }: { searchParams: Promis
             });
         });
 
-    // Add Google Docs, with their corresponding note data if available
-    googleDocs.forEach(doc => {
-        const correspondingNote = googleNotesByDocId.get(doc.id);
-
+    // Add not tracked Google Docs
+    notTrackedGoogleNotes.forEach(doc => {
         displayItems.push({
             id: doc.id || "",
             title: doc.name || "",
             modifiedTime: doc.modifiedTime || new Date().toISOString(),
             type: 'google-doc',
-            originalItem: {
-                ...doc,
-                isSynced: !!correspondingNote,
-                syncedDoc: correspondingNote
-            }
+            originalItem: doc
         });
     });
 
@@ -98,11 +88,6 @@ export default async function NotesPage({ searchParams }: { searchParams: Promis
     const initialSearch = typeof resolvedSearchParams.search === 'string' ? resolvedSearchParams.search : '';
     const initialShownTags = typeof resolvedSearchParams.shownTags === 'string' ? resolvedSearchParams.shownTags.split(',').filter(Boolean) : [];
     const initialHiddenTags = typeof resolvedSearchParams.hiddenTags === 'string' ? resolvedSearchParams.hiddenTags.split(',').filter(Boolean) : [];
-
-    // remove _id from displayItems
-    displayItems.forEach(item => {
-        delete item.originalItem._id;
-    });
 
     return (
         <NotesPageClient
