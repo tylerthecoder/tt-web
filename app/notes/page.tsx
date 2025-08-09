@@ -2,7 +2,7 @@ import { DatabaseSingleton } from "tt-services/src/connections/mongo";
 import { TylersThings } from "tt-services";
 import { cookies } from "next/headers";
 import { NotesPageClient } from "./NotesPageClient.tsx";
-import { NoteMetadata, isGoogleNoteMetadata } from "tt-services/src/client-index";
+import { NoteMetadata, isGoogleNoteMetadata } from "tt-services/src/client-index.ts";
 import { drive_v3 } from "googleapis/build/src/apis/drive/v3";
 
 export type NoteDisplayItem = {
