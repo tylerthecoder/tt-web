@@ -1,7 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
 import { Bubblegum_Sans } from 'next/font/google';
 
 const bubblegum = Bubblegum_Sans({
@@ -10,9 +10,35 @@ const bubblegum = Bubblegum_Sans({
     display: "swap",
 });
 
-export default function LoginPage() {
+function LoginContent() {
     const [error, setError] = useState<string>("");
     const router = useRouter();
+    const searchParams = useSearchParams();
+
+    useEffect(() => {
+        const errorParam = searchParams?.get('error');
+        if (errorParam) {
+            switch (errorParam) {
+                case 'no_code':
+                    setError('No authorization code received from Google');
+                    break;
+                case 'callback_failed':
+                    setError('Failed to complete authentication with Google');
+                    break;
+                case 'admin_email_not_configured':
+                    setError('Server configuration error - admin email not set');
+                    break;
+                case 'no_email':
+                    setError('Could not retrieve email from Google account');
+                    break;
+                case 'unauthorized_email':
+                    setError('Access denied - only the admin email is authorized');
+                    break;
+                default:
+                    setError(`Authentication error: ${errorParam}`);
+            }
+        }
+    }, [searchParams]);
 
     const handleGoogleSignIn = async () => {
         try {
@@ -31,11 +57,13 @@ export default function LoginPage() {
 
                 <div className="space-y-6">
                     <p className="text-white text-center text-sm">
-                        Sign in with your Google account to access your notes and lists.
+                        Sign in with your authorized Google account to access your notes and lists.
                     </p>
 
                     {error && (
-                        <p className="text-red-500 text-sm text-center">{error}</p>
+                        <div className="bg-red-500 bg-opacity-80 border border-red-600 rounded-lg p-3">
+                            <p className="text-white text-sm text-center">{error}</p>
+                        </div>
                     )}
 
                     <button
@@ -55,5 +83,19 @@ export default function LoginPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex min-h-screen items-center justify-center">
+                <div className="text-center">
+                    <p className="text-lg">Loading...</p>
+                </div>
+            </div>
+        }>
+            <LoginContent />
+        </Suspense>
     );
 }
