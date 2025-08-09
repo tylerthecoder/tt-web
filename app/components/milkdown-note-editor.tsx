@@ -9,11 +9,13 @@ import { useEffect, useState } from 'react';
 import { useNote, useUpdateNoteContent, usePullFromGoogleDoc } from '@/notes/hooks';
 import { Note, isGoogleNote } from 'tt-services/src/client-index.ts';
 import { GoogleDocModal } from './google-doc-modal';
+import { GoogleMergeModal } from './google-merge-modal';
 
 const MilkdownEditorWithNote: React.FC<{ note: Note, hideTitle?: boolean }> = ({ note, hideTitle = false }) => {
 	const { updateNote, isSyncing } = useUpdateNoteContent(note.id);
 	const { pullContent, isPulling, error } = usePullFromGoogleDoc(note.id);
 	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [isMergeOpen, setIsMergeOpen] = useState(false);
 
 	const { get } = useEditor((root) => {
 		return new Crepe({
@@ -36,13 +38,8 @@ const MilkdownEditorWithNote: React.FC<{ note: Note, hideTitle?: boolean }> = ({
 		});
 	}, [get, updateNote]);
 
-	const handlePullContent = async () => {
-		try {
-			await pullContent();
-		} catch (err) {
-			// Error is already handled in the hook
-			console.error('Failed to pull content:', err);
-		}
+	const handleOpenMerge = () => {
+		setIsMergeOpen(true);
 	};
 
 	return (
@@ -66,11 +63,11 @@ const MilkdownEditorWithNote: React.FC<{ note: Note, hideTitle?: boolean }> = ({
 									</a>
 								</span>
 								<button
-									onClick={handlePullContent}
+									onClick={handleOpenMerge}
 									disabled={isPulling}
 									className="text-xs md:text-sm text-green-400 hover:text-green-300 underline disabled:opacity-50 disabled:cursor-not-allowed"
 								>
-									{isPulling ? "Pulling..." : "Pull from Google"}
+									Merge from Google
 								</button>
 								{error && (
 									<span className="text-xs text-red-400">
@@ -127,6 +124,11 @@ const MilkdownEditorWithNote: React.FC<{ note: Note, hideTitle?: boolean }> = ({
 				isOpen={isModalOpen}
 				onClose={() => setIsModalOpen(false)}
 				noteId={note.id}
+			/>
+			<GoogleMergeModal
+				isOpen={isMergeOpen}
+				onClose={() => setIsMergeOpen(false)}
+				note={note}
 			/>
 		</div>
 	);

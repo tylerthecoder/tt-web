@@ -110,3 +110,23 @@ export async function pullContentFromGoogleDoc(noteId: string) {
         throw error;
     }
 }
+
+export async function stageGoogleDocContentForMerge(noteId: string) {
+    try {
+        const cookieStore = await cookies();
+        const userId = cookieStore.get('googleUserId')?.value;
+
+        if (!userId) {
+            throw new Error('Not authenticated with Google');
+        }
+
+        const db = await DatabaseSingleton.getInstance();
+        const services = await TylersThings.make(db);
+
+        const updated = await services.googleNotes.stageContentFromGoogleDoc(noteId, userId);
+        return updated;
+    } catch (error) {
+        console.error('Error staging Google Doc content for merge:', error);
+        throw error;
+    }
+}
