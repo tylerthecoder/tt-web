@@ -30,6 +30,7 @@
     "next": "^15.0.0",
     "postcss": "^8.3.11",
     "react": "^18.2.0",
+    "@openai/agents": "^0.0.15",
     "react-date-picker": "^9.0.0",
     "react-dom": "^18.2.0",
     "react-flip-move": "^3.0.4",
@@ -46,7 +47,7 @@
     "remark-rehype": "^10.1.0",
     "sharp": "^0.30.4",
     "tailwindcss": "^3.0.24",
-    "tt-services": "github:tylerthecoder/tt-services#10dc2eda78b2e3c395958b108d00bfce98da7a8f",
+    "tt-services": "link:tt-services",
     "turbo": "^1.10.16"
   },
   "devDependencies": {

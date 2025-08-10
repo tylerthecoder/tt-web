@@ -1,4 +1,4 @@
-import { TylersThings } from "tt-services";
+import { TylersThings } from "tt-services/src/lib";
 import { MongoDBService } from "tt-services/src/connections/mongo";
 
 class TylersThingsServiceClass {
