@@ -15,16 +15,27 @@ async function getAgent(): Promise<Agent> {
 
 // Helper to format approval item details for UI
 function formatApprovalItemDisplay(item: RunToolApprovalItem): { name: string; args: Record<string, any> } {
-    const json = item.toJSON();
-    const name: string = json.rawItem && 'name' in json.rawItem ? (json.rawItem as any).name : '';
+    const anyItem: any = item as any;
+
+    // Prefer toJSON if present (SDK class instance)
+    const json = typeof anyItem?.toJSON === 'function' ? anyItem.toJSON() : anyItem;
+
+    const raw = json?.rawItem ?? json?.raw_item ?? {};
+    const name: string = typeof raw?.name === 'string' ? raw.name : '';
+
     let args: Record<string, any> = {};
+    const rawArgs = (raw as any)?.arguments;
+
     try {
-        args = json.rawItem && 'arguments' in json.rawItem && (json.rawItem as any).arguments
-            ? JSON.parse((json.rawItem as any).arguments as string)
-            : {};
+        if (typeof rawArgs === 'string') {
+            args = JSON.parse(rawArgs);
+        } else if (rawArgs && typeof rawArgs === 'object') {
+            args = rawArgs as Record<string, any>;
+        }
     } catch {
         args = {};
     }
+
     return { name, args };
 }
 
@@ -51,10 +62,9 @@ export type ApprovalPreview = { index: number; name: string; args: Record<string
 
 async function getApprovalsFromState(state: RunState): Promise<ApprovalPreview[]> {
     const interruptions = state.getInterruptions();
-    const approvals = interruptions
-        .filter((i) => i.type === 'tool_approval_item') as RunToolApprovalItem[];
+    const approvals = interruptions.filter((i: any) => i?.type === 'tool_approval_item') as any[];
     return approvals.map((item, idx) => {
-        const { name, args } = formatApprovalItemDisplay(item);
+        const { name, args } = formatApprovalItemDisplay(item as unknown as RunToolApprovalItem);
         return { index: idx, name, args };
     });
 }
@@ -107,11 +117,12 @@ export async function approveTool(chatId: string, approvalIndex: number, alwaysA
 
     let state = await RunState.fromString(coreAgent, chat.state);
     const interruptions = state.getInterruptions();
-    const approvals = interruptions.filter((i) => i.type === 'tool_approval_item') as RunToolApprovalItem[];
-    const item = approvals[approvalIndex];
+    const approvals = interruptions.filter((i: any) => i?.type === 'tool_approval_item') as any[];
+    const item = approvals[approvalIndex] as any;
     if (!item) return { done: true };
 
-    state.approve(item, { alwaysApprove });
+    // Approve using RunState instance
+    (state as any).approve(item, { alwaysApprove });
     let result: RunResult<any, any> = await run(coreAgent, state);
 
     if (result.interruptions.length === 0) {
@@ -137,11 +148,11 @@ export async function rejectTool(chatId: string, approvalIndex: number, alwaysRe
 
     let state = await RunState.fromString(coreAgent, chat.state);
     const interruptions = state.getInterruptions();
-    const approvals = interruptions.filter((i) => i.type === 'tool_approval_item') as RunToolApprovalItem[];
-    const item = approvals[approvalIndex];
+    const approvals = interruptions.filter((i: any) => i?.type === 'tool_approval_item') as any[];
+    const item = approvals[approvalIndex] as any;
     if (!item) return { done: true };
 
-    state.reject(item, { alwaysReject });
+    (state as any).reject(item, { alwaysReject });
     let result: RunResult<any, any> = await run(coreAgent, state);
 
     if (result.interruptions.length === 0) {
