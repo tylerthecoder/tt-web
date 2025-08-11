@@ -47,7 +47,7 @@
     "remark-rehype": "^10.1.0",
     "sharp": "^0.30.4",
     "tailwindcss": "^3.0.24",
-    "tt-services": "link:tt-services",
+    "tt-services": "github:tylerthecoder/tt-services#6868d70ceeca8889b90b25b651a316a4a45fe08c",
     "turbo": "^1.10.16"
   },
   "devDependencies": {
