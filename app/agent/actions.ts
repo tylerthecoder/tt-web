@@ -60,7 +60,7 @@ export async function createChat(title?: string) {
 
 export type ApprovalPreview = { index: number; name: string; args: Record<string, any> };
 
-async function getApprovalsFromState(state: RunState): Promise<ApprovalPreview[]> {
+async function getApprovalsFromState(state: RunState<any, Agent>): Promise<ApprovalPreview[]> {
     const interruptions = state.getInterruptions();
     const approvals = interruptions.filter((i: any) => i?.type === 'tool_approval_item') as any[];
     return approvals.map((item, idx) => {
@@ -104,7 +104,7 @@ export async function sendUserMessage(chatId: string, content: string): Promise<
     // Persist run state and return approvals for UI
     const stateStr = result.state.toString();
     await services.chats.updateState(chatId, stateStr);
-    const approvals = await getApprovalsFromState(result.state as RunState);
+    const approvals = await getApprovalsFromState(result.state as RunState<any, any>);
     return { chat, done: false, approvals };
 }
 
@@ -134,7 +134,7 @@ export async function approveTool(chatId: string, approvalIndex: number, alwaysA
     } else {
         // Save updated state and return approvals again
         await services.chats.updateState(chatId, result.state.toString());
-        const approvals = await getApprovalsFromState(result.state as RunState);
+        const approvals = await getApprovalsFromState(result.state as RunState<any, any>);
         return { done: false, approvals };
     }
 }
@@ -162,7 +162,7 @@ export async function rejectTool(chatId: string, approvalIndex: number, alwaysRe
         return { chat: updated, done: true };
     } else {
         await services.chats.updateState(chatId, result.state.toString());
-        const approvals = await getApprovalsFromState(result.state as RunState);
+        const approvals = await getApprovalsFromState(result.state as RunState<any, any>);
         return { done: false, approvals };
     }
 }

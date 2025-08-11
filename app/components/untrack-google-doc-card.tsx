@@ -6,10 +6,10 @@ import { trackGoogleDoc } from '../google/docs/actions';
 import { FaGoogle, FaExternalLinkAlt, FaSync, FaCheck } from 'react-icons/fa';
 import { LayoutMode } from '../notes/NotesPageClient';
 import { BaseCard } from './BaseCard';
-import { drive_v3 } from 'googleapis/build/src/apis/drive/v3';
+import type { GoogleDriveFile } from '../types/google';
 
 interface UntrackedGoogleDocCardProps {
-    doc: drive_v3.Schema$File;
+    doc: GoogleDriveFile;
     layout?: LayoutMode;
 }
 

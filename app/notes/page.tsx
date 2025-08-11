@@ -2,8 +2,8 @@ import { DatabaseSingleton } from "tt-services/src/connections/mongo";
 import { TylersThings } from "tt-services";
 import { cookies } from "next/headers";
 import { NotesPageClient } from "./NotesPageClient.tsx";
-import { NoteMetadata, isGoogleNoteMetadata } from "tt-services/src/client-index.ts";
-import { drive_v3 } from "googleapis/build/src/apis/drive/v3";
+import { NoteMetadata } from "tt-services/src/client-index.ts";
+import type { GoogleDriveFile } from "../types/google";
 
 export type NoteDisplayItem = {
     id: string;
@@ -18,7 +18,7 @@ export type GoogleDocDisplayItem = {
     title: string;
     modifiedTime: string;
     type: 'google-doc';
-    originalItem: drive_v3.Schema$File;
+    originalItem: GoogleDriveFile;
 };
 
 export type DisplayItem = NoteDisplayItem | GoogleDocDisplayItem;
@@ -33,30 +33,16 @@ export default async function NotesPage({ searchParams }: { searchParams: Promis
     const userId = cookieStore.get('googleUserId')?.value;
 
     // Fetch all regular notes
-    const [notes, allTags, googleDocs] = await Promise.all([
-        services.notes.getAllNotesMetadata(),
+    const [allTags, notesAndUntrackedGoogleDocs] = await Promise.all([
         services.notes.getAllTags(),
-        userId ? services.google.getUserDocs(userId) : []
+        userId ? services.googleNotes.getAllNotesAndUntrackedGoogleDocs(userId) : Promise.resolve({ notes: [], googleDocs: [] })
     ]);
-
-    // Filter out Google notes that are already in the system
-    const notTrackedGoogleNotes = googleDocs.filter(doc => {
-        for (const note of notes) {
-            if (!isGoogleNoteMetadata(note)) {
-                continue;
-            }
-            if (note.googleDocId === doc.id) {
-                return false;
-            }
-        }
-        return true;
-    });
 
     // Build combined list of items to display
     const displayItems: DisplayItem[] = [];
 
     // Add regular notes (includes tracked Google notes that are already in the system)
-    notes
+    notesAndUntrackedGoogleDocs.notes
         .forEach(note => {
             displayItems.push({
                 id: note.id,
@@ -68,7 +54,7 @@ export default async function NotesPage({ searchParams }: { searchParams: Promis
         });
 
     // Add not tracked Google Docs
-    notTrackedGoogleNotes.forEach(doc => {
+    notesAndUntrackedGoogleDocs.googleDocs.forEach(doc => {
         displayItems.push({
             id: doc.id || "",
             title: doc.name || "",
