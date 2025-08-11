@@ -1,17 +1,11 @@
-import { DatabaseSingleton } from "tt-services/src/connections/mongo";
-import { TylersThings } from "tt-services";
 import { ListItem } from "./list-item";
+import { getTT } from "@/utils/utils";
 import { AddItemForm } from "./add-item-form";
-
-async function getList(id: string) {
-    const db = await DatabaseSingleton.getInstance();
-    const services = await TylersThings.make(db);
-    return services.lists.getListById(id);
-}
 
 export default async function ListPage({ params }: { params: Promise<{ id: string }> }) {
     const resolvedParams = await params;
-    const list = await getList(resolvedParams.id);
+    const tt = await getTT();
+    const list = await tt.lists.getListById(resolvedParams.id);
     if (!list) return <div>List not found</div>;
 
     return (

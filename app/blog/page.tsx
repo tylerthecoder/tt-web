@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { BlogService } from "./service";
+import { getBlogs } from "./actions";
 
 export default async function Page() {
-  const blogs = await BlogService.getBlogs();
+  const blogs = await getBlogs();
 
   return (
     <div className="prose prose-stone prose-invert">

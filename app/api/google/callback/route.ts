@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { DatabaseSingleton, TylersThings } from 'tt-services';
+import { getTT } from '@/utils/utils';
 
 export async function GET(req: NextRequest) {
     try {
@@ -17,15 +17,13 @@ export async function GET(req: NextRequest) {
             return NextResponse.redirect(new URL('/login?error=no_code', url.origin));
         }
 
-        // Get the service through TylersThings
-        const db = await DatabaseSingleton.getInstance();
-        const services = await TylersThings.make(db);
+        const tt = await getTT();
 
         // Exchange the code for tokens
-        const token = await services.google.getTokens(code);
+        const token = await tt.google.getTokens(code);
 
         // Get user info to check email
-        const userInfo = await services.google.getUserInfo(token.userId);
+        const userInfo = await tt.google.getUserInfo(token.userId);
         const userEmail = userInfo?.email;
 
         // Check if this is the admin email
@@ -47,7 +45,7 @@ export async function GET(req: NextRequest) {
 
         // Store both userId and email in cookies
         const response = NextResponse.redirect(new URL('/panel', url.origin));
-        
+
         response.cookies.set('googleUserId', token.userId, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',

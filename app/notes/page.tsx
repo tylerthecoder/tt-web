@@ -1,9 +1,8 @@
-import { DatabaseSingleton } from "tt-services/src/connections/mongo";
-import { TylersThings } from "tt-services";
 import { cookies } from "next/headers";
 import { NotesPageClient } from "./NotesPageClient.tsx";
 import { NoteMetadata } from "tt-services/src/client-index.ts";
 import type { GoogleDriveFile } from "../types/google";
+import { getTT } from "@/utils/utils";
 
 export type NoteDisplayItem = {
     id: string;
@@ -25,8 +24,7 @@ export type DisplayItem = NoteDisplayItem | GoogleDocDisplayItem;
 
 
 export default async function NotesPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
-    const db = await DatabaseSingleton.getInstance();
-    const services = await TylersThings.make(db);
+    const tt = await getTT();
 
     // Get Google user ID from cookies
     const cookieStore = await cookies();
@@ -34,8 +32,8 @@ export default async function NotesPage({ searchParams }: { searchParams: Promis
 
     // Fetch all regular notes
     const [allTags, notesAndUntrackedGoogleDocs] = await Promise.all([
-        services.notes.getAllTags(),
-        userId ? services.googleNotes.getAllNotesAndUntrackedGoogleDocs(userId) : Promise.resolve({ notes: [], googleDocs: [] })
+        tt.notes.getAllTags(),
+        userId ? tt.googleNotes.getAllNotesAndUntrackedGoogleDocs(userId) : Promise.resolve({ notes: [], googleDocs: [] })
     ]);
 
     // Build combined list of items to display

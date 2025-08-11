@@ -1,16 +1,10 @@
-import { DatabaseSingleton } from "tt-services/src/connections/mongo";
-import { TylersThings } from "tt-services";
 import Link from "next/link";
 import { CreateListButton } from "./create-list-button";
-
-async function getLists() {
-    const db = await DatabaseSingleton.getInstance();
-    const services = await TylersThings.make(db);
-    return services.lists.getAllLists();
-}
+import { getTT } from "@/utils/utils";
 
 export default async function ListsPage() {
-    const lists = await getLists();
+    const tt = await getTT();
+    const lists = await tt.lists.getAllLists();
 
     return (
         <div className="min-h-screen bg-gray-900 text-white p-8">

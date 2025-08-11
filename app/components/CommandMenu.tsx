@@ -47,6 +47,17 @@ export function CommandMenu({ notes = [], onClose }: CommandMenuProps) {
             type: 'navigation'
         },
         {
+            id: 'create-note',
+            title: 'Create Note',
+            description: 'Create a new note',
+            icon: <Edit className="w-4 h-4" />,
+            action: () => {
+                router.push('/notes/create');
+                handleClose();
+            },
+            type: 'navigation'
+        },
+        {
             id: 'panel',
             title: 'Panel',
             description: 'Main dashboard',
@@ -127,7 +138,7 @@ export function CommandMenu({ notes = [], onClose }: CommandMenuProps) {
     const allCommands = [...navigationCommands, ...noteCommands].filter(command => {
         if (!search) return command.type === 'navigation';
         return command.title.toLowerCase().includes(search.toLowerCase()) ||
-               command.description.toLowerCase().includes(search.toLowerCase());
+            command.description.toLowerCase().includes(search.toLowerCase());
     }).slice(0, 10); // Limit to 10 results for performance
 
     const handleClose = useCallback(() => {
@@ -142,7 +153,7 @@ export function CommandMenu({ notes = [], onClose }: CommandMenuProps) {
         // Ignore if typing in an input, textarea, or contenteditable element (except our own input)
         const target = event.target as HTMLElement;
         const isOurInput = target === inputRef.current;
-        
+
         if (!isOurInput && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
             return;
         }
@@ -186,7 +197,7 @@ export function CommandMenu({ notes = [], onClose }: CommandMenuProps) {
     useEffect(() => {
         document.addEventListener('keydown', handleKeyDown);
         document.addEventListener('keydown', handleMenuKeyDown);
-        
+
         return () => {
             document.removeEventListener('keydown', handleKeyDown);
             document.removeEventListener('keydown', handleMenuKeyDown);
@@ -254,7 +265,7 @@ export function CommandMenu({ notes = [], onClose }: CommandMenuProps) {
                                             </h3>
                                         </div>
                                     )}
-                                    
+
                                     {search && noteCommands.length > 0 && (
                                         <div className="px-4 py-2">
                                             <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
@@ -266,11 +277,10 @@ export function CommandMenu({ notes = [], onClose }: CommandMenuProps) {
                                     {allCommands.map((command, index) => (
                                         <div
                                             key={command.id}
-                                            className={`flex items-center px-4 py-3 cursor-pointer transition-colors ${
-                                                index === selectedIndex
+                                            className={`flex items-center px-4 py-3 cursor-pointer transition-colors ${index === selectedIndex
                                                     ? 'bg-gray-700 text-white'
                                                     : 'text-gray-300 hover:bg-gray-700 hover:text-white'
-                                            }`}
+                                                }`}
                                             onClick={command.action}
                                         >
                                             <div className="flex items-center flex-1">

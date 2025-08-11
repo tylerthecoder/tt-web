@@ -1,20 +1,4 @@
 {
-  "name": "tylertracy-website",
-  "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "typecheck": "tsc --noEmit",
-    "start:prod": "bun install && bun run build && bun run start",
-    "link-services": "bun scripts/link-services.ts"
-  },
-  "overrides": {
-    "prosemirror-model": "^1.18.1",
-    "zod": "^3.25.67"
-  },
   "dependencies": {
     "@milkdown/crepe": "^7.15.3",
     "@milkdown/ctx": "^7.15.3",
@@ -30,6 +14,8 @@
     "framer-motion": "^6.5.1",
     "lucide-react": "^0.525.0",
     "next": "^15.4.6",
+    "pino": "^9.8.0",
+    "pino-pretty": "^13.1.1",
     "postcss": "^8.5.6",
     "react": "^18.3.1",
     "react-date-picker": "^9.3.0",
@@ -48,17 +34,34 @@
     "remark-rehype": "^10.1.0",
     "sharp": "^0.30.7",
     "tailwindcss": "^3.4.17",
-    "tt-services": "github:tylerthecoder/tt-services#a210a26991f79f8c2448ab07e83feecac6549ed8",
+    "tt-services": "link:tt-services",
     "turbo": "^1.13.4"
   },
   "devDependencies": {
     "@openai/agents": "^0.0.15",
     "@types/bcrypt": "^5.0.2",
+    "@types/bun": "^1.2.20",
     "@types/node": "20.12.8",
     "@types/react": "^18.3.23",
     "@types/react-modal": "^3.16.3",
     "eslint": "8.29.0",
     "eslint-config-next": "^15.4.6",
     "typescript": "^5.9.2"
-  }
+  },
+  "name": "tylertracy-website",
+  "overrides": {
+    "prosemirror-model": "^1.18.1",
+    "zod": "^3.25.67"
+  },
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev",
+    "link-services": "bun scripts/link-services.ts",
+    "lint": "next lint",
+    "start": "next start",
+    "start:prod": "bun install && bun run build && bun run start",
+    "typecheck": "tsc --noEmit"
+  },
+  "version": "1.0.0"
 }

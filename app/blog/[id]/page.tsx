@@ -1,9 +1,9 @@
 import { Metadata, ResolvingMetadata } from "next";
-import { BlogService } from "../service";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { format } from 'date-fns'; // Using format for a specific date string
 import { FaCalendarAlt } from 'react-icons/fa';
+import { getBlog, getBlogMetadata } from "../actions";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -14,7 +14,7 @@ export async function generateMetadata(
   _parent: ResolvingMetadata
 ): Promise<Metadata> {
   const params = await props.params;
-  const blog = await BlogService.getBlog(params.id);
+  const blog = await getBlogMetadata(params.id);
 
   if ("error" in blog) {
     return {
@@ -29,7 +29,7 @@ export async function generateMetadata(
 
 export default async function Page(props: Props) {
   const params = await props.params;
-  const blog = await BlogService.getBlog(params.id);
+  const blog = await getBlog(params.id);
 
   if ("error" in blog) {
     return <div className="text-white p-8">Error loading blog post.</div>;

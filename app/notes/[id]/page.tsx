@@ -1,5 +1,3 @@
-import { DatabaseSingleton } from "tt-services/src/connections/mongo";
-import { Note, TylersThings } from "tt-services";
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { FaArrowLeft, FaEdit } from 'react-icons/fa';
@@ -7,18 +5,7 @@ import { formatDistance } from 'date-fns';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
-
-async function getNote(id: string) {
-    try {
-        const db = await DatabaseSingleton.getInstance();
-        const services = await TylersThings.make(db);
-        const note = await services.notes.getNoteById(id);
-        return note;
-    } catch (error) {
-        console.error("Failed to fetch note:", error);
-        return null; // Handle potential errors during fetching
-    }
-}
+import { getNote } from '@/panel/actions';
 
 export default async function NoteViewPage({ params }: { params: Promise<{ id: string }> }) {
     const resolvedParams = await params;

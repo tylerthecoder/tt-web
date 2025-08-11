@@ -1,5 +1,5 @@
+import { getTT } from "@/utils/utils";
 import Image from "next/legacy/image";
-import { TylersThingsService,  } from "../tt-service";
 import { Creation } from "tt-services";
 
 interface IProjectProps {
@@ -14,9 +14,9 @@ const kebabCase = (name: string) => {
 const Project = ({ creation }: IProjectProps) => {
 	return (
 		<a href={creation.link}
-		   target="_blank"
-		   rel="noopener noreferrer"
-		   className="block group"
+			target="_blank"
+			rel="noopener noreferrer"
+			className="block group"
 		>
 			<div className="
 				bg-orange-950
@@ -57,8 +57,8 @@ const Project = ({ creation }: IProjectProps) => {
 }
 
 export default async function Projects() {
-	const tylersThings = await TylersThingsService.get();
-	const creations = await tylersThings.creations.getPublishedCreations();
+	const tt = await getTT();
+	const creations = await tt.creations.getPublishedCreations();
 
 	return (
 		<div className="container mx-auto px-4 py-12">
