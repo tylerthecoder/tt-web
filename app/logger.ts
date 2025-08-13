@@ -1,11 +1,9 @@
 import pino from 'pino';
+import pretty from 'pino-pretty';
 
-export const baseLogger = pino({
-    name: "tt-web",
-    transport: {
-        target: 'pino-pretty',
-        options: {
-            ignore: 'module,filename',
-        }
-    },
-});
+const stream = pretty({ colorize: true, ignore: 'pid,hostname' });
+
+export const baseLogger = pino(
+    { level: 'debug' },
+    stream
+);
