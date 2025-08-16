@@ -1,13 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { DatabaseSingleton, TylersThings } from 'tt-services';
+import { getTT } from '@/utils/utils';
 
 export async function GET(req: NextRequest) {
     try {
-        // Get the service through TylersThings
-        const db = await DatabaseSingleton.getInstance();
-        const services = await TylersThings.make(db);
-
-        const authUrl = services.google.getAuthUrl();
+        const tt = await getTT();
+        const authUrl = tt.google.getAuthUrl();
 
         // Redirect the user to Google's OAuth consent screen
         return NextResponse.redirect(authUrl);

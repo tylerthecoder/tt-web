@@ -1,17 +1,18 @@
 'use server'
 
 import { Agent, run, RunResult, RunState, RunToolApprovalItem } from '@openai/agents';
-import { TylersThings, makeAgent } from 'tt-services';
+import { makeAgent } from 'tt-services';
 import { requireAuth } from '../utils/auth';
+import { getTT } from '@/utils/utils';
+import { baseLogger } from '@/logger';
 
-async function getServices(): Promise<TylersThings> {
-    return TylersThings.buildAndConnect();
-}
+const logger = baseLogger.child({ module: 'agent-actions' });
 
 async function getAgent(): Promise<Agent> {
-    const tt = await getServices();
+    const tt = await getTT();
     return makeAgent(tt);
 }
+
 
 // Helper to format approval item details for UI
 function formatApprovalItemDisplay(item: RunToolApprovalItem): { name: string; args: Record<string, any> } {
@@ -41,20 +42,20 @@ function formatApprovalItemDisplay(item: RunToolApprovalItem): { name: string; a
 
 export async function listChats() {
     await requireAuth();
-    const services = await getServices();
-    return services.chats.listChats();
+    const tt = await getTT();
+    return tt.chats.listChats();
 }
 
 export async function getChat(chatId: string) {
     await requireAuth();
-    const services = await getServices();
-    return services.chats.getChatById(chatId);
+    const tt = await getTT();
+    return tt.chats.getChatById(chatId);
 }
 
 export async function createChat(title?: string) {
     await requireAuth();
-    const services = await getServices();
-    const chat = await services.chats.createChat({ title });
+    const tt = await getTT();
+    const chat = await tt.chats.createChat({ title });
     return chat;
 }
 
@@ -71,9 +72,9 @@ async function getApprovalsFromState(state: RunState<any, Agent>): Promise<Appro
 
 export async function getPendingApprovals(chatId: string): Promise<ApprovalPreview[]> {
     await requireAuth();
-    const services = await getServices();
+    const tt = await getTT();
     const coreAgent = await getAgent();
-    const chat = await services.chats.getChatById(chatId);
+    const chat = await tt.chats.getChatById(chatId);
     if (!chat?.state || typeof chat.state !== 'string') return [];
     const state = await RunState.fromString(coreAgent, chat.state);
     return getApprovalsFromState(state);
@@ -81,10 +82,10 @@ export async function getPendingApprovals(chatId: string): Promise<ApprovalPrevi
 
 export async function sendUserMessage(chatId: string, content: string): Promise<{ chat: any; done: boolean; approvals?: ApprovalPreview[] }> {
     await requireAuth();
-    const services = await getServices();
+    const tt = await getTT();
     const coreAgent = await getAgent();
     // Append user message first
-    let chat = await services.chats.appendMessage(chatId, { role: 'user', content });
+    let chat = await tt.chats.appendMessage(chatId, { role: 'user', content });
 
     // Build prompt from conversation
     const historyText = (chat.messages as Array<{ role: string; content: string }>)
@@ -95,24 +96,24 @@ export async function sendUserMessage(chatId: string, content: string): Promise<
 
     if (result.interruptions.length === 0) {
         const assistantOutput = typeof result.finalOutput === 'string' ? result.finalOutput : JSON.stringify(result.finalOutput);
-        chat = await services.chats.appendMessage(chatId, { role: 'assistant', content: assistantOutput });
+        chat = await tt.chats.appendMessage(chatId, { role: 'assistant', content: assistantOutput });
         // Clear any stored state since we're done
-        await services.chats.updateState(chatId, undefined);
+        await tt.chats.updateState(chatId, undefined);
         return { chat, done: true };
     }
 
     // Persist run state and return approvals for UI
     const stateStr = result.state.toString();
-    await services.chats.updateState(chatId, stateStr);
+    await tt.chats.updateState(chatId, stateStr);
     const approvals = await getApprovalsFromState(result.state as RunState<any, any>);
     return { chat, done: false, approvals };
 }
 
 export async function approveTool(chatId: string, approvalIndex: number, alwaysApprove = false): Promise<{ chat?: any; done: boolean; approvals?: ApprovalPreview[] }> {
     await requireAuth();
-    const services = await getServices();
+    const tt = await getTT();
     const coreAgent = await getAgent();
-    const chat = await services.chats.getChatById(chatId);
+    const chat = await tt.chats.getChatById(chatId);
     if (!chat?.state || typeof chat.state !== 'string') return { done: true };
 
     let state = await RunState.fromString(coreAgent, chat.state);
@@ -128,12 +129,12 @@ export async function approveTool(chatId: string, approvalIndex: number, alwaysA
     if (result.interruptions.length === 0) {
         // Append final output and clear state
         const assistantOutput = typeof result.finalOutput === 'string' ? result.finalOutput : JSON.stringify(result.finalOutput);
-        const updated = await services.chats.appendMessage(chatId, { role: 'assistant', content: assistantOutput });
-        await services.chats.updateState(chatId, undefined);
+        const updated = await tt.chats.appendMessage(chatId, { role: 'assistant', content: assistantOutput });
+        await tt.chats.updateState(chatId, undefined);
         return { chat: updated, done: true };
     } else {
         // Save updated state and return approvals again
-        await services.chats.updateState(chatId, result.state.toString());
+        await tt.chats.updateState(chatId, result.state.toString());
         const approvals = await getApprovalsFromState(result.state as RunState<any, any>);
         return { done: false, approvals };
     }
@@ -141,9 +142,9 @@ export async function approveTool(chatId: string, approvalIndex: number, alwaysA
 
 export async function rejectTool(chatId: string, approvalIndex: number, alwaysReject = false): Promise<{ chat?: any; done: boolean; approvals?: ApprovalPreview[] }> {
     await requireAuth();
-    const services = await getServices();
+    const tt = await getTT();
     const coreAgent = await getAgent();
-    const chat = await services.chats.getChatById(chatId);
+    const chat = await tt.chats.getChatById(chatId);
     if (!chat?.state || typeof chat.state !== 'string') return { done: true };
 
     let state = await RunState.fromString(coreAgent, chat.state);
@@ -157,11 +158,11 @@ export async function rejectTool(chatId: string, approvalIndex: number, alwaysRe
 
     if (result.interruptions.length === 0) {
         const assistantOutput = typeof result.finalOutput === 'string' ? result.finalOutput : JSON.stringify(result.finalOutput);
-        const updated = await services.chats.appendMessage(chatId, { role: 'assistant', content: assistantOutput });
-        await services.chats.updateState(chatId, undefined);
+        const updated = await tt.chats.appendMessage(chatId, { role: 'assistant', content: assistantOutput });
+        await tt.chats.updateState(chatId, undefined);
         return { chat: updated, done: true };
     } else {
-        await services.chats.updateState(chatId, result.state.toString());
+        await tt.chats.updateState(chatId, result.state.toString());
         const approvals = await getApprovalsFromState(result.state as RunState<any, any>);
         return { done: false, approvals };
     }

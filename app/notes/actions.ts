@@ -1,26 +1,23 @@
 'use server'
 
-import { DatabaseSingleton } from "tt-services/src/connections/mongo";
-import { TylersThings } from "tt-services";
 import { revalidatePath } from "next/cache";
 import { requireAuth } from "../utils/auth";
+import { getTT } from "@/utils/utils";
 
 
 export async function deleteNote(noteId: string) {
-    await requireAuth(); // Add authentication check
-    
-    const db = await DatabaseSingleton.getInstance();
-    const services = await TylersThings.make(db);
-    await services.notes.softDeleteNote(noteId);
+    await requireAuth();
+
+    const tt = await getTT();
+    await tt.notes.softDeleteNote(noteId);
     revalidatePath('/notes');
 }
 
 export async function createNote(title: string) {
-    await requireAuth(); // Add authentication check
-    
-    const db = await DatabaseSingleton.getInstance();
-    const services = await TylersThings.make(db);
-    const note = await services.notes.createNote({
+    await requireAuth();
+
+    const tt = await getTT();
+    const note = await tt.notes.createNote({
         title,
         content: '',
         date: new Date().toISOString(),
@@ -30,13 +27,12 @@ export async function createNote(title: string) {
 }
 
 export async function addTagToNote(noteId: string, tag: string) {
-    await requireAuth(); // Add authentication check
-    
-    const db = await DatabaseSingleton.getInstance();
-    const services = await TylersThings.make(db);
+    await requireAuth();
+
+    const tt = await getTT();
 
     try {
-        await services.notes.addTag(noteId, tag);
+        await tt.notes.addTag(noteId, tag);
 
         revalidatePath('/notes');
         return { success: true };
@@ -47,13 +43,12 @@ export async function addTagToNote(noteId: string, tag: string) {
 }
 
 export async function removeTagFromNote(noteId: string, tag: string) {
-    await requireAuth(); // Add authentication check
-    
-    const db = await DatabaseSingleton.getInstance();
-    const services = await TylersThings.make(db);
+    await requireAuth();
+
+    const tt = await getTT();
 
     try {
-        await services.notes.removeTag(noteId, tag);
+        await tt.notes.removeTag(noteId, tag);
 
         revalidatePath('/notes');
         return { success: true };

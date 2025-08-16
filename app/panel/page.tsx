@@ -3,15 +3,12 @@ import { AgeCounter } from '../components/age-counter';
 import { WeeklyProgress } from './weekly-progress';
 import { CountdownTimer } from '../components/countdown-timer';
 import { PanelTabsClient } from './PanelTabsClient';
-import { DatabaseSingleton } from 'tt-services/src/connections/mongo';
-import { TylersThings } from 'tt-services/src/lib';
-import { DailyNote } from 'tt-services/src/services/DailyNoteService';
-import { NoteMetadata } from 'tt-services/src/client-index';
+import { getTT } from '@/utils/utils';
+import { DailyNote, NoteMetadata } from "tt-services"
 
 export default async function PanelPage() {
     const week = await getCurrentWeek();
-    const db = await DatabaseSingleton.getInstance();
-    const tt = await TylersThings.make(db);
+    const tt = await getTT();
     const jots = await tt.jots.getAllJots();
 
     const initialDailyNote: DailyNote = await tt.dailyNotes.getToday();

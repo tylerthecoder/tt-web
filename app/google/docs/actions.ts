@@ -1,6 +1,6 @@
 'use server'
 
-import { DatabaseSingleton, TylersThings } from 'tt-services';
+import { getTT } from '@/utils/utils';
 import { requireAuth } from '../../utils/auth';
 
 /**
@@ -15,10 +15,9 @@ export async function trackGoogleDoc(docId: string) {
             return { success: false, error: 'Document ID is required' };
         }
 
-        const db = await DatabaseSingleton.getInstance();
-        const services = await TylersThings.make(db);
+        const tt = await getTT();
 
-        const note = await services.googleNotes.createGoogleNoteFromGoogleDocId(userId, docId);
+        const note = await tt.googleNotes.createGoogleNoteFromGoogleDocId(userId, docId);
 
         return { success: true, note };
     } catch (error) {

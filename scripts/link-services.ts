@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import { $ } from 'bun';
 
 /**
  * Script to switch tt-services dependency back to local linked version
@@ -40,7 +41,9 @@ async function linkServices() {
     fs.writeFileSync(PACKAGE_JSON_PATH, updatedContent);
 
     console.log(`✅ Successfully switched tt-services to: ${LOCAL_LINK_VERSION}`);
-    console.log('💡 Remember to run your package manager install command if needed');
+
+    // Run bun install
+    await $`bun install`;
 
   } catch (error) {
     console.error('❌ Error updating package.json:', error);
