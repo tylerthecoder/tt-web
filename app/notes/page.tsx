@@ -1,8 +1,8 @@
-import { cookies } from "next/headers";
 import { NotesPageClient } from "./NotesPageClient.tsx";
 import { NoteMetadata } from "tt-services/src/client-index.ts";
 import type { GoogleDriveFile } from "../types/google";
 import { getTT } from "@/utils/utils";
+import { getGoogleUserId } from "@/utils/auth.ts";
 
 export type NoteDisplayItem = {
     id: string;
@@ -26,14 +26,12 @@ export type DisplayItem = NoteDisplayItem | GoogleDocDisplayItem;
 export default async function NotesPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
     const tt = await getTT();
 
-    // Get Google user ID from cookies
-    const cookieStore = await cookies();
-    const userId = cookieStore.get('googleUserId')?.value;
+    const googleUserId = await getGoogleUserId();
 
     // Fetch all regular notes
     const [allTags, notesAndUntrackedGoogleDocs] = await Promise.all([
         tt.notes.getAllTags(),
-        userId ? tt.googleNotes.getAllNotesAndUntrackedGoogleDocs(userId) : Promise.resolve({ notes: [], googleDocs: [] })
+        googleUserId ? tt.googleNotes.getAllNotesAndUntrackedGoogleDocs(googleUserId) : Promise.resolve({ notes: [], googleDocs: [] })
     ]);
 
     // Build combined list of items to display
@@ -80,7 +78,7 @@ export default async function NotesPage({ searchParams }: { searchParams: Promis
             initialSearch={initialSearch}
             initialShownTags={initialShownTags}
             initialHiddenTags={initialHiddenTags}
-            showGoogleNotice={!userId}
+            showGoogleNotice={!googleUserId}
         />
     );
 }

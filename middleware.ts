@@ -3,9 +3,9 @@ import type { NextRequest } from 'next/server';
 
 function isLocalhost(request: NextRequest): boolean {
     // Check if we're running on localhost
-    return process.env.NODE_ENV === 'development' || 
-           request.nextUrl.hostname === 'localhost' ||
-           request.nextUrl.hostname === '127.0.0.1';
+    return process.env.NODE_ENV === 'development' ||
+        request.nextUrl.hostname === 'localhost' ||
+        request.nextUrl.hostname === '127.0.0.1';
 }
 
 function isAuthDisabled(request: NextRequest): boolean {
@@ -29,23 +29,17 @@ export async function middleware(request: NextRequest) {
         return NextResponse.next();
     }
 
-    // Check for authentication
-    const googleUserId = request.cookies.get('googleUserId');
-    const userEmail = request.cookies.get('userEmail');
+    // Check for authentication via opaque session
+    const sessionCookie = request.cookies.get('tt_session');
     const adminEmail = process.env.ADMIN_EMAIL;
 
-    if (!googleUserId || !googleUserId.value || !userEmail || !userEmail.value) {
+    if (!sessionCookie || !sessionCookie.value) {
         return NextResponse.redirect(new URL('/login', request.url));
     }
 
-    // Validate admin email
-    if (adminEmail && userEmail.value !== adminEmail) {
-        // Clear invalid cookies and redirect to login
-        const response = NextResponse.redirect(new URL('/login?error=unauthorized_email', request.url));
-        response.cookies.delete('googleUserId');
-        response.cookies.delete('userEmail');
-        return response;
-    }
+    // We cannot validate the session in middleware without a DB call conveniently.
+    // Lightweight check: allow the request through. Server routes/pages must validate session before sensitive operations.
+    // If you want stricter blocking, add an edge endpoint to validate the signature of a JWT; we're using DB-backed session, so we defer.
 
     return NextResponse.next();
 }

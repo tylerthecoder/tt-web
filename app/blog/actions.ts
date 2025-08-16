@@ -6,7 +6,6 @@ import markdownToHtml from "./utils";
 export async function getBlogs() {
     const tylersThings = await getTT();
     const blogs = await tylersThings.notes.getPublishedNotes();
-    console.log("Fetched blogs", blogs);
     return blogs;
 }
 
