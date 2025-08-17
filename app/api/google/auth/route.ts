@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
         const currentUrl = new URL(req.url);
 
         if (isPreviewHost(currentUrl.hostname)) {
-            const redirectUrl = "https://tylertracy.com/api/google/callback";
+            const redirectUrl = "https://www.tylertracy.com/api/google/callback";
             const returnUrl = `${currentUrl.protocol}//${currentUrl.hostname}/api/google/callback`;
             const statePayload = { returnOrigin: returnUrl };
             const state = Buffer.from(JSON.stringify(statePayload)).toString('base64url');
