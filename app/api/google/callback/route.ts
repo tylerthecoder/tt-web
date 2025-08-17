@@ -78,7 +78,7 @@ export async function GET(req: NextRequest) {
                 const sig = signSessionHandoff(sid, ts);
                 bridgeUrl.searchParams.set('sid', sid);
                 bridgeUrl.searchParams.set('ts', ts);
-                if (sig) bridgeUrl.searchParams.set('sig', sig);
+                bridgeUrl.searchParams.set('sig', sig);
 
                 return NextResponse.redirect(bridgeUrl);
 
