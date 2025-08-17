@@ -9,10 +9,6 @@ export default async function RootLayout({
 }) {
   return (
     <html>
-      <head>
-        <link rel="icon" href="/pi.png" sizes="any" />
-      </head>
-
       <body className="flex flex-col bg-gray-900 w-full h-full">
         <Script
           strategy="lazyOnload"

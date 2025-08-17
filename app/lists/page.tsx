@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { CreateListButton } from "./create-list-button";
 import { getTT } from "@/utils/utils";
+import { requireAuth } from "../utils/auth";
 
 export default async function ListsPage() {
+    await requireAuth();
+
     const tt = await getTT();
     const lists = await tt.lists.getAllLists();
 

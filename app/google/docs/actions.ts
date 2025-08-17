@@ -1,15 +1,17 @@
 'use server'
 
 import { getTT } from '@/utils/utils';
-import { requireAuth } from '../../utils/auth';
+import { getGoogleUserId } from '../../utils/auth';
 
 /**
  * Server action to track a Google Doc with our notes system
  */
 export async function trackGoogleDoc(docId: string) {
     try {
-        // Use the auth utility instead of manual check
-        const userId = await requireAuth();
+        const userId = await getGoogleUserId();
+        if (!userId) {
+            throw new Error('User not found');
+        }
 
         if (!docId) {
             return { success: false, error: 'Document ID is required' };

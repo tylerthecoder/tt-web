@@ -3,6 +3,7 @@
     "@milkdown/crepe": "^7.15.3",
     "@milkdown/ctx": "^7.15.3",
     "@milkdown/react": "^7.15.3",
+    "@next/bundle-analyzer": "^15.4.6",
     "@tailwindcss/typography": "^0.5.16",
     "@vercel/analytics": "^1.5.0",
     "autoprefixer": "^10.4.21",
@@ -34,7 +35,7 @@
     "remark-rehype": "^10.1.0",
     "sharp": "^0.30.7",
     "tailwindcss": "^3.4.17",
-    "tt-services": "github:tylerthecoder/tt-services#56fe227c841db750e13bd697142239161fcb6f8b",
+    "tt-services": "github:tylerthecoder/tt-services#85ac7996d756f265b79df7d82f3c1cc7ddf5fa96",
     "turbo": "^1.13.4"
   },
   "devDependencies": {
