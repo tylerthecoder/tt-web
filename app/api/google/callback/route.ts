@@ -23,6 +23,9 @@ export async function GET(req: NextRequest) {
 
         const redirectUrl = `${url.origin}/api/google/callback`;
 
+        console.log("Code", code);
+        console.log("Redirect URL", redirectUrl);
+
         // Exchange the code for tokens
         const token = await tt.google.getTokens(code, redirectUrl);
 

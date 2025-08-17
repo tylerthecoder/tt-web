@@ -9,9 +9,9 @@ import { requireAuth } from '../utils/auth';
 export default async function PanelPage() {
     await requireAuth();
     const tt = await getTT();
-    const week = await getCurrentWeek();
 
-    const [jots, initialDailyNote, allDailyNotesMetadata, lists] = await Promise.all([
+    const [week, jots, initialDailyNote, allDailyNotesMetadata, lists] = await Promise.all([
+        getCurrentWeek(),
         tt.jots.getAllJots(),
         tt.dailyNotes.getToday(),
         tt.dailyNotes.getAllNotesMetadata(),
