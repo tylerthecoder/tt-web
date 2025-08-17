@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache';
-import { requireAuth } from '../utils/auth';
+import { getGoogleUserId, requireAuth } from '../utils/auth';
 import { getTT } from '@/utils/utils';
 import { baseLogger } from '@/logger';
 
@@ -102,7 +102,10 @@ export async function pullContentFromGoogleDoc(noteId: string) {
     await requireAuth();
     try {
         // Use the auth utility instead of manual check
-        const userId = await requireAuth();
+        const userId = await getGoogleUserId();
+        if (!userId) {
+            throw new Error('User not found');
+        }
 
         const tt = await getTT();
 

@@ -4,20 +4,17 @@ import { createHmac } from 'crypto';
 import { SessionRecord } from 'tt-services';
 
 
-export function isLocalhost(): boolean {
-    // Check if we're running on localhost
-    return process.env.NODE_ENV === 'development' ||
-        process.env.VERCEL_URL?.includes('localhost') ||
-        process.env.HOST?.includes('localhost') ||
-        typeof window !== 'undefined' && window.location.hostname === 'localhost';
+export function isAuthDisabled(): boolean {
+    const isAuthDisabled = process.env.AUTH_DISABLED === 'true';
+    if (isAuthDisabled) {
+        console.log("AUTH DISABLED");
+    }
+    return isAuthDisabled;
 }
 
-export function isAuthDisabled(): boolean {
-    // Auth is disabled on localhost by default, unless FORCE_AUTH_LOCALLY is set to 'true'
-    if (isLocalhost()) {
-        return process.env.FORCE_AUTH_LOCALLY !== 'true';
-    }
-    return false;
+export async function hasSessionCookie(): Promise<boolean> {
+    const cookieStore = await cookies();
+    return cookieStore.get('tt_session') !== null;
 }
 
 export async function getSession(): Promise<SessionRecord | null> {

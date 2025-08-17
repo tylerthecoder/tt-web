@@ -2,7 +2,7 @@ import { NotesPageClient } from "./NotesPageClient.tsx";
 import { NoteMetadata } from "tt-services/src/client-index.ts";
 import type { GoogleDriveFile } from "../types/google";
 import { getTT } from "@/utils/utils";
-import { getGoogleUserId } from "@/utils/auth.ts";
+import { getGoogleUserId, requireAuth } from "@/utils/auth.ts";
 
 export type NoteDisplayItem = {
     id: string;
@@ -24,6 +24,8 @@ export type DisplayItem = NoteDisplayItem | GoogleDocDisplayItem;
 
 
 export default async function NotesPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
+    await requireAuth();
+
     const tt = await getTT();
 
     const googleUserId = await getGoogleUserId();

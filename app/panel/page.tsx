@@ -4,16 +4,19 @@ import { WeeklyProgress } from './weekly-progress';
 import { CountdownTimer } from '../components/countdown-timer';
 import { PanelTabsClient } from './PanelTabsClient';
 import { getTT } from '@/utils/utils';
-import { DailyNote, NoteMetadata } from "tt-services"
+import { requireAuth } from '../utils/auth';
 
 export default async function PanelPage() {
-    const week = await getCurrentWeek();
+    await requireAuth();
     const tt = await getTT();
-    const jots = await tt.jots.getAllJots();
+    const week = await getCurrentWeek();
 
-    const initialDailyNote: DailyNote = await tt.dailyNotes.getToday();
-    const allDailyNotesMetadata: NoteMetadata[] = await tt.dailyNotes.getAllNotesMetadata();
-    const lists = await tt.lists.getAllLists();
+    const [jots, initialDailyNote, allDailyNotesMetadata, lists] = await Promise.all([
+        tt.jots.getAllJots(),
+        tt.dailyNotes.getToday(),
+        tt.dailyNotes.getAllNotesMetadata(),
+        tt.lists.getAllLists(),
+    ]);
 
     const weekStart = new Date(week.startDate);
     const weekEnd = new Date(weekStart);
