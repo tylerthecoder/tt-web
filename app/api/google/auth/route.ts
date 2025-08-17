@@ -14,6 +14,9 @@ export async function GET(req: NextRequest) {
             const statePayload = { returnOrigin: returnUrl };
             const state = Buffer.from(JSON.stringify(statePayload)).toString('base64url');
             const authUrl = tt.google.getAuthUrl(redirectUrl, state);
+            console.log("Redirect URL", redirectUrl);
+            console.log("Return URL", returnUrl);
+            console.log("Auth URL", authUrl);
             return NextResponse.redirect(authUrl);
         }
 
