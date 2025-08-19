@@ -3,14 +3,6 @@
 import React, { ReactNode } from "react";
 import { formatDistance } from "date-fns";
 import { LayoutMode } from "../notes/NotesPageClient";
-import { TagManager } from "./TagManager";
-
-export type BaseCardTagConfig = {
-    itemId: string;
-    tags?: string[];
-    availableTags: string[];
-    className?: string;
-};
 
 interface BaseCardProps {
     layout?: LayoutMode;
@@ -22,8 +14,6 @@ interface BaseCardProps {
     headerExtra?: ReactNode;
     body?: ReactNode;
     footerButtons?: ReactNode;
-    showTagManager?: boolean;
-    tagConfig?: BaseCardTagConfig;
 }
 
 export function BaseCard({
@@ -36,8 +26,6 @@ export function BaseCard({
     headerExtra,
     body,
     footerButtons,
-    showTagManager,
-    tagConfig,
 }: BaseCardProps) {
     const lastModified = updatedAt || createdAt;
 
@@ -59,14 +47,6 @@ export function BaseCard({
                     {headerExtra}
                 </div>
                 <div className="p-4 flex-grow">
-                    {showTagManager && tagConfig && (
-                        <TagManager
-                            itemId={tagConfig.itemId}
-                            tags={tagConfig.tags}
-                            availableTags={tagConfig.availableTags}
-                            className={tagConfig.className || "mt-3"}
-                        />
-                    )}
                     {body}
                 </div>
                 <div className="p-4 bg-gray-950 flex justify-end gap-2">
@@ -93,16 +73,6 @@ export function BaseCard({
                         Created {formatDistance(new Date(createdAt), new Date(), { addSuffix: true })}
                     </p>
                 )}
-
-                {showTagManager && tagConfig && (
-                    <div className="mt-4">
-                        <TagManager
-                            itemId={tagConfig.itemId}
-                            tags={tagConfig.tags}
-                            availableTags={tagConfig.availableTags}
-                        />
-                    </div>
-                )}
             </div>
 
             <div className="p-4 flex-grow flex flex-col">
@@ -114,3 +84,4 @@ export function BaseCard({
         </div>
     );
 }
+

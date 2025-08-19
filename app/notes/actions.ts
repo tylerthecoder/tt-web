@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from "next/cache";
-import { requireAuth } from "../utils/auth";
+import { requireAuth, getGoogleUserId } from "../utils/auth";
 import { getTT } from "@/utils/utils";
 
 
@@ -55,5 +55,54 @@ export async function removeTagFromNote(noteId: string, tag: string) {
     } catch (error) {
         console.error('Error removing tag:', error);
         return { success: false, error: 'Failed to remove tag' };
+    }
+}
+
+export async function getAllTags() {
+    await requireAuth();
+
+    const tt = await getTT();
+
+    try {
+        const tags = await tt.notes.getAllTags();
+        return { success: true, tags };
+    } catch (error) {
+        console.error('Error fetching tags:', error);
+        return { success: false, error: 'Failed to fetch tags', tags: [] };
+    }
+}
+
+export async function pushNoteToGoogleDrive(noteId: string, options: {
+    convertToGoogleNote?: boolean;
+    tabName?: string;
+} = {}) {
+    await requireAuth();
+
+    const userId = await getGoogleUserId();
+    if (!userId) {
+        return { success: false, error: 'Google authentication required' };
+    }
+
+    const tt = await getTT();
+
+    try {
+        const result = await tt.googlePush.pushNoteToGoogleDrive(noteId, userId, options);
+
+        if (result.success) {
+            revalidatePath('/notes');
+            revalidatePath(`/notes/${noteId}`);
+            revalidatePath(`/notes/${noteId}/edit`);
+        }
+
+        return result;
+    } catch (error) {
+        console.error('Error pushing note to Google Drive:', error);
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : 'Failed to push to Google Drive',
+            googleDocId: '',
+            googleDocUrl: '',
+            isNewDocument: false
+        };
     }
 }

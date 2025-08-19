@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@tanstack/react-query": "^5.51.1",
     "@milkdown/crepe": "^7.15.3",
     "@milkdown/ctx": "^7.15.3",
     "@milkdown/react": "^7.15.3",
@@ -35,7 +36,7 @@
     "remark-rehype": "^10.1.0",
     "sharp": "^0.30.7",
     "tailwindcss": "^3.4.17",
-    "tt-services": "github:tylerthecoder/tt-services#85ac7996d756f265b79df7d82f3c1cc7ddf5fa96",
+    "tt-services": "link:tt-services",
     "turbo": "^1.13.4"
   },
   "devDependencies": {

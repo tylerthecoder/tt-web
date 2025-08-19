@@ -5,16 +5,16 @@ import Link from 'next/link';
 import { FaFileAlt, FaEye, FaEdit, FaExternalLinkAlt, FaGoogle } from 'react-icons/fa';
 import { isGoogleNoteMetadata, NoteMetadata } from 'tt-services/src/client-index';
 import { LayoutMode } from '../notes/NotesPageClient';
-import { BaseCard } from './BaseCard';
+import { BaseCard } from './base-card';
 import { DeleteNoteButton } from '../notes/delete-note-button';
+import { NoteTagManager } from './note-tag-manager';
 
 interface NoteCardProps {
     note: NoteMetadata;
-    availableTags: string[];
     layout?: LayoutMode;
 }
 
-export function NoteCard({ note, availableTags, layout = 'grid' }: NoteCardProps) {
+export function NoteCard({ note, layout = 'grid' }: NoteCardProps) {
     const isGoogle = isGoogleNoteMetadata(note);
 
     const footerButtons = (
@@ -48,6 +48,12 @@ export function NoteCard({ note, availableTags, layout = 'grid' }: NoteCardProps
         </>
     );
 
+    const body = (
+        <>
+            <NoteTagManager note={note} className="mt-3" />
+        </>
+    );
+
     return (
         <BaseCard
             layout={layout}
@@ -55,10 +61,10 @@ export function NoteCard({ note, availableTags, layout = 'grid' }: NoteCardProps
             titleIcon={isGoogle ? <FaGoogle className="text-red-400 mr-2" size={18} /> : <FaFileAlt className="text-red-400 mr-2" size={18} />}
             createdAt={note.createdAt}
             updatedAt={note.updatedAt}
-            showTagManager
-            tagConfig={{ itemId: note.id, tags: note.tags, availableTags }}
+            body={body}
             footerButtons={footerButtons}
             accentClassName={isGoogle ? 'border-red-500' : undefined}
         />
     );
 }
+

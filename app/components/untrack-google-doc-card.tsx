@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { trackGoogleDoc } from '../google/docs/actions';
 import { FaGoogle, FaExternalLinkAlt, FaSync, FaCheck } from 'react-icons/fa';
 import { LayoutMode } from '../notes/NotesPageClient';
-import { BaseCard } from './BaseCard';
+import { BaseCard } from './base-card';
 import type { GoogleDriveFile } from '../types/google';
 
 interface UntrackedGoogleDocCardProps {
@@ -112,7 +112,6 @@ export function UntrackedGoogleDocCard({
             titleIcon={<FaGoogle className="text-red-400 mr-2" size={18} />}
             createdAt={createdTime ?? undefined}
             updatedAt={modifiedTime ?? undefined}
-            showTagManager={false}
             body={bodyContent}
             footerButtons={
                 <>

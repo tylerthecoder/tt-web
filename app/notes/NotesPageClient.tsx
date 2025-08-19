@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { NoteCard } from "../components/NoteCard";
+import { NoteCard } from "../components/note-card";
 import { UntrackedGoogleDocCard } from "../components/untrack-google-doc-card.tsx";
 import { NotesFilter } from "../components/NotesFilter";
 import { FaThLarge, FaList } from 'react-icons/fa';
@@ -12,7 +12,6 @@ export type LayoutMode = 'grid' | 'list';
 
 interface NotesPageClientProps {
     displayItems: DisplayItem[];
-    availableTags: string[];
     initialSearch: string;
     initialShownTags: string[];
     initialHiddenTags: string[];
@@ -21,7 +20,6 @@ interface NotesPageClientProps {
 
 export function NotesPageClient({
     displayItems,
-    availableTags,
     initialSearch,
     initialShownTags,
     initialHiddenTags,
@@ -78,9 +76,7 @@ export function NotesPageClient({
                 </div>
             )}
 
-            {/* Filter component - now handles filtering locally */}
             <NotesFilter
-                availableTags={availableTags}
                 items={displayItems}
                 setFilteredItems={setFilteredItems}
             />
@@ -92,7 +88,6 @@ export function NotesPageClient({
                             {item.type === 'note' ? (
                                 <NoteCard
                                     note={item.originalItem}
-                                    availableTags={availableTags}
                                     layout="grid"
                                 />
                             ) : (
@@ -111,7 +106,6 @@ export function NotesPageClient({
                             {item.type === 'note' ? (
                                 <NoteCard
                                     note={item.originalItem}
-                                    availableTags={availableTags}
                                     layout="list"
                                 />
                             ) : (

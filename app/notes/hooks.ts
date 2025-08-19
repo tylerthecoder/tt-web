@@ -1,4 +1,6 @@
 import { assignGoogleDocIdToNote, getNote, updateNoteContent, pullContentFromGoogleDoc } from '@/panel/actions';
+import { getAllTags } from '@/notes/actions';
+import { useQuery } from '@tanstack/react-query';
 import { Note } from 'tt-services';
 import { useEffect, useState, useRef, useCallback } from 'react';
 
@@ -67,6 +69,27 @@ export const useAssignGoogleDocIdToNote = (noteId: string) => {
     return { assignGoogleDocId, isAssigning };
 }
 
+export const useTags = () => {
+    const query = useQuery({
+        queryKey: ['tags'],
+        queryFn: async () => {
+            const result = await getAllTags();
+            if (!result.success) throw new Error(result.error || 'Failed to fetch tags');
+            return result.tags as string[];
+        },
+        staleTime: 60_000, // 60s
+        gcTime: 5 * 60_000, // 5m
+        retry: 1,
+    });
+
+    return {
+        tags: query.data ?? [],
+        loading: query.isLoading,
+        error: query.error ? (query.error as Error).message : null,
+        refetch: () => query.refetch(),
+    };
+}
+
 export const usePullFromGoogleDoc = (noteId: string) => {
     const [isPulling, setIsPulling] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -90,3 +113,6 @@ export const usePullFromGoogleDoc = (noteId: string) => {
 
     return { pullContent, isPulling, error };
 }
+
+
+

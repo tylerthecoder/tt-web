@@ -24,6 +24,9 @@ export async function getBlog(id: string) {
     if (!blog) {
         throw new Error(`Blog with id ${id} not found`);
     }
+    if (!blog.published) {
+        throw new Error(`Blog with id ${id} is not published`);
+    }
     return blog;
 }
 

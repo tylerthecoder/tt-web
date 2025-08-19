@@ -30,11 +30,10 @@ export default async function NotesPage({ searchParams }: { searchParams: Promis
 
     const googleUserId = await getGoogleUserId();
 
-    // Fetch all regular notes
-    const [allTags, notesAndUntrackedGoogleDocs] = await Promise.all([
-        tt.notes.getAllTags(),
-        googleUserId ? tt.googleNotes.getAllNotesAndUntrackedGoogleDocs(googleUserId) : Promise.resolve({ notes: [], googleDocs: [] })
-    ]);
+    // Fetch notes and Google docs
+    const notesAndUntrackedGoogleDocs = googleUserId ?
+        await tt.googleNotes.getAllNotesAndUntrackedGoogleDocs(googleUserId) :
+        { notes: [], googleDocs: [] };
 
     // Build combined list of items to display
     const displayItems: DisplayItem[] = [];
@@ -76,7 +75,6 @@ export default async function NotesPage({ searchParams }: { searchParams: Promis
     return (
         <NotesPageClient
             displayItems={displayItems}
-            availableTags={allTags}
             initialSearch={initialSearch}
             initialShownTags={initialShownTags}
             initialHiddenTags={initialHiddenTags}

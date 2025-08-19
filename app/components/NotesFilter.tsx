@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { FaSearch, FaTimes, FaCheck, FaBan } from 'react-icons/fa';
+import { FaSearch, FaTimes, FaCheck, FaBan, FaSpinner } from 'react-icons/fa';
 import { Note, GoogleNote } from 'tt-services/src/services/notes';
+import { useTags } from '../notes/hooks';
 
 // Type for tag filter states
 type TagFilterState = 'none' | 'shown' | 'hidden';
@@ -17,12 +18,12 @@ type DisplayItem = {
 };
 
 interface NotesFilterProps {
-    availableTags: string[];
     items: DisplayItem[];
     setFilteredItems: (items: DisplayItem[]) => void;
 }
 
-export function NotesFilter({ availableTags, items, setFilteredItems }: NotesFilterProps) {
+export function NotesFilter({ items, setFilteredItems }: NotesFilterProps) {
+    const { tags: availableTags, loading: tagsLoading, error: tagsError } = useTags();
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -260,7 +261,20 @@ export function NotesFilter({ availableTags, items, setFilteredItems }: NotesFil
                     </h3>
 
                     <div className="flex flex-wrap gap-2">
-                        {availableTags.map(tag => {
+                        {tagsLoading && (
+                            <div className="flex items-center text-xs text-gray-400">
+                                <FaSpinner className="animate-spin mr-2" />
+                                Loading tags...
+                            </div>
+                        )}
+
+                        {tagsError && (
+                            <div className="text-xs text-red-400">
+                                Error loading tags: {tagsError}
+                            </div>
+                        )}
+
+                        {!tagsLoading && !tagsError && availableTags.map(tag => {
                             const state = tagFilters[tag] || 'none';
 
                             // Define styles based on state
@@ -289,7 +303,7 @@ export function NotesFilter({ availableTags, items, setFilteredItems }: NotesFil
                             );
                         })}
 
-                        {availableTags.length === 0 && (
+                        {!tagsLoading && !tagsError && availableTags.length === 0 && (
                             <span className="text-gray-500 text-xs">No tags available</span>
                         )}
                     </div>
