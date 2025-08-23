@@ -41,7 +41,7 @@ export function CommandMenu({ notes = [], onClose }: CommandMenuProps) {
             description: 'Browse all notes',
             icon: <FileText className="w-4 h-4" />,
             action: () => {
-                router.push('/notes');
+                router.push('/panel/notes');
                 handleClose();
             },
             type: 'navigation'
@@ -52,7 +52,7 @@ export function CommandMenu({ notes = [], onClose }: CommandMenuProps) {
             description: 'Create a new note',
             icon: <Edit className="w-4 h-4" />,
             action: () => {
-                router.push('/notes/create');
+                router.push('/panel/notes');
                 handleClose();
             },
             type: 'navigation'
@@ -69,38 +69,16 @@ export function CommandMenu({ notes = [], onClose }: CommandMenuProps) {
             type: 'navigation'
         },
         {
-            id: 'create-note',
-            title: 'Create Note',
-            description: 'Create a new note',
-            icon: <Edit className="w-4 h-4" />,
-            action: () => {
-                router.push('/notes/create');
-                handleClose();
-            },
-            type: 'navigation'
-        },
-        {
             id: 'lists',
             title: 'Lists',
             description: 'Manage your lists',
             icon: <List className="w-4 h-4" />,
             action: () => {
-                router.push('/lists');
+                router.push('/panel/lists');
                 handleClose();
             },
             type: 'navigation'
         },
-        {
-            id: 'jot',
-            title: 'Jot',
-            description: 'Quick notes',
-            icon: <StickyNote className="w-4 h-4" />,
-            action: () => {
-                router.push('/jot');
-                handleClose();
-            },
-            type: 'navigation'
-        }
     ];
 
     // Filter notes based on search
@@ -116,7 +94,7 @@ export function CommandMenu({ notes = [], onClose }: CommandMenuProps) {
             description: `View note`,
             icon: <FileText className="w-4 h-4" />,
             action: () => {
-                router.push(`/notes/${note.id}`);
+                router.push(`/panel/note/${note.id}`);
                 handleClose();
             },
             type: 'note'
@@ -127,7 +105,7 @@ export function CommandMenu({ notes = [], onClose }: CommandMenuProps) {
             description: `Edit note`,
             icon: <Edit className="w-4 h-4" />,
             action: () => {
-                router.push(`/notes/${note.id}/edit`);
+                router.push(`/panel/note/${note.id}/edit`);
                 handleClose();
             },
             type: 'note'
@@ -278,8 +256,8 @@ export function CommandMenu({ notes = [], onClose }: CommandMenuProps) {
                                         <div
                                             key={command.id}
                                             className={`flex items-center px-4 py-3 cursor-pointer transition-colors ${index === selectedIndex
-                                                    ? 'bg-gray-700 text-white'
-                                                    : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                                                ? 'bg-gray-700 text-white'
+                                                : 'text-gray-300 hover:bg-gray-700 hover:text-white'
                                                 }`}
                                             onClick={command.action}
                                         >

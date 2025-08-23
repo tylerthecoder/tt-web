@@ -4,9 +4,9 @@ import React from 'react';
 import Link from 'next/link';
 import { FaFileAlt, FaEye, FaEdit, FaExternalLinkAlt, FaGoogle } from 'react-icons/fa';
 import { isGoogleNoteMetadata, NoteMetadata } from 'tt-services/src/client-index';
-import { LayoutMode } from '../notes/NotesPageClient';
+type LayoutMode = 'grid' | 'list';
 import { BaseCard } from './base-card';
-import { DeleteNoteButton } from '../notes/delete-note-button';
+import { DeleteNoteButton } from './delete-note-button';
 import { NoteTagManager } from './note-tag-manager';
 
 interface NoteCardProps {
@@ -31,14 +31,14 @@ export function NoteCard({ note, layout = 'grid' }: NoteCardProps) {
                 </a>
             )}
             <Link
-                href={`/notes/${note.id}`}
+                href={`/panel/note/${note.id}/view`}
                 className="py-1 px-3 border border-gray-600 rounded text-sm text-gray-300 hover:bg-gray-800 transition-colors flex items-center"
             >
                 <FaEye className="mr-1" size={12} />
                 View
             </Link>
             <Link
-                href={`/notes/${note.id}/edit`}
+                href={`/panel/note/${note.id}/edit`}
                 className="py-1 px-3 border border-gray-600 rounded text-sm text-gray-300 hover:bg-gray-800 transition-colors flex items-center"
             >
                 <FaEdit className="mr-1" size={12} />

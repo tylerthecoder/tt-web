@@ -1,5 +1,5 @@
 import { TylersThings } from "tt-services";
-import { baseLogger } from "../logger";
+import { baseLogger } from "./logger";
 
 
 export const getTT = async () => {

@@ -3,8 +3,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FaGoogle, FaUpload, FaDownload, FaExternalLinkAlt, FaSpinner, FaTimes } from 'react-icons/fa';
 import { Note, isGoogleNote } from 'tt-services/src/client-index.ts';
-import { pushNoteToGoogleDrive, getAllTags } from '@/notes/actions';
-import { assignGoogleDocIdToNote, pullContentFromGoogleDoc } from '@/panel/actions';
+import { pushNoteToGoogleDrive, getAllTags } from '@/(panel)/panel/actions';
+import { assignGoogleDocIdToNote, pullContentFromGoogleDoc } from '@/(panel)/panel/actions';
 
 // Hook for Google sync functionality
 export const useGoogleSync = (noteId: string, note?: Note | null) => {

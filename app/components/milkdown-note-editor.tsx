@@ -6,7 +6,7 @@ import { listenerCtx } from '@milkdown/plugin-listener';
 import "@milkdown/crepe/theme/common/style.css";
 import "@milkdown/crepe/theme/frame.css";
 import { useEffect, useState } from 'react';
-import { useNote, useUpdateNoteContent } from '@/notes/hooks';
+import { useNote, useUpdateNoteContent } from '../(panel)/panel/hooks';
 import { Note } from 'tt-services/src/client-index.ts';
 import { GoogleSyncControls } from './google-sync-controls';
 
@@ -47,7 +47,7 @@ const MilkdownEditorWithNote: React.FC<MilkdownEditorWithNoteProps> = ({ note, h
 			<div className="flex items-start justify-between px-3 md:px-4 py-2 bg-gray-700">
 				{!hideTitle && (
 					<div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3 flex-1 min-w-0">
-												<h1 className="text-xl md:text-3xl text-gray-300 font-medium truncate">
+						<h1 className="text-xl md:text-3xl text-gray-300 font-medium truncate">
 							{note.title}
 						</h1>
 

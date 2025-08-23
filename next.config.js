@@ -19,5 +19,18 @@ module.exports = withBundleAnalyzer({
     };
 
     return config;
+  },
+  async redirects() {
+    return [
+      // Notes to panel
+      { source: '/notes', destination: '/panel/notes', permanent: false },
+      { source: '/notes/:id', destination: '/panel/note/:id/view', permanent: false },
+      { source: '/notes/:id/edit', destination: '/panel/note/:id/edit', permanent: false },
+      // Lists to panel
+      { source: '/lists', destination: '/panel/lists', permanent: false },
+      { source: '/lists/:id', destination: '/panel/list/:id', permanent: false },
+      // Panel default subroutes
+      { source: '/panel', destination: '/panel/daily', permanent: false },
+    ]
   }
 });

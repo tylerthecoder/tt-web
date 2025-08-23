@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { trackGoogleDoc } from '../google/docs/actions';
 import { FaGoogle, FaExternalLinkAlt, FaSync, FaCheck } from 'react-icons/fa';
-import { LayoutMode } from '../notes/NotesPageClient';
+type LayoutMode = 'grid' | 'list';
 import { BaseCard } from './base-card';
 import type { GoogleDriveFile } from '../types/google';
 
