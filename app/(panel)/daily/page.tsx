@@ -3,6 +3,7 @@
 import { format, parseISO } from 'date-fns';
 import React, { useCallback, useEffect, useState, useTransition } from 'react';
 import { FaArrowLeft, FaArrowRight, FaBars, FaSpinner, FaTimes } from 'react-icons/fa';
+import { DailyNote, isDailyNote } from 'tt-services/src/client-index';
 
 import { MilkdownEditor } from '@/components/milkdown-note-editor';
 
@@ -11,46 +12,51 @@ import { useAllDailyNotesMetadata, useDailyNote } from '../hooks';
 
 export default function DailyPage() {
   const dailyNoteQuery = useDailyNote();
-  const metadataQuery = useAllDailyNotesMetadata();
-  const [currentNote, setCurrentNote] = useState<any | null>(null);
+  const allDailyNotesMetadata = useAllDailyNotesMetadata();
+  const [selectedNote, setSelectedNote] = useState<DailyNote | null>(null);
   const [isPending, startTransition] = useTransition();
-  const [currentIndex, setCurrentIndex] = useState<number>(-1);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  useEffect(() => {
-    if (dailyNoteQuery.data && metadataQuery.data) {
-      setCurrentNote(dailyNoteQuery.data as any);
-      const index = metadataQuery.data.findIndex(
-        (meta: any) => meta.id === dailyNoteQuery.data!.id,
-      );
-      setCurrentIndex(index);
-    }
-  }, [dailyNoteQuery.data, metadataQuery.data]);
+  const currentNote = selectedNote || dailyNoteQuery.data;
+  const currentIndex = selectedIndex ?? (allDailyNotesMetadata.data?.findIndex((meta) => meta.id === currentNote?.id) ?? -1);
+
+  const isPrevDisabled =
+    isPending || !allDailyNotesMetadata.data || currentIndex >= allDailyNotesMetadata.data.length - 1;
+  const isNextDisabled = isPending || currentIndex <= 0;
+
 
   const fetchAndSetNote = useCallback(
     (noteId: string) => {
       startTransition(async () => {
         const note = await getNoteAction(noteId);
-        if (note) {
-          setCurrentNote(note as any);
-          const index = (metadataQuery.data || []).findIndex((meta: any) => meta.id === noteId);
-          setCurrentIndex(index);
-          if (window.innerWidth < 768) {
-            setSidebarOpen(false);
-          }
-        } else {
+
+        if (!note) {
           console.error('Daily note not found:', noteId);
+          return;
+        }
+
+        if (!isDailyNote(note)) {
+          console.error('Note is not a daily note:', noteId);
+          return;
+        }
+
+        setSelectedNote(note);
+        const index = (allDailyNotesMetadata.data || []).findIndex((meta) => meta.id === noteId);
+        setSelectedIndex(index);
+        if (window.innerWidth < 768) {
+          setSidebarOpen(false);
         }
       });
     },
-    [metadataQuery.data],
+    [allDailyNotesMetadata.data],
   );
 
   const handleNavigate = (direction: 'prev' | 'next') => {
     if (currentIndex === -1) return;
     const targetIndex = direction === 'prev' ? currentIndex + 1 : currentIndex - 1;
-    if (metadataQuery.data && targetIndex >= 0 && targetIndex < metadataQuery.data.length) {
-      const targetNoteId = metadataQuery.data[targetIndex].id;
+    if (allDailyNotesMetadata.data && targetIndex >= 0 && targetIndex < allDailyNotesMetadata.data.length) {
+      const targetNoteId = allDailyNotesMetadata.data[targetIndex].id;
       fetchAndSetNote(targetNoteId);
     }
   };
@@ -69,16 +75,8 @@ export default function DailyPage() {
     }
   };
 
-  const isPrevDisabled =
-    isPending || !metadataQuery.data || currentIndex >= metadataQuery.data.length - 1;
-  const isNextDisabled = isPending || currentIndex <= 0;
-
   return (
     <div className="flex h-full bg-gray-900 text-white relative">
-      {(!dailyNoteQuery.data || !metadataQuery.data) && (
-        <div className="m-auto text-gray-300">Loading daily notes…</div>
-      )}
-
       {/* Sidebar List */}
       <div
         className={`
@@ -98,13 +96,13 @@ export default function DailyPage() {
           </button>
         </div>
         <div className="flex-grow relative">
-          {metadataQuery.isLoading ? (
-            <div className="absolute inset-0 flex items-center justify-center">
+          {allDailyNotesMetadata.isLoading ? (
+            <div className="absolute inset-0 flex items-center justify-center h-full">
               <span className="animate-spin inline-block w-6 h-6 border-2 border-gray-500 border-t-transparent rounded-full" />
             </div>
           ) : (
             <ul>
-              {(metadataQuery.data || []).map((meta: any) => (
+              {(allDailyNotesMetadata.data || []).map((meta) => (
                 <li key={meta.id}>
                   <button
                     onClick={() => handleListClick(meta.id)}
@@ -172,7 +170,7 @@ export default function DailyPage() {
             >
               <FaBars className="text-xl" />
             </button>
-            {isPending ? <FaSpinner className="animate-spin text-4xl" /> : 'Select a note'}
+            {isPending || dailyNoteQuery.isLoading ? <FaSpinner className="animate-spin text-4xl" /> : 'Select a note'}
           </div>
         )}
       </div>

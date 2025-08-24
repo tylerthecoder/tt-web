@@ -1,9 +1,8 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
-import { getGoogleDriveFileById } from '@/google/docs/actions';
-import type { GoogleDriveFile } from '@/types/google';
+import { useGoogleDriveFileById } from '@/(panel)/hooks';
 
 import { UntrackedGoogleDocCard } from './untrack-google-doc-card';
 
@@ -13,34 +12,9 @@ interface Props {
 }
 
 export function UntrackedGoogleDocCardLoader({ docId, layout = 'grid' }: Props) {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [doc, setDoc] = useState<GoogleDriveFile | null>(null);
+  const { data: doc, isLoading, error } = useGoogleDriveFileById(docId);
 
-  useEffect(() => {
-    let isMounted = true;
-    async function run() {
-      try {
-        setLoading(true);
-        setError(null);
-        const res = await getGoogleDriveFileById(docId);
-        if (!res.success) {
-          throw new Error(res.error || 'Failed to load Google Doc');
-        }
-        if (isMounted) setDoc(res.file || null);
-      } catch (e) {
-        if (isMounted) setError(e instanceof Error ? e.message : 'Failed to load Google Doc');
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    }
-    run();
-    return () => {
-      isMounted = false;
-    };
-  }, [docId]);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="border border-gray-700 rounded p-4 bg-gray-900 animate-pulse">
         <div className="flex items-center mb-3">
@@ -62,7 +36,7 @@ export function UntrackedGoogleDocCardLoader({ docId, layout = 'grid' }: Props) 
   if (error) {
     return (
       <div className="border border-red-700 rounded p-4 text-red-400">
-        Failed to load document: {error}
+        Failed to load document: {error instanceof Error ? error.message : 'Error'}
       </div>
     );
   }

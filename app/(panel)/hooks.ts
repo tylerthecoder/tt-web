@@ -1,10 +1,14 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef, useState } from 'react';
+
+import { getGoogleDriveFileById } from '@/google/docs/actions';
+import type { GoogleDriveFile } from '@/types/google';
 
 import {
   assignGoogleDocIdToNote,
+  createList,
   getAllDailyNotesMetadata,
   getAllJots,
   getAllLists,
@@ -38,6 +42,43 @@ export function useLists() {
     queryKey: ['lists'],
     queryFn: () => getAllLists(),
     staleTime: 30_000,
+  });
+}
+
+export function useCreateList() {
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: (name: string) => createList(name),
+    onSuccess: (newList: any) => {
+      queryClient.setQueryData<any[]>(['lists'], (existing) => {
+        if (Array.isArray(existing)) {
+          return [...existing, newList];
+        }
+        return [newList];
+      });
+    },
+  });
+
+  return {
+    createList: mutation.mutateAsync,
+    isCreating: mutation.isPending,
+    error: (mutation.error as Error) || null,
+  };
+}
+
+export function useGoogleDriveFileById(docId: string) {
+  return useQuery<GoogleDriveFile | null>({
+    queryKey: ['google-drive-file', docId],
+    queryFn: async () => {
+      const res = await getGoogleDriveFileById(docId);
+      if (!res.success) {
+        throw new Error(res.error || 'Failed to load Google Doc');
+      }
+      return (res.file || null) as GoogleDriveFile | null;
+    },
+    enabled: !!docId,
+    staleTime: 60_000,
   });
 }
 

@@ -3,36 +3,39 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo } from 'react';
-import { FaCalendarDay, FaFileAlt, FaList, FaListAlt, FaStickyNote } from 'react-icons/fa';
+import { FaCalendarDay, FaFileAlt, FaList, FaListAlt, FaStickyNote, FaTree } from 'react-icons/fa';
 
-type TabId = 'daily' | 'todos' | 'lists' | 'jots' | 'notes';
+interface Tab {
+  id: string;
+  label: string;
+  icon: React.ReactNode;
+  href: string;
+  hotkey?: string;
+  isActive: (pathname: string) => boolean;
+}
+
+const tabs: Tab[] = [
+  { id: 'daily', label: 'Daily', icon: <FaCalendarDay />, href: '/daily', hotkey: 'd', isActive: (pathname) => pathname.startsWith('/daily') },
+  { id: 'todos', label: 'Todos', icon: <FaListAlt />, href: '/todos', hotkey: 't', isActive: (pathname) => pathname.startsWith('/todos') },
+  { id: 'lists', label: 'Lists', icon: <FaList />, href: '/lists', hotkey: 'l', isActive: (pathname) => pathname.startsWith('/lists') || pathname.startsWith('/list/') },
+  { id: 'jots', label: 'Jots', icon: <FaStickyNote />, href: '/jots', hotkey: 'j', isActive: (pathname) => pathname.startsWith('/jots') },
+  { id: 'notes', label: 'Notes', icon: <FaFileAlt />, href: '/notes', hotkey: 'n', isActive: (pathname) => pathname.startsWith('/notes') || pathname.startsWith('/note/') },
+  { id: 'redwood', label: 'Redwood', icon: <FaTree />, href: '/b/redwood', hotkey: 'r', isActive: (pathname) => pathname.startsWith('/b/redwood') },
+];
+
+type TabId = Tab['id'];
 
 export function TabsNav() {
   const pathname = usePathname() || '/daily';
   const router = useRouter();
 
-  const tabs: { id: TabId; label: string; icon: React.ReactNode; href: string; hotkey?: string }[] =
-    useMemo(
-      () => [
-        { id: 'daily', label: 'Daily (d)', icon: <FaCalendarDay />, href: '/daily', hotkey: 'd' },
-        { id: 'todos', label: 'Todos (t)', icon: <FaListAlt />, href: '/todos', hotkey: 't' },
-        { id: 'lists', label: 'Lists (l)', icon: <FaList />, href: '/lists', hotkey: 'l' },
-        { id: 'jots', label: 'Jots (j)', icon: <FaStickyNote />, href: '/jots', hotkey: 'j' },
-        { id: 'notes', label: 'Notes (n)', icon: <FaFileAlt />, href: '/notes', hotkey: 'n' },
-      ],
-      [],
-    );
   const activeId: TabId = useMemo(() => {
-    if (pathname.startsWith('/todos')) return 'todos';
-    if (pathname.startsWith('/lists') || pathname.startsWith('/list/')) return 'lists';
-    if (pathname.startsWith('/jots')) return 'jots';
-    if (pathname.startsWith('/notes') || pathname.startsWith('/note/')) return 'notes';
-    return 'daily';
+    return tabs.find((t) => t.isActive(pathname))?.id || 'daily';
   }, [pathname]);
 
   useEffect(() => {
     tabs.forEach((t) => router.prefetch?.(t.href));
-  }, [router, tabs]);
+  }, [router]);
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -46,7 +49,7 @@ export function TabsNav() {
         router.push(match.href);
       }
     },
-    [router, tabs],
+    [router],
   );
 
   useEffect(() => {
@@ -62,17 +65,16 @@ export function TabsNav() {
             key={tab.id}
             href={tab.href}
             className={`flex items-center gap-2 px-3 md:px-4 py-3 text-sm font-medium border-b-2 transition-colors duration-150 ease-in-out whitespace-nowrap \
-                            ${
-                              activeId === tab.id
-                                ? 'border-blue-500 text-blue-400'
-                                : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-500'
-                            }
+                            ${activeId === tab.id
+                ? 'border-blue-500 text-blue-400'
+                : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-500'
+              }
                         `}
             prefetch
           >
             <span className="hidden md:inline">{tab.icon}</span>
             <span className="md:hidden">{tab.label.split(' ')[0]}</span>
-            <span className="hidden md:inline">{tab.label}</span>
+            <span className="hidden md:inline">{tab.label} {tab.hotkey ? `(${tab.hotkey})` : ''}</span>
           </Link>
         ))}
       </div>

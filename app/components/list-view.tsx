@@ -175,7 +175,7 @@ export function ListView({
   if (!list) return <div className="text-gray-400">List not found</div>;
 
   return (
-    <div>
+    <div className="p-4">
       <div className="flex items-center gap-2">
         {showBackButton && (
           <Link href={backButtonUrl} className="text-gray-400 hover:text-gray-200">
@@ -197,7 +197,7 @@ export function ListView({
             type="text"
             value={newItemContent}
             onChange={(e) => setNewItemContent(e.target.value)}
-            className="flex-grow px-3 py-2 bg-gray-800 rounded-lg border border-gray-700 focus:border-blue-500 focus:outline-none"
+            className="flex-grow px-3 py-2 text-white bg-gray-800 rounded-lg border border-gray-700 focus:border-blue-500 focus:outline-none"
             placeholder="Add new item"
             disabled={isAdding}
           />
