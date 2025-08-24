@@ -8,14 +8,14 @@ import { CountdownTimer } from '@/components/countdown-timer';
 import { QueryProvider } from '@/components/query-provider';
 import { TabsNav } from '@/components/tabs-nav';
 import { WeeklyProgress } from '@/components/weekly-progress';
+import { CommandMenu } from '@/components/CommandMenu';
 
-import { CommandMenuProvider } from '../components/CommandMenuProvider';
 
 const analyticsId = 'G-B5KCWMNFJE';
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <body className="flex flex-col bg-gray-900 w-full h-full">
+    <body suppressHydrationWarning className="flex flex-col bg-gray-900 w-full h-full">
       <Script
         strategy="lazyOnload"
         id="google-anal"
@@ -34,19 +34,18 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </Script>
 
       <QueryProvider>
-        <CommandMenuProvider>
-          <div className="p-4 bg-gray-800 bg-opacity-50 flex-shrink-0 hidden md:block">
-            <div className="flex justify-between items-center">
-              <WeeklyProgress />
-              <div className="flex flex-col items-end">
-                <AgeCounter />
-                <CountdownTimer />
-              </div>
+        <div className="p-4 bg-gray-800 bg-opacity-50 flex-shrink-0 hidden md:block">
+          <div className="flex justify-between items-center">
+            <WeeklyProgress />
+            <div className="flex flex-col items-end">
+              <AgeCounter />
+              <CountdownTimer />
             </div>
           </div>
-          <TabsNav />
-          <div className="flex-grow">{children}</div>
-        </CommandMenuProvider>
+        </div>
+        <TabsNav />
+        <CommandMenu />
+        <div className="flex-grow">{children}</div>
       </QueryProvider>
       <Analytics />
     </body>

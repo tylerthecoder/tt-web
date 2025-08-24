@@ -10,7 +10,7 @@ import { UntrackedGoogleDocCard } from '@/components/untrack-google-doc-card';
 
 import { useNotesIndex } from '../hooks';
 
-type LayoutMode = 'grid' | 'list';
+export type LayoutMode = 'grid' | 'list';
 
 export default function NotesPage() {
   const { data, isLoading } = useNotesIndex();

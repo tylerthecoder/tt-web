@@ -14,7 +14,7 @@ export default async function RootLayout({
 }) {
 
   return (
-    <body className="flex flex-col bg-gray-900 w-full h-full">
+    <body suppressHydrationWarning className="flex flex-col bg-gray-900 w-full h-full">
       <Script
         strategy="lazyOnload"
         id="google-anal"

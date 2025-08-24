@@ -1,50 +1,11 @@
-'use client';
+import { ListView } from '@/components/list-view';
 
-import { useRouter } from 'next/navigation';
-import React from 'react';
-import { FaArrowLeft } from 'react-icons/fa';
-
-import { AddItemForm } from '@/components/add-item-form';
-import { ListItem } from '@/components/list-item';
-
-import { useList } from '../../hooks';
-
-export default function ListDetailPage({ params }: { params: { id: string } }) {
-  const id = params.id;
-  const { data: list, isLoading } = useList(id);
-  const router = useRouter();
-
-  if (isLoading) return <div className="p-4 text-gray-300">Loading…</div>;
-  if (!list) return <div className="p-4 text-gray-400">List not found</div>;
+export default async function ListDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
 
   return (
     <div className="min-h-full bg-gray-900 text-white p-4 md:p-6">
-      <div className="flex items-center gap-3 mb-6">
-        <button
-          onClick={() => router.push('/lists')}
-          className="p-2 rounded-lg hover:bg-gray-800 transition-colors"
-        >
-          <FaArrowLeft />
-        </button>
-        <h1 className="text-2xl md:text-3xl font-bold truncate">{list.name}</h1>
-      </div>
-
-      <div>
-        <AddItemForm listId={list.id} />
-
-        <div className="mt-6 space-y-3">
-          {list.items.map((item) => (
-            <ListItem key={item.id} item={item} listId={list.id} />
-          ))}
-        </div>
-
-        {list.items.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-gray-400 text-lg">No items in this list yet.</p>
-            <p className="text-gray-500 text-sm mt-2">Add your first item above.</p>
-          </div>
-        )}
-      </div>
+      <ListView listId={id} showBackButton={true} backButtonUrl="/lists" />
     </div>
   );
 }

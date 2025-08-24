@@ -24,7 +24,7 @@ export function TabsNav() {
     );
   const activeId: TabId = useMemo(() => {
     if (pathname.startsWith('/todos')) return 'todos';
-    if (pathname.startsWith('/lists')) return 'lists';
+    if (pathname.startsWith('/lists') || pathname.startsWith('/list/')) return 'lists';
     if (pathname.startsWith('/jots')) return 'jots';
     if (pathname.startsWith('/notes') || pathname.startsWith('/note/')) return 'notes';
     return 'daily';
@@ -62,11 +62,10 @@ export function TabsNav() {
             key={tab.id}
             href={tab.href}
             className={`flex items-center gap-2 px-3 md:px-4 py-3 text-sm font-medium border-b-2 transition-colors duration-150 ease-in-out whitespace-nowrap \
-                            ${
-                              activeId === tab.id
-                                ? 'border-blue-500 text-blue-400'
-                                : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-500'
-                            }
+                            ${activeId === tab.id
+                ? 'border-blue-500 text-blue-400'
+                : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-500'
+              }
                         `}
             prefetch
           >

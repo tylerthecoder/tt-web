@@ -3,7 +3,7 @@
 import { formatDistance } from 'date-fns';
 import React, { ReactNode } from 'react';
 
-import { LayoutMode } from '../notes/NotesPageClient';
+import { LayoutMode } from '@/(panel)/notes/page';
 
 interface BaseCardProps {
   layout?: LayoutMode;
