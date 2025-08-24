@@ -6,7 +6,7 @@ export default async function Page() {
   const blogs = await getBlogs();
 
   return (
-    <div className="prose prose-stone prose-invert">
+    <div className="prose prose-stone prose-invert mx-auto px-4 py-12">
       <h1> All Blog Posts </h1>
       <p> I write about AI, Philosophy, and Technology </p>
 
