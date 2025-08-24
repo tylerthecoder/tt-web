@@ -46,7 +46,6 @@ body,
   overflow-y: auto;
 }
 
-
 @media (max-width: 768px) {
   .milkdown .ProseMirror {
     padding: 5px !important;

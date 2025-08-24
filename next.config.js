@@ -1,23 +1,22 @@
-/** @type {import('next').NextConfig} */
-
+const path = require('path');
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
-})
+});
 
-module.exports = withBundleAnalyzer({
+const isDev = process.env.NODE_ENV === 'development';
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ["i.scdn.co", "files.tylertracy.com"],
+    domains: ['i.scdn.co', 'files.tylertracy.com'],
   },
-  output: "standalone",
-  transpilePackages: ["tt-services"],
-  webpack: (config) => {
-    config.resolve.fallback = {
-      "mongodb-client-encryption": false,
-      "aws4": false
+  output: 'standalone',
+  transpilePackages: ['tt-services'],
+  outputFileTracingRoot: isDev ? path.join(__dirname, '..') : undefined,
+  async redirects() {
+    return [{ source: '/panel', destination: '/daily', permanent: false }];
+  },
+};
 
-    };
-
-    return config;
-  }
-});
+module.exports = withBundleAnalyzer(nextConfig);

@@ -1,7 +1,5 @@
 {
-  "cSpell.words": [
-    "Vibage"
-  ],
-  "typescript.tsdk": "../../node_modules/typescript/lib",
-  "typescript.enablePromptUseWorkspaceTsdk": true
+  "editor.formatOnPaste": true,
+  "editor.formatOnSave": true,
+  "editor.tabSize": 2
 }
