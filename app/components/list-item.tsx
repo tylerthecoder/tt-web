@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { toggleItemCheck, addNoteToItem, deleteListItem } from "@/(panel)/panel/actions";
-import { createNote } from "@/(panel)/panel/actions";
+import { toggleItemCheck, addNoteToItem, deleteListItem } from "@/(panel)/actions";
+import { createNote } from "@/(panel)/actions";
 import { MilkdownEditor } from '@/components/milkdown-note-editor';
 import type { ListItem as ListItemType } from "tt-services";
 import { formatDistanceToNow } from "date-fns";

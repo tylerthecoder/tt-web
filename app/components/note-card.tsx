@@ -31,14 +31,14 @@ export function NoteCard({ note, layout = 'grid' }: NoteCardProps) {
                 </a>
             )}
             <Link
-                href={`/panel/note/${note.id}/view`}
+                href={`/note/${note.id}/view`}
                 className="py-1 px-3 border border-gray-600 rounded text-sm text-gray-300 hover:bg-gray-800 transition-colors flex items-center"
             >
                 <FaEye className="mr-1" size={12} />
                 View
             </Link>
             <Link
-                href={`/panel/note/${note.id}/edit`}
+                href={`/note/${note.id}/edit`}
                 className="py-1 px-3 border border-gray-600 rounded text-sm text-gray-300 hover:bg-gray-800 transition-colors flex items-center"
             >
                 <FaEdit className="mr-1" size={12} />

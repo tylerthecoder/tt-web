@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { createList } from "@/(panel)/panel/actions";
+import { createList } from "@/(panel)/actions";
 import { useRouter } from "next/navigation";
 
 export function CreateListButton() {
@@ -16,7 +16,7 @@ export function CreateListButton() {
         const list = await createList(name);
         setIsCreating(false);
         setName("");
-        router.push(`/panel/list/${list.id}`);
+        router.push(`/list/${list.id}`);
     };
 
     if (!isCreating) {

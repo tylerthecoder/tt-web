@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
 import React from 'react';
-import { useList } from '../hooks';
+import { useList } from '../../hooks';
 import { AddItemForm } from '@/components/add-item-form';
 import { ListItem } from '@/components/list-item';
 import { FaArrowLeft } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
 
-export default function ListDetail({ listId }: { listId: string }) {
-    const { data: list, isLoading } = useList(listId);
+export default function ListDetailPage({ params }: { params: { id: string } }) {
+    const { data: list, isLoading } = useList(params.id);
     const router = useRouter();
 
     if (isLoading) return <div className="p-4 text-gray-300">Loading…</div>;
@@ -18,7 +18,7 @@ export default function ListDetail({ listId }: { listId: string }) {
         <div className="h-full flex flex-col overflow-hidden">
             <div className="flex items-center gap-3 p-4 bg-gray-700 border-b border-gray-600">
                 <button
-                    onClick={() => router.push('/panel/lists')}
+                    onClick={() => router.push('/lists')}
                     className="p-2 text-gray-300 hover:text-white hover:bg-gray-600 rounded transition-colors"
                 >
                     <FaArrowLeft />

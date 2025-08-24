@@ -2,8 +2,8 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { FaTimes, FaPlus, FaTags, FaSpinner } from 'react-icons/fa';
-import { addTagToNote, removeTagFromNote } from '@/(panel)/panel/actions';
-import { useTags } from '@/(panel)/panel/hooks';
+import { addTagToNote, removeTagFromNote } from '@/(panel)/actions';
+import { useTags } from '@/(panel)/hooks';
 import type { Note, NoteMetadata } from 'tt-services/src/client-index.ts';
 
 interface NoteTagManagerProps {

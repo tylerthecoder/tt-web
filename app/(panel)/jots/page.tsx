@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, { useState, useTransition } from 'react';
 import { deleteJotAction } from '../actions';
@@ -6,7 +6,7 @@ import { FaTrash } from 'react-icons/fa';
 import { format } from 'date-fns';
 import { useJots } from '../hooks';
 
-export default function JotsViewer() {
+export default function JotsPage() {
     const jotsQuery = useJots();
     const [jots, setJots] = useState(jotsQuery.data || []);
     const [isPending, startTransition] = useTransition();
@@ -65,6 +65,5 @@ export default function JotsViewer() {
         </div>
     );
 }
-
 
 

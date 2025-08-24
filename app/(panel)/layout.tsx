@@ -1,9 +1,12 @@
-import NavBar from "../components/navbar";
 import "../global.css";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/react";
 import { CommandMenuProvider } from "../components/CommandMenuProvider";
-import { QueryProvider } from "../components/query-provider";
+import { QueryProvider } from "@/components/query-provider";
+import { TabsNav } from "@/components/tabs-nav";
+import { WeeklyProgress } from "@/components/weekly-progress";
+import { AgeCounter } from "@/components/age-counter";
+import { CountdownTimer } from "@/components/countdown-timer";
 
 const analyticsId = "G-B5KCWMNFJE";
 
@@ -39,6 +42,16 @@ export default async function RootLayout({
 
         <QueryProvider>
           <CommandMenuProvider>
+            <div className="p-4 bg-gray-800 bg-opacity-50 flex-shrink-0 hidden md:block">
+              <div className="flex justify-between items-center">
+                <WeeklyProgress />
+                <div className="flex flex-col items-end">
+                  <AgeCounter />
+                  <CountdownTimer />
+                </div>
+              </div>
+            </div>
+            <TabsNav />
             <div className="flex-grow">{children}</div>
           </CommandMenuProvider>
         </QueryProvider>

@@ -3,7 +3,7 @@
 import React, { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaTrash, FaSpinner } from 'react-icons/fa';
-import { deleteNote as deleteNoteAction } from '../(panel)/panel/actions';
+import { deleteNote as deleteNoteAction } from '../(panel)/actions';
 
 interface DeleteNoteButtonProps {
     noteId: string;

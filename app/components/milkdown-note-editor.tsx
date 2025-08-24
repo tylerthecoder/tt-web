@@ -6,7 +6,7 @@ import { listenerCtx } from '@milkdown/plugin-listener';
 import "@milkdown/crepe/theme/common/style.css";
 import "@milkdown/crepe/theme/frame.css";
 import { useEffect, useState } from 'react';
-import { useNote, useUpdateNoteContent } from '../(panel)/panel/hooks';
+import { useNote, useUpdateNoteContent } from '../(panel)/hooks';
 import { Note } from 'tt-services/src/client-index.ts';
 import { GoogleSyncControls } from './google-sync-controls';
 

@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useNotesIndex } from '../(panel)/hooks';
 import { Search, FileText, Home, Calendar, List, StickyNote, Edit, ArrowRight } from 'lucide-react';
 
 interface Note {
@@ -27,6 +27,7 @@ interface Command {
 }
 
 export function CommandMenu({ notes = [], onClose }: CommandMenuProps) {
+    const { data } = useNotesIndex();
     const [isOpen, setIsOpen] = useState(false);
     const [search, setSearch] = useState('');
     const [selectedIndex, setSelectedIndex] = useState(0);
@@ -41,7 +42,7 @@ export function CommandMenu({ notes = [], onClose }: CommandMenuProps) {
             description: 'Browse all notes',
             icon: <FileText className="w-4 h-4" />,
             action: () => {
-                router.push('/panel/notes');
+                router.push('/notes');
                 handleClose();
             },
             type: 'navigation'
@@ -52,7 +53,7 @@ export function CommandMenu({ notes = [], onClose }: CommandMenuProps) {
             description: 'Create a new note',
             icon: <Edit className="w-4 h-4" />,
             action: () => {
-                router.push('/panel/notes');
+                router.push('/notes');
                 handleClose();
             },
             type: 'navigation'
@@ -63,7 +64,7 @@ export function CommandMenu({ notes = [], onClose }: CommandMenuProps) {
             description: 'Main dashboard',
             icon: <Home className="w-4 h-4" />,
             action: () => {
-                router.push('/panel');
+                router.push('/daily');
                 handleClose();
             },
             type: 'navigation'
@@ -74,7 +75,7 @@ export function CommandMenu({ notes = [], onClose }: CommandMenuProps) {
             description: 'Manage your lists',
             icon: <List className="w-4 h-4" />,
             action: () => {
-                router.push('/panel/lists');
+                router.push('/lists');
                 handleClose();
             },
             type: 'navigation'
@@ -82,9 +83,8 @@ export function CommandMenu({ notes = [], onClose }: CommandMenuProps) {
     ];
 
     // Filter notes based on search
-    const filteredNotes = notes.filter(note =>
-        note.title.toLowerCase().includes(search.toLowerCase())
-    );
+    const processed = (data?.notes || []).map(n => ({ id: n.id, title: n.title || '', modifiedTime: n.updatedAt || n.createdAt || '' }));
+    const filteredNotes = (notes.length ? notes : processed).filter(note => note.title.toLowerCase().includes(search.toLowerCase()));
 
     // Create note commands
     const noteCommands: Command[] = filteredNotes.slice(0, 5).flatMap(note => [
@@ -94,7 +94,7 @@ export function CommandMenu({ notes = [], onClose }: CommandMenuProps) {
             description: `View note`,
             icon: <FileText className="w-4 h-4" />,
             action: () => {
-                router.push(`/panel/note/${note.id}`);
+                router.push(`/note/${note.id}`);
                 handleClose();
             },
             type: 'note'
@@ -105,7 +105,7 @@ export function CommandMenu({ notes = [], onClose }: CommandMenuProps) {
             description: `Edit note`,
             icon: <Edit className="w-4 h-4" />,
             action: () => {
-                router.push(`/panel/note/${note.id}/edit`);
+                router.push(`/note/${note.id}/edit`);
                 handleClose();
             },
             type: 'note'

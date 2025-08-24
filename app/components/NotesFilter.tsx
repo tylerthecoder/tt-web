@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FaSearch, FaTimes, FaCheck, FaBan, FaSpinner } from 'react-icons/fa';
 import { Note, GoogleNote } from 'tt-services/src/services/notes';
-import { useTags } from '@/(panel)/panel/hooks';
+import { useTags } from '@/(panel)/hooks';
 
 // Type for tag filter states
 type TagFilterState = 'none' | 'shown' | 'hidden';

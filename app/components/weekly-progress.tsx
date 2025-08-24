@@ -1,18 +1,15 @@
-
-'use client';
+"use client";
 
 import React, { useState, useEffect } from 'react';
 import { format, differenceInDays, differenceInHours } from 'date-fns';
-import { useWeek } from './hooks';
+import { useWeek } from '../(panel)/hooks';
 
-// Helper to add ordinal suffix (st, nd, rd, th)
 function formatDayWithOrdinal(date: Date): string {
-    return format(date, "MMM do"); // e.g., Feb 9th, Mar 1st
+    return format(date, "MMM do");
 }
 
-// Helper for full date with ordinal
 function formatFullDayWithOrdinal(date: Date): string {
-    return format(date, "EEEE MMMM do"); // e.g., Thursday April 10th
+    return format(date, "EEEE MMMM do");
 }
 
 export function WeeklyProgress() {
@@ -69,14 +66,11 @@ export function WeeklyProgress() {
                     {daysRemaining} day{daysRemaining !== 1 ? 's' : ''} left
                 </span>
             </div>
-            {/* Progress bar container made relative */}
             <div className="relative w-full bg-gray-700 rounded-full h-4 overflow-hidden">
-                {/* Actual progress fill */}
                 <div
                     className="absolute top-0 left-0 bg-blue-500 h-full rounded-full transition-all duration-500 ease-out"
                     style={{ width: `${progress}%` }}
                 ></div>
-                {/* Overlay text container */}
                 <div className="absolute inset-0 flex items-center justify-between px-2 z-10">
                     <span className="text-xs font-medium text-white mix-blend-difference">{formattedStartDate}</span>
                     <span className="text-xs font-medium text-white mix-blend-difference">{formattedEndDate}</span>
@@ -85,3 +79,5 @@ export function WeeklyProgress() {
         </div>
     );
 }
+
+

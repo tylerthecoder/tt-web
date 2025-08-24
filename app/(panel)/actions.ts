@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache';
-import { getGoogleUserId, requireAuth } from '../../utils/auth';
+import { getGoogleUserId, requireAuth } from '../utils/auth';
 import { getTT } from '@/utils/utils';
 import { baseLogger } from '@/utils/logger';
 

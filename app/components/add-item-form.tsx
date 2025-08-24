@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { addItemToList } from "@/(panel)/panel/actions";
+import { addItemToList } from "@/(panel)/actions";
 
 interface AddItemFormProps {
     listId: string;

@@ -1,4 +1,4 @@
-import { Config } from "../app/utils/config";
+import { Config } from "@/utils/config";
 
 export const SERVER_URL = Config.apiUrl;
 

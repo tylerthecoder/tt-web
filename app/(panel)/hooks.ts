@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 export function useWeek() {
     return useQuery({
-        queryKey: ['panel', 'week'],
+        queryKey: ['week'],
         queryFn: () => getCurrentWeek(),
         staleTime: 60_000,
     });
@@ -14,7 +14,7 @@ export function useWeek() {
 
 export function useJots() {
     return useQuery({
-        queryKey: ['panel', 'jots'],
+        queryKey: ['jots'],
         queryFn: () => getAllJots(),
         staleTime: 30_000,
     });
@@ -22,7 +22,7 @@ export function useJots() {
 
 export function useLists() {
     return useQuery({
-        queryKey: ['panel', 'lists'],
+        queryKey: ['lists'],
         queryFn: () => getAllLists(),
         staleTime: 30_000,
     });
@@ -30,7 +30,7 @@ export function useLists() {
 
 export function useDailyNote() {
     return useQuery({
-        queryKey: ['panel', 'daily-note'],
+        queryKey: ['daily-note'],
         queryFn: () => getTodayDailyNote(),
         staleTime: 15_000,
     });
@@ -38,24 +38,15 @@ export function useDailyNote() {
 
 export function useAllDailyNotesMetadata() {
     return useQuery({
-        queryKey: ['panel', 'daily-notes-metadata'],
+        queryKey: ['daily-notes-metadata'],
         queryFn: () => getAllDailyNotesMetadata(),
         staleTime: 5 * 60_000,
     });
 }
 
-export function usePanelData() {
-    const weekQuery = useWeek();
-    const jotsQuery = useJots();
-    const listsQuery = useLists();
-    const dailyNoteQuery = useDailyNote();
-    const allDailyNotesMetadataQuery = useAllDailyNotesMetadata();
-    return { weekQuery, jotsQuery, listsQuery, dailyNoteQuery, allDailyNotesMetadataQuery };
-}
-
 export function useNotesIndex() {
     return useQuery({
-        queryKey: ['panel', 'notes-index'],
+        queryKey: ['notes-index'],
         queryFn: () => getNotesAndUntrackedGoogleDocs(),
         staleTime: 60_000,
     });
@@ -63,7 +54,7 @@ export function useNotesIndex() {
 
 export function useList(listId: string) {
     return useQuery({
-        queryKey: ['panel', 'list', listId],
+        queryKey: ['list', listId],
         queryFn: () => getListById(listId),
         enabled: !!listId,
         staleTime: 30_000,

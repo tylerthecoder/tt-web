@@ -1,7 +1,6 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { useNote } from '../hooks';
+import { useNote } from '@/(panel)/hooks';
 import Link from 'next/link';
 import { FaArrowLeft, FaEdit } from 'react-icons/fa';
 import { formatDistance } from 'date-fns';
@@ -9,8 +8,8 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 
-export default function NoteView({ noteId }: { noteId: string }) {
-    const { note, loading } = useNote(noteId);
+export default function NoteViewPage({ params }: { params: { id: string } }) {
+    const { note, loading } = useNote(params.id);
 
     if (loading || !note) {
         return <div className="p-4 text-gray-300">Loading…</div>;
@@ -22,12 +21,12 @@ export default function NoteView({ noteId }: { noteId: string }) {
         <div className="min-h-full bg-gray-900 text-white p-4 md:p-6">
             <div className="max-w-4xl mx-auto">
                 <div className="flex justify-between items-center mb-6">
-                    <Link href="/panel/notes" className="text-blue-400 hover:text-blue-300 flex items-center gap-2">
+                    <Link href="/notes" className="text-blue-400 hover:text-blue-300 flex items-center gap-2">
                         <FaArrowLeft />
                         Back to Notes
                     </Link>
                     <Link
-                        href={`/panel/note/${note.id}/edit`}
+                        href={`/note/${note.id}/edit`}
                         className="bg-gray-700 px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors flex items-center gap-2"
                     >
                         <FaEdit />

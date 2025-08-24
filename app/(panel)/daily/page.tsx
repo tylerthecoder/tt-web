@@ -7,7 +7,7 @@ import { FaArrowLeft, FaArrowRight, FaSpinner, FaBars, FaTimes } from 'react-ico
 import { format, parseISO } from 'date-fns';
 import { useAllDailyNotesMetadata, useDailyNote } from '../hooks';
 
-export default function DailyNoteViewer() {
+export default function DailyPage() {
     const dailyNoteQuery = useDailyNote();
     const metadataQuery = useAllDailyNotesMetadata();
     const [currentNote, setCurrentNote] = useState<any | null>(null);
@@ -41,9 +41,7 @@ export default function DailyNoteViewer() {
 
     const handleNavigate = (direction: 'prev' | 'next') => {
         if (currentIndex === -1) return;
-
         const targetIndex = direction === 'prev' ? currentIndex + 1 : currentIndex - 1;
-
         if (metadataQuery.data && targetIndex >= 0 && targetIndex < metadataQuery.data.length) {
             const targetNoteId = metadataQuery.data[targetIndex].id;
             fetchAndSetNote(targetNoteId);
@@ -72,13 +70,8 @@ export default function DailyNoteViewer() {
             {(!dailyNoteQuery.data || !metadataQuery.data) && (
                 <div className="m-auto text-gray-300">Loading daily notes…</div>
             )}
-            {sidebarOpen && (
-                <div
-                    className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
-                    onClick={() => setSidebarOpen(false)}
-                />
-            )}
 
+            {/* Sidebar List */}
             <div className={`
                 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
                 md:translate-x-0 md:relative fixed left-0 top-0 h-full z-50
@@ -111,6 +104,7 @@ export default function DailyNoteViewer() {
                 </ul>
             </div>
 
+            {/* Main Content Area */}
             <div className="flex-1 flex flex-col overflow-hidden">
                 {currentNote ? (
                     <>
@@ -167,6 +161,5 @@ export default function DailyNoteViewer() {
         </div>
     );
 }
-
 
 

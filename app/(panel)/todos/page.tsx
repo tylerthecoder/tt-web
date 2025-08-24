@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import type { Week, WeekTodo } from "tt-services";
-import { addTodo, getCurrentWeek, deleteTodo, toggleTodo, updateTodoContent } from "./actions";
+import { addTodo, getCurrentWeek, deleteTodo, toggleTodo, updateTodoContent } from "@/(panel)/actions";
 
-export function WeeklyTodos() {
+export default function TodosPage() {
     const [week, setWeek] = useState<Week | null>(null);
     const [newTodoContent, setNewTodoContent] = useState("");
     const [editingTodoId, setEditingTodoId] = useState<string | null>(null);
