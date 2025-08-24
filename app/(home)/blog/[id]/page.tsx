@@ -1,9 +1,10 @@
-import { Metadata, ResolvingMetadata } from "next";
+import { format } from 'date-fns'; // Using format for a specific date string
+import { Metadata, ResolvingMetadata } from 'next';
+import { FaCalendarAlt } from 'react-icons/fa';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { format } from 'date-fns'; // Using format for a specific date string
-import { FaCalendarAlt } from 'react-icons/fa';
-import { getBlog, getBlogMetadata } from "../actions";
+
+import { getBlog, getBlogMetadata } from '../actions';
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -11,19 +12,19 @@ type Props = {
 
 export async function generateMetadata(
   props: Props,
-  _parent: ResolvingMetadata
+  _parent: ResolvingMetadata,
 ): Promise<Metadata> {
   const params = await props.params;
   const blog = await getBlogMetadata(params.id);
 
-  if ("error" in blog) {
+  if ('error' in blog) {
     return {
-      title: "Blog not found"
+      title: 'Blog not found',
     };
   }
 
   return {
-    title: blog.title
+    title: blog.title,
   };
 }
 
@@ -31,7 +32,7 @@ export default async function Page(props: Props) {
   const params = await props.params;
   const blog = await getBlog(params.id);
 
-  if ("error" in blog) {
+  if ('error' in blog) {
     return <div className="text-white p-8">Error loading blog post.</div>;
   }
 
@@ -45,11 +46,9 @@ export default async function Page(props: Props) {
             Published on {format(new Date(blog.createdAt), 'MMMM d, yyyy')}
           </div>
         )}
-        <article
-          className="prose prose-stone prose-invert lg:prose-xl max-w-none text-gray-200"
-        >
+        <article className="prose prose-stone prose-invert lg:prose-xl max-w-none text-gray-200">
           <ReactMarkdown remarkPlugins={[remarkGfm]}>
-            {blog.content || "*No content available.*"}
+            {blog.content || '*No content available.*'}
           </ReactMarkdown>
         </article>
       </div>

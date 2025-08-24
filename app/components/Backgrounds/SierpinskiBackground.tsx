@@ -1,6 +1,7 @@
-import { useEffect, useRef } from "react";
-import { Vector, drawCircle } from "../../services/drawingService";
-import { useAnimationFrame } from "../../hooks/useAnimationFrame";
+import { useEffect, useRef } from 'react';
+
+import { useAnimationFrame } from '../../hooks/useAnimationFrame';
+import { drawCircle, Vector } from '../../services/drawingService';
 
 const maxY = Math.sqrt(3) / 2;
 const points: Array<{ x: number; y: number }> = [{ x: 0, y: 0 }];
@@ -10,39 +11,39 @@ const getNextPoint = (currentPoint: Vector): Vector => {
   if (c == 0) {
     return {
       x: 0.5 * currentPoint.x,
-      y: 0.5 * currentPoint.y
+      y: 0.5 * currentPoint.y,
     };
   } else if (c == 1) {
     return {
       x: 0.5 * currentPoint.x + 0.25,
-      y: 0.5 * currentPoint.y + Math.sqrt(3) / 4
+      y: 0.5 * currentPoint.y + Math.sqrt(3) / 4,
     };
   } else if (c == 2) {
     return {
       x: 0.5 * currentPoint.x + 0.5,
-      y: 0.5 * currentPoint.y
+      y: 0.5 * currentPoint.y,
     };
   }
-  throw new Error("Invalid c");
+  throw new Error('Invalid c');
 };
 
 const drawPoint = (canvas: HTMLCanvasElement, point: Vector) => {
   const pos = {
     x: point.x * canvas.width,
-    y: canvas.height - point.y * canvas.height * (1 / maxY)
+    y: canvas.height - point.y * canvas.height * (1 / maxY),
   };
-  const ctx = canvas.getContext("2d");
+  const ctx = canvas.getContext('2d');
   if (!ctx) return;
-  drawCircle(ctx, pos, 1.3, "red");
+  drawCircle(ctx, pos, 1.3, 'red');
 };
 
 const drawAll = (canvas: HTMLCanvasElement) => {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
-  const ctx = canvas.getContext("2d");
+  const ctx = canvas.getContext('2d');
   if (!ctx) return;
 
-  ctx.fillStyle = "black";
+  ctx.fillStyle = 'black';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   for (const point of points) {
     drawPoint(canvas, point);
@@ -78,8 +79,8 @@ export function SierpinskiBackground() {
       drawAll(canvas);
     };
 
-    window.addEventListener("resize", listener);
-    return () => window.removeEventListener("resize", listener);
+    window.addEventListener('resize', listener);
+    return () => window.removeEventListener('resize', listener);
   });
 
   useEffect(() => {

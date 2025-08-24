@@ -1,6 +1,7 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef } from 'react';
+
+import { useAnimationFrame } from '../../hooks/useAnimationFrame';
 import {
-  Vector,
   addVectors,
   copyVector,
   distanceBetweenVectors,
@@ -8,9 +9,9 @@ import {
   multiplyVector,
   normalizeVector,
   randomVector,
-  subtractVectors
-} from "../../services/drawingService";
-import { useAnimationFrame } from "../../hooks/useAnimationFrame";
+  subtractVectors,
+  Vector,
+} from '../../services/drawingService';
 
 let mouseX = 0;
 let mouseY = 0;
@@ -35,7 +36,7 @@ class Ball {
     private pos: Vector,
     private vel: Vector,
     private r: number,
-    private color: string
+    private color: string,
   ) {
     this.oldVel = randomVector();
 
@@ -44,9 +45,7 @@ class Ball {
 
   public update(canvas: HTMLCanvasElement, mousePos: Vector) {
     const distFromMouse = distanceBetweenVectors(this.pos, mousePos);
-    const directionOfMouse = normalizeVector(
-      subtractVectors(mousePos, this.pos)
-    );
+    const directionOfMouse = normalizeVector(subtractVectors(mousePos, this.pos));
 
     if (distFromMouse < 300) {
       const jerk = multiplyVector(directionOfMouse, -0.1);
@@ -54,7 +53,7 @@ class Ball {
     }
 
     if (distFromMouse < this.r) {
-      alert("You win!");
+      alert('You win!');
     } else if (distFromMouse < 100) {
       this.isRunning = true;
       this.oldVel = copyVector(this.vel);
@@ -120,8 +119,8 @@ class Ball {
 }
 
 class BouncingController {
-  private ball1 = new Ball({ x: 100, y: 100 }, { x: 0, y: 0 }, 20, "blue");
-  private ball2 = new Ball({ x: 200, y: 100 }, { x: 0, y: 0 }, 20, "yellow");
+  private ball1 = new Ball({ x: 100, y: 100 }, { x: 0, y: 0 }, 20, 'blue');
+  private ball2 = new Ball({ x: 200, y: 100 }, { x: 0, y: 0 }, 20, 'yellow');
 
   loop(canvas: HTMLCanvasElement) {
     const mousePos = { x: mouseX, y: mouseY - 66 };
@@ -130,7 +129,7 @@ class BouncingController {
     this.ball2.update(canvas, mousePos);
 
     // Draw
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     // Clear the canvas
@@ -144,8 +143,8 @@ class BouncingController {
 }
 
 const drawAll = (canvas: HTMLCanvasElement) => {
-  canvas.style.width = "100%";
-  canvas.style.height = "100%";
+  canvas.style.width = '100%';
+  canvas.style.height = '100%';
   canvas.width = canvas.offsetWidth;
   canvas.height = canvas.offsetHeight;
 };
@@ -169,14 +168,14 @@ export const BouncingBackground = () => {
       drawAll(canvas);
     };
 
-    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener('mousemove', onMouseMove);
 
     listener();
 
-    window.addEventListener("resize", listener);
+    window.addEventListener('resize', listener);
     return () => {
-      window.removeEventListener("resize", listener);
-      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener('resize', listener);
+      window.removeEventListener('mousemove', onMouseMove);
     };
   }, []);
 

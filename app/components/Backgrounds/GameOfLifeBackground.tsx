@@ -1,13 +1,14 @@
-import { useEffect, useRef, useState } from "react";
-import { Vector, drawRect } from "../../services/drawingService";
-import { useAnimationFrame } from "../../hooks/useAnimationFrame";
-import { useWindowResize } from "../../hooks/useWindowResize";
+import { useEffect, useRef, useState } from 'react';
+
+import { useAnimationFrame } from '../../hooks/useAnimationFrame';
+import { useWindowResize } from '../../hooks/useWindowResize';
+import { drawRect, Vector } from '../../services/drawingService';
 
 type Grid = boolean[][];
 
 const CONFIG = {
   CELL_SIZE: 5,
-  CELL_COLOR: "red"
+  CELL_COLOR: 'red',
 };
 
 const GridService = {
@@ -17,9 +18,7 @@ const GridService = {
       newCells[i] = [];
       for (let j = 0; j < grid[i].length; j++) {
         const neighbors = GridService.countNeighbors(grid, i, j);
-        const isAlive =
-          neighbors === 3 ||
-          (grid[i][j] && (neighbors === 2 || neighbors === 3));
+        const isAlive = neighbors === 3 || (grid[i][j] && (neighbors === 2 || neighbors === 3));
         newCells[i][j] = isAlive;
       }
     }
@@ -48,9 +47,9 @@ const GridService = {
   },
 
   draw: (grid: Grid, canvas: HTMLCanvasElement) => {
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    ctx.fillStyle = "black";
+    ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = CONFIG.CELL_COLOR;
     for (let i = 0; i < grid.length; i++) {
@@ -60,7 +59,7 @@ const GridService = {
             i * CONFIG.CELL_SIZE,
             j * CONFIG.CELL_SIZE,
             CONFIG.CELL_SIZE,
-            CONFIG.CELL_SIZE
+            CONFIG.CELL_SIZE,
           );
         }
       }
@@ -76,7 +75,7 @@ const GridService = {
       }
     }
     return grid;
-  }
+  },
 };
 
 const STATE: {
@@ -94,7 +93,7 @@ export const GameOfLifeBackground = () => {
     if (!STATE.grid) {
       STATE.grid = GridService.makeRandomGrid(
         window.innerWidth / CONFIG.CELL_SIZE,
-        window.innerHeight / CONFIG.CELL_SIZE
+        window.innerHeight / CONFIG.CELL_SIZE,
       );
       canvasRef.current.width = window.innerWidth;
       canvasRef.current.height = window.innerHeight;

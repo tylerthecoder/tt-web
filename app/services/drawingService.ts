@@ -4,7 +4,7 @@ export function drawCircle(
   ctx: CanvasRenderingContext2D,
   pos: Vector,
   radius: number,
-  color: string
+  color: string,
 ) {
   ctx.beginPath();
   ctx.arc(pos.x, pos.y, radius, 0, 2 * Math.PI);
@@ -12,12 +12,7 @@ export function drawCircle(
   ctx.fill();
 }
 
-export function drawRect(
-  ctx: CanvasRenderingContext2D,
-  pos: Vector,
-  size: Vector,
-  color: string
-) {
+export function drawRect(ctx: CanvasRenderingContext2D, pos: Vector, size: Vector, color: string) {
   ctx.fillStyle = color;
   ctx.fillRect(pos.x, pos.y, size.x, size.y);
 }
@@ -52,7 +47,7 @@ export function distanceBetweenVectors(v1: Vector, v2: Vector) {
 export function randomVector() {
   return normalizeVector({
     x: Math.random() * 2 - 1,
-    y: Math.random() * 2 - 1
+    y: Math.random() * 2 - 1,
   });
 }
 

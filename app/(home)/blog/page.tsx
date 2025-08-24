@@ -1,5 +1,6 @@
-import Link from "next/link";
-import { getBlogs } from "./actions";
+import Link from 'next/link';
+
+import { getBlogs } from './actions';
 
 export default async function Page() {
   const blogs = await getBlogs();
@@ -11,18 +12,17 @@ export default async function Page() {
 
       <h3> AI Control </h3>
       <ul>
-        <li> <Link href="/blog/67f8401d0b9bbcfb66f2d1f3"> High Stakes Control Research </Link> </li>
+        <li>
+          {' '}
+          <Link href="/blog/67f8401d0b9bbcfb66f2d1f3"> High Stakes Control Research </Link>{' '}
+        </li>
       </ul>
 
       <h3> Random </h3>
       <ul>
-        {blogs.map(blog => (
+        {blogs.map((blog) => (
           <li key={blog.id}>
-            <Link
-              href="/blog/[id]"
-              as={`/blog/${blog.id}`}
-              className="text-white"
-            >
+            <Link href="/blog/[id]" as={`/blog/${blog.id}`} className="text-white">
               {blog.title}
             </Link>
           </li>

@@ -4,13 +4,11 @@ import { useRouter } from 'next/navigation';
 import React from 'react';
 import { FaArrowLeft } from 'react-icons/fa';
 
+import { useList } from '@/(panel)/hooks';
 import { AddItemForm } from '@/components/add-item-form';
 import { ListItem } from '@/components/list-item';
 
-import { useList } from '../../hooks';
-
-export default function ListDetailPage({ params }: { params: { id: string } }) {
-  const id = params.id;
+export function ListDetailClient({ id }: { id: string }) {
   const { data: list, isLoading } = useList(id);
   const router = useRouter();
 
@@ -18,18 +16,18 @@ export default function ListDetailPage({ params }: { params: { id: string } }) {
   if (!list) return <div className="p-4 text-gray-400">List not found</div>;
 
   return (
-    <div className="min-h-full bg-gray-900 text-white p-4 md:p-6">
-      <div className="flex items-center gap-3 mb-6">
+    <div className="h-full flex flex-col overflow-hidden">
+      <div className="flex items-center gap-3 p-4 bg-gray-700 border-b border-gray-600">
         <button
           onClick={() => router.push('/lists')}
-          className="p-2 rounded-lg hover:bg-gray-800 transition-colors"
+          className="p-2 text-gray-300 hover:text-white hover:bg-gray-600 rounded transition-colors"
         >
           <FaArrowLeft />
         </button>
-        <h1 className="text-2xl md:text-3xl font-bold truncate">{list.name}</h1>
+        <h1 className="text-2xl font-bold text-white truncate">{list.name}</h1>
       </div>
 
-      <div>
+      <div className="flex-1 overflow-y-auto p-4">
         <AddItemForm listId={list.id} />
 
         <div className="mt-6 space-y-3">

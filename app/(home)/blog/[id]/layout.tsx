@@ -1,11 +1,9 @@
-import "katex/dist/katex.min.css";
-import BlogSidebar from "../blog-sidebar";
+/* eslint-disable @next/next/no-html-link-for-pages */
+import 'katex/dist/katex.min.css';
 
-export default function BlogLayout({
-  children
-}: {
-  children: React.ReactNode;
-}) {
+import BlogSidebar from '../blog-sidebar';
+
+export default function BlogLayout({ children }: { children: React.ReactNode }) {
   return (
     <div>
       {children}

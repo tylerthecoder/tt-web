@@ -6,5 +6,3 @@ export type GoogleDriveFile = {
   createdTime?: string | null;
   modifiedTime?: string | null;
 };
-
-

@@ -1,6 +1,7 @@
-import { useRef, useState } from "react";
-import { useAnimationFrame } from "../../hooks/useAnimationFrame";
-import { drawCircle } from "../../services/drawingService";
+import { useRef, useState } from 'react';
+
+import { useAnimationFrame } from '../../hooks/useAnimationFrame';
+import { drawCircle } from '../../services/drawingService';
 
 interface Planet {
   x: number;
@@ -17,11 +18,11 @@ interface Ball {
 }
 
 function drawPlanet(ctx: CanvasRenderingContext2D, planet: Planet) {
-  drawCircle(ctx, planet, planet.radius, "red");
+  drawCircle(ctx, planet, planet.radius, 'red');
 }
 
 function drawBall(ctx: CanvasRenderingContext2D, ball: Ball) {
-  drawCircle(ctx, ball, 10, "yellow");
+  drawCircle(ctx, ball, 10, 'yellow');
 }
 
 function makePlanets(canvas: HTMLCanvasElement) {
@@ -50,7 +51,7 @@ function makePlanets(canvas: HTMLCanvasElement) {
       x,
       y,
       radius,
-      color: "red"
+      color: 'red',
     });
   }
   return planets;
@@ -63,17 +64,13 @@ function makeBalls(canvas: HTMLCanvasElement) {
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
       vx: Math.random() * 20 - 10,
-      vy: Math.random() * 20 - 10
+      vy: Math.random() * 20 - 10,
     });
   }
   return balls;
 }
 
-function logicLoop(
-  planets: Planet[],
-  balls: Ball[],
-  canvas: HTMLCanvasElement
-) {
+function logicLoop(planets: Planet[], balls: Ball[], canvas: HTMLCanvasElement) {
   const ballsToRemove: Ball[] = [];
 
   for (const ball of balls) {
@@ -137,9 +134,9 @@ function draw(planets: Planet[], balls: Ball[], canvas: HTMLCanvasElement) {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
   logicLoop(planets, balls, canvas);
-  const ctx = canvas.getContext("2d");
+  const ctx = canvas.getContext('2d');
   if (!ctx) return;
-  ctx.fillStyle = "black";
+  ctx.fillStyle = 'black';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   for (const planet of planets) {
     drawPlanet(ctx, planet);
@@ -160,12 +157,7 @@ export const GravityBackground = () => {
     }
     const canvas = canvasRef.current;
     if (planets.length === 0 || balls.length === 0) {
-      console.log(
-        "making planets and balls",
-        makePlanets(canvas),
-        canvas.width,
-        canvas.height
-      );
+      console.log('making planets and balls', makePlanets(canvas), canvas.width, canvas.height);
       setPlanets(makePlanets(canvas));
       setBalls(makeBalls(canvas));
     }

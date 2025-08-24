@@ -1,36 +1,29 @@
-import "../global.css";
-import Script from "next/script";
-import { Analytics } from "@vercel/analytics/react";
-import { CommandMenuProvider } from "../components/CommandMenuProvider";
-import { QueryProvider } from "@/components/query-provider";
-import { TabsNav } from "@/components/tabs-nav";
-import { WeeklyProgress } from "@/components/weekly-progress";
-import { AgeCounter } from "@/components/age-counter";
-import { CountdownTimer } from "@/components/countdown-timer";
+import '../global.css';
 
-const analyticsId = "G-B5KCWMNFJE";
+import { Analytics } from '@vercel/analytics/react';
+import Script from 'next/script';
 
-export default async function RootLayout({
-  children
-}: {
-  children: React.ReactNode;
-}) {
+import { AgeCounter } from '@/components/age-counter';
+import { CountdownTimer } from '@/components/countdown-timer';
+import { QueryProvider } from '@/components/query-provider';
+import { TabsNav } from '@/components/tabs-nav';
+import { WeeklyProgress } from '@/components/weekly-progress';
 
+import { CommandMenuProvider } from '../components/CommandMenuProvider';
+
+const analyticsId = 'G-B5KCWMNFJE';
+
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html>
-      <head>
-        <link rel="icon" href="/pi.png" sizes="any" />
-      </head>
+    <body className="flex flex-col bg-gray-900 w-full h-full">
+      <Script
+        strategy="lazyOnload"
+        id="google-anal"
+        src={`https://www.googletagmanager.com/gtag/js?id=${analyticsId}`}
+      />
 
-      <body className="flex flex-col bg-gray-900 w-full h-full">
-        <Script
-          strategy="lazyOnload"
-          id="google-anal"
-          src={`https://www.googletagmanager.com/gtag/js?id=${analyticsId}`}
-        />
-
-        <Script id="google-anal2" strategy="lazyOnload">
-          {`
+      <Script id="google-anal2" strategy="lazyOnload">
+        {`
                     window.dataLayer = window.dataLayer || [];
                     function gtag(){dataLayer.push(arguments);}
                     gtag('js', new Date());
@@ -38,25 +31,24 @@ export default async function RootLayout({
                     page_path: window.location.pathname,
                     });
                 `}
-        </Script>
+      </Script>
 
-        <QueryProvider>
-          <CommandMenuProvider>
-            <div className="p-4 bg-gray-800 bg-opacity-50 flex-shrink-0 hidden md:block">
-              <div className="flex justify-between items-center">
-                <WeeklyProgress />
-                <div className="flex flex-col items-end">
-                  <AgeCounter />
-                  <CountdownTimer />
-                </div>
+      <QueryProvider>
+        <CommandMenuProvider>
+          <div className="p-4 bg-gray-800 bg-opacity-50 flex-shrink-0 hidden md:block">
+            <div className="flex justify-between items-center">
+              <WeeklyProgress />
+              <div className="flex flex-col items-end">
+                <AgeCounter />
+                <CountdownTimer />
               </div>
             </div>
-            <TabsNav />
-            <div className="flex-grow">{children}</div>
-          </CommandMenuProvider>
-        </QueryProvider>
-        <Analytics />
-      </body>
-    </html>
+          </div>
+          <TabsNav />
+          <div className="flex-grow">{children}</div>
+        </CommandMenuProvider>
+      </QueryProvider>
+      <Analytics />
+    </body>
   );
 }

@@ -1,5 +1,6 @@
-import { CurrentSong } from "../../services/api";
-import Image from "next/legacy/image";
+import Image from 'next/legacy/image';
+
+import { CurrentSong } from '../../services/api';
 
 type Props = {
   currentSong: CurrentSong;
@@ -9,8 +10,7 @@ export const NowPlaying = (props: Props) => {
   const { currentSong } = props;
   const { artistName, imageUrl, name, state } = currentSong;
 
-  const statusText =
-    state === "PLAYING" ? "I'm listening to" : "I was listening to";
+  const statusText = state === 'PLAYING' ? "I'm listening to" : 'I was listening to';
 
   return (
     <div className="flex items-center justify-center w-full">
@@ -21,7 +21,7 @@ export const NowPlaying = (props: Props) => {
           className="rounded-l-lg"
           width={50}
           height={50}
-          alt={"spotify song cover art"}
+          alt={'spotify song cover art'}
         />
         <div className="text-white px-1 cursor-pointer bg-gray-800 rounded-r-lg flex flex-col justify-center items-center hover:bg-gray-900">
           <p className="text-sm">{name}</p>

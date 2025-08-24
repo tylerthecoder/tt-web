@@ -1,36 +1,35 @@
-"use client";
-import headshotPic from "../public/headshot.webp";
-import { CrazyImage } from "../components/CrazyImage";
-import Image from "next/image";
-import API, { CurrentSong } from "../services/api";
-import { NowPlaying } from "../components/NowPlaying";
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import Head from "next/head";
-import { RandomBackground } from "../components/Backgrounds/RandomBackground";
-import { Bubblegum_Sans } from 'next/font/google'
-import useTypeyText from "../hooks/useTypyText";
-import { useRouter } from "next/navigation";
+'use client';
+import { Bubblegum_Sans } from 'next/font/google';
+import Head from 'next/head';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
+import headshotPic from '../../public/headshot.webp';
+import { RandomBackground } from '../components/Backgrounds/RandomBackground';
+import { CrazyImage } from '../components/CrazyImage';
+import { NowPlaying } from '../components/NowPlaying';
+import useTypeyText from '../hooks/useTypyText';
+import API, { CurrentSong } from '../services/api';
 
 const bubblegum = Bubblegum_Sans({
-  weight: "400",
-  subsets: ["latin"],
-  display: "swap",
+  weight: '400',
+  subsets: ['latin'],
+  display: 'swap',
 });
 
-
-const RESUME_URL = "https://files.tylertracy.com/resume.pdf";
-const YOUTUBE_URL = "https://www.youtube.com/channel/UCUdKa40A3qNa1cN2gK9Qb8g";
-const LINKEDIN_URL = "https://www.linkedin.com/in/tyler-tracy/";
-const GITHUB_URL = "https://github.com/tylerthecoder";
-const X_URL = "https://twitter.com/tylertracy321";
-const BLOG_URL = "https://tylertracy.com/blog";
-const TYLERCRAFT_URL =
-  "https://craft.tylertracy.com/?worldId=0.9484798532361967";
-const GOOGLE_SCHOLAR_URL = "https://scholar.google.com/citations?user=gdsMjNwAAAAJ&hl=en";
+const RESUME_URL = 'https://files.tylertracy.com/resume.pdf';
+const YOUTUBE_URL = 'https://www.youtube.com/channel/UCUdKa40A3qNa1cN2gK9Qb8g';
+const LINKEDIN_URL = 'https://www.linkedin.com/in/tyler-tracy/';
+const GITHUB_URL = 'https://github.com/tylerthecoder';
+const X_URL = 'https://twitter.com/tylertracy321';
+const BLOG_URL = 'https://tylertracy.com/blog';
+const TYLERCRAFT_URL = 'https://craft.tylertracy.com/?worldId=0.9484798532361967';
+const GOOGLE_SCHOLAR_URL = 'https://scholar.google.com/citations?user=gdsMjNwAAAAJ&hl=en';
 
 const Subtitle = () => {
-  const { typedText, cursor } = useTypeyText("AI Safety Researcher");
+  const { typedText, cursor } = useTypeyText('AI Safety Researcher');
 
   return (
     <div>
@@ -42,12 +41,7 @@ const Subtitle = () => {
   );
 };
 
-const HomButton = (props: {
-  href: string;
-  iconSrc: string;
-  iconAlt: string;
-  text: string;
-}) => {
+const HomButton = (props: { href: string; iconSrc: string; iconAlt: string; text: string }) => {
   return (
     <Link href={props.href} passHref>
       <button
@@ -60,12 +54,7 @@ const HomButton = (props: {
       "
       >
         <div className="mr-1">
-          <Image
-            src={props.iconSrc}
-            width={32}
-            height={32}
-            alt={props.iconAlt}
-          />
+          <Image src={props.iconSrc} width={32} height={32} alt={props.iconAlt} />
         </div>
         <p className="w-[60px]">{props.text}</p>
       </button>
@@ -102,12 +91,7 @@ const Home = () => {
       <div className="w-full h-full flex md:flex-row flex-col">
         <div className="md:w-[300px] w-full md:border-r-2 border-white mx-2 px-2">
           <div className="flex justify-center z-0">
-            <CrazyImage
-              src={headshotPic}
-              alt="Tyler's headshot"
-              width={225}
-              height={300}
-            />
+            <CrazyImage src={headshotPic} alt="Tyler's headshot" width={225} height={300} />
           </div>
           <div className="pt-3 w-full">
             {!!currentSong && <NowPlaying currentSong={currentSong} />}
@@ -125,24 +109,14 @@ const Home = () => {
               iconSrc="/github.png"
               iconAlt="Github logo"
             />
-            <HomButton
-              text="Twitter"
-              href={X_URL}
-              iconSrc="/x.svg"
-              iconAlt="X logo"
-            />
+            <HomButton text="Twitter" href={X_URL} iconSrc="/x.svg" iconAlt="X logo" />
             <HomButton
               text="LinkedIn"
               href={LINKEDIN_URL}
               iconSrc="/linkedin.svg"
               iconAlt="Linkedin logo"
             />
-            <HomButton
-              text="Blog"
-              href={BLOG_URL}
-              iconSrc="/blog.png"
-              iconAlt="Blog icon"
-            />
+            <HomButton text="Blog" href={BLOG_URL} iconSrc="/blog.png" iconAlt="Blog icon" />
             <HomButton
               text="Enter 3D"
               href={TYLERCRAFT_URL}
@@ -166,13 +140,19 @@ const Home = () => {
               Hi, I'm Tyler
             </h1>
             <Subtitle />
-            <article className={`mt-4 mx-3 prose lg:prose-2xl prose-neutral prose-invert ${bubblegum.className}`}>
+            <article
+              className={`mt-4 mx-3 prose lg:prose-2xl prose-neutral prose-invert ${bubblegum.className}`}
+            >
               <h2> Quick Facts </h2>
               <ul>
-                <li> Member of Technical Staff at <a href="https://redwoodresearch.org" target="_blank" rel="noopener noreferrer">Redwood Research</a> </li>
                 <li>
-                  Working on High-Stakes AI Control research
+                  {' '}
+                  Member of Technical Staff at{' '}
+                  <a href="https://redwoodresearch.org" target="_blank" rel="noopener noreferrer">
+                    Redwood Research
+                  </a>{' '}
                 </li>
+                <li>Working on High-Stakes AI Control research</li>
                 <li>
                   Was a software engineer, realized AI was a big deal, quit my job, now I'm here
                 </li>
@@ -180,24 +160,29 @@ const Home = () => {
 
               <h2> Core beliefs </h2>
               <ul>
-                <li> AI is the most important invention of humanity and will have dramatic consequences on the future of the universe</li>
+                <li>
+                  {' '}
+                  AI is the most important invention of humanity and will have dramatic consequences
+                  on the future of the universe
+                </li>
                 <li>We should aim to increase understanding in the universe</li>
                 <li>
-                  All software and information that does not pose an existential
-                  threat should be open-sourced for everyone to access
+                  All software and information that does not pose an existential threat should be
+                  open-sourced for everyone to access
                 </li>
                 <li>
-                  All living creatures capable of experiencing suffering deserve
-                  to be treated with moral consideration.
+                  All living creatures capable of experiencing suffering deserve to be treated with
+                  moral consideration.
                 </li>
-                <li> Things used to be worse, they are better now, and they could be even better </li>
+                <li>
+                  {' '}
+                  Things used to be worse, they are better now, and they could be even better{' '}
+                </li>
               </ul>
 
               <h2> Goals </h2>
               <ul>
-                <li>
-                  Maximize the amount of experience that I have (live forever)
-                </li>
+                <li>Maximize the amount of experience that I have (live forever)</li>
                 <li>Prevent AI from taking over the world</li>
                 <li> Build the ultimate productivity workflow </li>
               </ul>

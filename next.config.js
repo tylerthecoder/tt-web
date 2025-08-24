@@ -2,16 +2,16 @@
 const path = require('path');
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
-})
+});
 
 module.exports = withBundleAnalyzer({
   reactStrictMode: true,
   // serverExternalPackages: ["tt-services"],
   images: {
-    domains: ["i.scdn.co", "files.tylertracy.com"],
+    domains: ['i.scdn.co', 'files.tylertracy.com'],
   },
-  output: "standalone",
-  transpilePackages: ["tt-services"],
+  output: 'standalone',
+  transpilePackages: ['tt-services'],
   // webpack: (config) => {
   //   config.resolve.fallback = {
   //     "mongodb-client-encryption": false,
@@ -23,8 +23,6 @@ module.exports = withBundleAnalyzer({
   // },
   outputFileTracingRoot: path.join(__dirname, '..'),
   async redirects() {
-    return [
-      { source: '/panel', destination: '/daily', permanent: false },
-    ]
-  }
+    return [{ source: '/panel', destination: '/daily', permanent: false }];
+  },
 });
