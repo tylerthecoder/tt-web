@@ -11,6 +11,7 @@ import { Note } from 'tt-services/src/client-index.ts';
 
 import { useNote, useUpdateNoteContent } from '../(panel)/hooks';
 import { GoogleSyncControls } from './google-sync-controls';
+import { PublishControls } from './publish-controls';
 
 interface MilkdownEditorWithNoteProps {
   note: Note;
@@ -52,8 +53,13 @@ const MilkdownEditorWithNote: React.FC<MilkdownEditorWithNoteProps> = ({
           <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3 flex-1 min-w-0">
             <h1 className="text-xl md:text-3xl text-gray-300 font-medium truncate">{note.title}</h1>
 
-            {/* Google Sync Controls */}
-            {showGoogleSync && <GoogleSyncControls note={note} className="text-xs md:text-sm" />}
+            {/* Publish Controls + Google Sync Controls */}
+            <div className="flex items-center gap-3 flex-wrap">
+              <PublishControls note={note} className="text-xs md:text-sm" />
+              {showGoogleSync && (
+                <GoogleSyncControls note={note} className="text-xs md:text-sm" />
+              )}
+            </div>
             {note.tags && note.tags.length > 0 && (
               <div className="flex gap-1 flex-wrap">
                 {note.tags.map((tag) => (

@@ -6,8 +6,10 @@ import { CountdownTimer } from '@/components/countdown-timer';
 import { QueryProvider } from '@/components/query-provider';
 import { TabsNav } from '@/components/tabs-nav';
 import { WeeklyProgress } from '@/components/weekly-progress';
+import { requireAuth } from '@/utils/auth';
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  await requireAuth();
   return (
     <div className="flex flex-col bg-gray-900 w-full min-h-full">
 

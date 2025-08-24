@@ -80,6 +80,28 @@ export async function getNoteContent(noteId: string) {
   return note?.content || '';
 }
 
+export async function publishNote(noteId: string) {
+  await requireAuth();
+
+  const tt = await getTT();
+  await tt.notes.publishNote(noteId);
+
+  // Revalidate blog routes so newly published note appears
+  revalidatePath('/blog');
+  revalidatePath(`/blog/${noteId}`);
+}
+
+export async function unpublishNote(noteId: string) {
+  await requireAuth();
+
+  const tt = await getTT();
+  await tt.notes.unpublishNote(noteId);
+
+  // Revalidate blog routes so unpublished note disappears
+  revalidatePath('/blog');
+  revalidatePath(`/blog/${noteId}`);
+}
+
 export async function updateNoteContent(noteId: string, content: string) {
   await requireAuth();
 

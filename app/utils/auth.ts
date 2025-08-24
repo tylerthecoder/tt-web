@@ -66,6 +66,12 @@ export async function requireAuth(): Promise<void> {
   if (!session) {
     throw new Error('Authentication required');
   }
+
+  // Enforce admin email restriction for all authenticated access
+  const adminEmail = process.env.ADMIN_EMAIL;
+  if (adminEmail && session.userEmail !== adminEmail) {
+    throw new Error('Unauthorized');
+  }
 }
 
 export function isPreviewHost(hostname: string): boolean {

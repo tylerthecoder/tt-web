@@ -1,23 +1,19 @@
-import { cookies } from 'next/headers';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
-async function hasSessionCookie(): Promise<boolean> {
-  const cookieStore = await cookies();
-  return cookieStore.get('tt_session') !== null;
+function hasSessionCookieFromRequest(req: NextRequest): boolean {
+  const cookie = req.cookies.get('tt_session');
+  return cookie !== undefined && cookie !== null;
 }
 
+const PANEL_PATHS = ['/panel', '/notes', '/lists', '/agent', '/daily', '/jot'];
+
 export async function middleware(request: NextRequest) {
-  // Protect panel, notes, and lists routes
-  if (
-    !request.nextUrl.pathname.startsWith('/panel') &&
-    !request.nextUrl.pathname.startsWith('/notes') &&
-    !request.nextUrl.pathname.startsWith('/lists')
-  ) {
+  if (!PANEL_PATHS.some((path) => request.nextUrl.pathname.startsWith(path))) {
     return NextResponse.next();
   }
 
-  if (!(await hasSessionCookie())) {
+  if (!hasSessionCookieFromRequest(request)) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 

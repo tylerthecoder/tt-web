@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-import headshotPic from '../../public/headshot.webp';
+import headshotPic from '../../public/tyler-anime-2.png';
 import { RandomBackground } from '../components/Backgrounds/RandomBackground';
 import { CrazyImage } from '../components/CrazyImage';
 import { NowPlaying } from '../components/NowPlaying';
@@ -91,9 +91,9 @@ const Home = () => {
       <div className="w-full h-full flex md:flex-row flex-col">
         <div className="md:w-[300px] w-full md:border-r-2 border-white mx-2 px-2">
           <div className="flex justify-center z-0">
-            <CrazyImage src={headshotPic} alt="Tyler's headshot" width={225} height={300} />
+            <CrazyImage src={headshotPic} alt="Tyler's headshot" width={225} height={337} />
           </div>
-          <div className="pt-3 w-full">
+          <div className="w-full">
             {!!currentSong && <NowPlaying currentSong={currentSong} />}
           </div>
           <div className="pt-3 w-full">
@@ -146,11 +146,10 @@ const Home = () => {
               <h2> Quick Facts </h2>
               <ul>
                 <li>
-                  {' '}
                   Member of Technical Staff at{' '}
                   <a href="https://redwoodresearch.org" target="_blank" rel="noopener noreferrer">
-                    Redwood Research
-                  </a>{' '}
+                    Redwood Research{' '}
+                  </a>
                 </li>
                 <li>Working on High-Stakes AI Control research</li>
                 <li>
@@ -161,7 +160,6 @@ const Home = () => {
               <h2> Core beliefs </h2>
               <ul>
                 <li>
-                  {' '}
                   AI is the most important invention of humanity and will have dramatic consequences
                   on the future of the universe
                 </li>
@@ -175,8 +173,7 @@ const Home = () => {
                   moral consideration.
                 </li>
                 <li>
-                  {' '}
-                  Things used to be worse, they are better now, and they could be even better{' '}
+                  Things used to be worse, they are better now, and they could be even better
                 </li>
               </ul>
 
@@ -184,7 +181,7 @@ const Home = () => {
               <ul>
                 <li>Maximize the amount of experience that I have (live forever)</li>
                 <li>Prevent AI from taking over the world</li>
-                <li> Build the ultimate productivity workflow </li>
+                <li>Design the "correct way" to build and compose software</li>
               </ul>
 
               <h2> Hot Takes </h2>

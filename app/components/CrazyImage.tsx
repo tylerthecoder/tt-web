@@ -11,14 +11,17 @@ export const CrazyImage = (props: Props) => {
   const { src, alt, width, height } = props;
 
   return (
-    <div className="flex justify-center">
-      <div className="absolute">
+    <div className="flex justify-center relative">
+      <div className="absolute w-full h-full">
         <Image
           src={src}
           alt={alt + ' inverted'}
           className="filter invert"
           width={width}
           height={height}
+          layout="fill"
+          objectFit="cover"
+          objectPosition="0% 0%"
           priority
         />
       </div>
