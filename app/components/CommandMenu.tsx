@@ -72,9 +72,8 @@ export function CommandMenu() {
     },
   ];
 
-  const filteredNotes = data?.notes.filter((note) =>
-    note.title.toLowerCase().includes(search.toLowerCase()),
-  ) || [];
+  const filteredNotes =
+    data?.notes.filter((note) => note.title.toLowerCase().includes(search.toLowerCase())) || [];
 
   // Create note commands
   const noteCommands: Command[] = filteredNotes.slice(0, 5).flatMap((note) => [
@@ -253,10 +252,11 @@ export function CommandMenu() {
                   {allCommands.map((command, index) => (
                     <div
                       key={command.id}
-                      className={`flex items-center px-4 py-3 cursor-pointer transition-colors ${index === selectedIndex
-                        ? 'bg-gray-700 text-white'
-                        : 'text-gray-300 hover:bg-gray-700 hover:text-white'
-                        }`}
+                      className={`flex items-center px-4 py-3 cursor-pointer transition-colors ${
+                        index === selectedIndex
+                          ? 'bg-gray-700 text-white'
+                          : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                      }`}
                       onClick={command.action}
                     >
                       <div className="flex items-center flex-1">

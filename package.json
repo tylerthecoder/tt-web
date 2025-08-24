@@ -14,6 +14,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "framer-motion": "^6.5.1",
+    "googleapis": "^140",
     "lucide-react": "^0.525.0",
     "mongodb": "^6.18.0",
     "next": "^15.4.6",
@@ -63,6 +64,7 @@
   "private": true,
   "scripts": {
     "build": "next build",
+    "build:fast": "next build --turbopack",
     "dev": "next dev --turbopack",
     "link-services": "bun scripts/link-services.ts",
     "lint": "next lint",

@@ -1,18 +1,13 @@
-import "../global.css";
+import '../global.css';
 
-import { Analytics } from "@vercel/analytics/react";
-import Script from "next/script";
+import { Analytics } from '@vercel/analytics/react';
+import Script from 'next/script';
 
-import NavBar from "../components/navbar";
+import NavBar from '../components/navbar';
 
-const analyticsId = "G-B5KCWMNFJE";
+const analyticsId = 'G-B5KCWMNFJE';
 
-export default async function RootLayout({
-  children
-}: {
-  children: React.ReactNode;
-}) {
-
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <body suppressHydrationWarning className="flex flex-col bg-gray-900 w-full h-full">
       <Script

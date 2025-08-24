@@ -33,5 +33,6 @@ export const useAnimationFrame = (
   useEffect(() => {
     frame.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(frame.current ?? 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps); // Make sure to change it if the deps change
 };

@@ -21,7 +21,6 @@ export function UntrackedGoogleDocCardLoader({ docId, layout = 'grid' }: Props) 
     let isMounted = true;
     async function run() {
       try {
-
         setLoading(true);
         setError(null);
         const res = await getGoogleDriveFileById(docId);
@@ -72,5 +71,3 @@ export function UntrackedGoogleDocCardLoader({ docId, layout = 'grid' }: Props) 
 
   return <UntrackedGoogleDocCard doc={doc} layout={layout} />;
 }
-
-

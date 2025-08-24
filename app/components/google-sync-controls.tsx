@@ -167,7 +167,7 @@ function GoogleSyncModal({ isOpen, onClose, noteId }: GoogleSyncModalProps) {
     if (showDocSelector && googleDocs.length === 0) {
       fetchGoogleDocs();
     }
-  }, [showDocSelector]);
+  }, [showDocSelector, googleDocs.length]);
 
   const fetchGoogleDocs = async () => {
     setLoading(true);

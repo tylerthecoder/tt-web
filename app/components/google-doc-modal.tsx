@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-import { useAssignGoogleDocIdToNote } from '@/notes/hooks';
+import { useAssignGoogleDocIdToNote } from '@/(panel)/hooks';
 
 interface GoogleDocModalProps {
   isOpen: boolean;

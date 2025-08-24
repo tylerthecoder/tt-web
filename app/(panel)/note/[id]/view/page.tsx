@@ -2,6 +2,7 @@
 
 import { formatDistance } from 'date-fns';
 import Link from 'next/link';
+import { use } from 'react';
 import { FaArrowLeft, FaEdit } from 'react-icons/fa';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
@@ -9,8 +10,9 @@ import remarkGfm from 'remark-gfm';
 
 import { useNote } from '@/(panel)/hooks';
 
-export default function NoteViewPage({ params }: { params: { id: string } }) {
-  const { note, loading } = useNote(params.id);
+export default function NoteViewPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = use(params);
+  const { note, loading } = useNote(resolvedParams.id);
 
   if (loading || !note) {
     return <div className="p-4 text-gray-300">Loading…</div>;

@@ -1,15 +1,21 @@
 'use client';
 
-import { FaArrowLeft } from 'react-icons/fa';
-import Link from 'next/link';
-
-import React, { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import Link from 'next/link';
+import React, { useMemo, useState } from 'react';
+import { FaArrowLeft } from 'react-icons/fa';
 import type { List, ListItem as ListItemType } from 'tt-services';
 
 import { MilkdownEditor } from '@/components/milkdown-note-editor';
-import { addItemToList, addNoteToItem, createNote, deleteListItem, getListById, toggleItemCheck } from '../(panel)/actions';
 
+import {
+  addItemToList,
+  addNoteToItem,
+  createNote,
+  deleteListItem,
+  getListById,
+  toggleItemCheck,
+} from '../(panel)/actions';
 
 interface ListViewProps {
   listId: string;
@@ -18,7 +24,12 @@ interface ListViewProps {
   backButtonUrl?: string;
 }
 
-export function ListView({ listId, showTitle = true, showBackButton = false, backButtonUrl = '/' }: ListViewProps) {
+export function ListView({
+  listId,
+  showTitle = true,
+  showBackButton = false,
+  backButtonUrl = '/',
+}: ListViewProps) {
   const queryClient = useQueryClient();
 
   // Unified list hook colocated in this file
@@ -73,7 +84,9 @@ export function ListView({ listId, showTitle = true, showBackButton = false, bac
         const updated: List = {
           ...previousList,
           items: previousList.items.map((it) =>
-            it.id === itemId ? { ...it, checked: !it.checked, updatedAt: new Date().toISOString() } : it,
+            it.id === itemId
+              ? { ...it, checked: !it.checked, updatedAt: new Date().toISOString() }
+              : it,
           ),
           updatedAt: new Date().toISOString(),
         };
@@ -223,7 +236,6 @@ export function ListView({ listId, showTitle = true, showBackButton = false, bac
   );
 }
 
-
 function ItemRow({
   item,
   listId,
@@ -295,5 +307,3 @@ function ItemRow({
     </div>
   );
 }
-
-

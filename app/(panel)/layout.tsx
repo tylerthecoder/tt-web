@@ -4,12 +4,11 @@ import { Analytics } from '@vercel/analytics/react';
 import Script from 'next/script';
 
 import { AgeCounter } from '@/components/age-counter';
+import { CommandMenu } from '@/components/CommandMenu';
 import { CountdownTimer } from '@/components/countdown-timer';
 import { QueryProvider } from '@/components/query-provider';
 import { TabsNav } from '@/components/tabs-nav';
 import { WeeklyProgress } from '@/components/weekly-progress';
-import { CommandMenu } from '@/components/CommandMenu';
-
 
 const analyticsId = 'G-B5KCWMNFJE';
 
