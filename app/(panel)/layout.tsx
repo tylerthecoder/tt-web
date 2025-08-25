@@ -12,7 +12,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   await requireAuth();
   return (
     <div className="flex flex-col bg-gray-900 w-full min-h-full">
-
       <QueryProvider>
         <div className="p-4 bg-gray-800 bg-opacity-50 flex-shrink-0 hidden md:block">
           <div className="flex justify-between items-center">

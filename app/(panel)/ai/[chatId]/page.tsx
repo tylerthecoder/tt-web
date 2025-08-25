@@ -23,5 +23,3 @@ export default async function AiChatPage({ params }: { params: Promise<{ chatId:
     </div>
   );
 }
-
-

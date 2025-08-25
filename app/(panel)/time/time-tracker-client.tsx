@@ -9,7 +9,14 @@ import type { TimeBlock } from 'tt-services';
 import { MilkdownEditor } from '@/components/milkdown-note-editor';
 import { NoteModal } from '@/components/note-modal';
 
-import { addTagToNote, createNote, endTimeBlock, getAllTimeBlocks, startTimeBlock, updateTimeBlock } from '../actions';
+import {
+  addTagToNote,
+  createNote,
+  endTimeBlock,
+  getAllTimeBlocks,
+  startTimeBlock,
+  updateTimeBlock,
+} from '../actions';
 
 type UiBlock = TimeBlock & { durationMs: number };
 
@@ -59,8 +66,13 @@ export default function TimeTrackerClient() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: { startTime?: string; endTime?: string | null; noteId?: string | null } }) =>
-      updateTimeBlock(id, updates),
+    mutationFn: async ({
+      id,
+      updates,
+    }: {
+      id: string;
+      updates: { startTime?: string; endTime?: string | null; noteId?: string | null };
+    }) => updateTimeBlock(id, updates),
     onMutate: async () => {
       setError(null);
     },
@@ -103,7 +115,8 @@ export default function TimeTrackerClient() {
             value={label}
             onChange={(e) => setLabel(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === 'Enter' && label.trim()) startMutation.mutate({ label: label.trim(), noteId: noteId.trim() || undefined });
+              if (e.key === 'Enter' && label.trim())
+                startMutation.mutate({ label: label.trim(), noteId: noteId.trim() || undefined });
             }}
           />
           <input
@@ -113,11 +126,15 @@ export default function TimeTrackerClient() {
             value={noteId}
             onChange={(e) => setNoteId(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === 'Enter' && label.trim()) startMutation.mutate({ label: label.trim(), noteId: noteId.trim() || undefined });
+              if (e.key === 'Enter' && label.trim())
+                startMutation.mutate({ label: label.trim(), noteId: noteId.trim() || undefined });
             }}
           />
           <button
-            onClick={() => label.trim() && startMutation.mutate({ label: label.trim(), noteId: noteId.trim() || undefined })}
+            onClick={() =>
+              label.trim() &&
+              startMutation.mutate({ label: label.trim(), noteId: noteId.trim() || undefined })
+            }
             disabled={!label.trim() || startMutation.isPending}
             className="px-3 py-2 rounded bg-green-600 hover:bg-green-500 disabled:opacity-50 flex items-center gap-2"
             title="Start time block"
@@ -154,7 +171,12 @@ export default function TimeTrackerClient() {
                   <BlockRow
                     block={b}
                     onSave={(updates) => updateMutation.mutate({ id: b.id, updates })}
-                    onStop={() => updateMutation.mutate({ id: b.id, updates: { endTime: new Date().toISOString() } })}
+                    onStop={() =>
+                      updateMutation.mutate({
+                        id: b.id,
+                        updates: { endTime: new Date().toISOString() },
+                      })
+                    }
                     onAddNote={() => addNoteMutation.mutate(b)}
                     onOpenNote={() => b.noteId && setOpenNoteId(b.noteId)}
                     compact
@@ -166,7 +188,12 @@ export default function TimeTrackerClient() {
         )}
       </div>
 
-      <NoteModal noteId={openNoteId} onClose={() => setOpenNoteId(null)} hideTitle title="Time Block Note" />
+      <NoteModal
+        noteId={openNoteId}
+        onClose={() => setOpenNoteId(null)}
+        hideTitle
+        title="Time Block Note"
+      />
     </div>
   );
 }
@@ -201,26 +228,30 @@ function localInputToIso(local: string) {
   return d.toISOString();
 }
 
-function BlockRow(
-  {
-    block,
-    onSave,
-    onStop,
-    onAddNote,
-    onOpenNote,
-    compact = false,
-  }: {
-    block: UiBlock;
-    onSave: (updates: { startTime?: string; endTime?: string | null; noteId?: string | null }) => void;
-    onStop?: () => void;
-    onAddNote?: () => void;
-    onOpenNote?: () => void;
-    compact?: boolean;
-  },
-) {
+function BlockRow({
+  block,
+  onSave,
+  onStop,
+  onAddNote,
+  onOpenNote,
+  compact = false,
+}: {
+  block: UiBlock;
+  onSave: (updates: {
+    startTime?: string;
+    endTime?: string | null;
+    noteId?: string | null;
+  }) => void;
+  onStop?: () => void;
+  onAddNote?: () => void;
+  onOpenNote?: () => void;
+  compact?: boolean;
+}) {
   const [isEditing, setIsEditing] = useState(false);
   const [startLocal, setStartLocal] = useState(() => isoToLocalInput(block.startTime));
-  const [endLocal, setEndLocal] = useState(() => (block.endTime ? isoToLocalInput(block.endTime) : ''));
+  const [endLocal, setEndLocal] = useState(() =>
+    block.endTime ? isoToLocalInput(block.endTime) : '',
+  );
   const [noteId, setNoteId] = useState(block.noteId || '');
 
   const isActive = !block.endTime;
@@ -228,7 +259,8 @@ function BlockRow(
   const save = () => {
     const updates: { startTime?: string; endTime?: string | null; noteId?: string | null } = {};
     if (startLocal) updates.startTime = localInputToIso(startLocal);
-    if (endLocal === '') updates.endTime = null; else updates.endTime = localInputToIso(endLocal);
+    if (endLocal === '') updates.endTime = null;
+    else updates.endTime = localInputToIso(endLocal);
     updates.noteId = noteId.trim() === '' ? null : noteId.trim();
     onSave(updates);
     setIsEditing(false);
@@ -255,14 +287,17 @@ function BlockRow(
         <div>
           <div className="text-gray-100 font-medium">{block.label}</div>
           <div className="text-xs text-gray-300">
-            {format(new Date(block.startTime), 'PPpp')} — {block.endTime ? format(new Date(block.endTime), 'PPpp') : 'present'}
+            {format(new Date(block.startTime), 'PPpp')} —{' '}
+            {block.endTime ? format(new Date(block.endTime), 'PPpp') : 'present'}
           </div>
           {block.noteId && !isEditing && (
             <div className="text-[10px] text-gray-300">Note: {block.noteId}</div>
           )}
         </div>
         <div className="flex items-center gap-2">
-          {isActive && <span className="px-2 py-0.5 text-xs rounded bg-green-700 text-white">Active</span>}
+          {isActive && (
+            <span className="px-2 py-0.5 text-xs rounded bg-green-700 text-white">Active</span>
+          )}
           <div className="text-gray-200 whitespace-nowrap">{formatDuration(block.durationMs)}</div>
         </div>
       </div>
@@ -296,25 +331,55 @@ function BlockRow(
             />
           </label>
           <div className="flex items-end gap-2">
-            <button className="px-3 py-2 rounded bg-green-700 hover:bg-green-600" onClick={save}>Save</button>
-            <button className="px-3 py-2 rounded bg-gray-700 hover:bg-gray-600" onClick={cancel}>Cancel</button>
-            <button className="px-3 py-2 rounded bg-red-700 hover:bg-red-600" onClick={() => { setEndLocal(''); }}>Clear end</button>
+            <button className="px-3 py-2 rounded bg-green-700 hover:bg-green-600" onClick={save}>
+              Save
+            </button>
+            <button className="px-3 py-2 rounded bg-gray-700 hover:bg-gray-600" onClick={cancel}>
+              Cancel
+            </button>
+            <button
+              className="px-3 py-2 rounded bg-red-700 hover:bg-red-600"
+              onClick={() => {
+                setEndLocal('');
+              }}
+            >
+              Clear end
+            </button>
           </div>
         </div>
       ) : (
         <div className="flex items-center gap-2 flex-wrap">
           {block.noteId ? (
-            <button className="px-2 py-1 text-xs rounded bg-blue-700 hover:bg-blue-600" onClick={() => onOpenNote && onOpenNote()}>Open Note</button>
+            <button
+              className="px-2 py-1 text-xs rounded bg-blue-700 hover:bg-blue-600"
+              onClick={() => onOpenNote && onOpenNote()}
+            >
+              Open Note
+            </button>
           ) : (
-            <button className="px-2 py-1 text-xs rounded bg-blue-700 hover:bg-blue-600" onClick={() => onAddNote && onAddNote()}>Add Note</button>
+            <button
+              className="px-2 py-1 text-xs rounded bg-blue-700 hover:bg-blue-600"
+              onClick={() => onAddNote && onAddNote()}
+            >
+              Add Note
+            </button>
           )}
-          <button className="px-2 py-1 text-xs rounded bg-gray-600 hover:bg-gray-500" onClick={() => setIsEditing(true)}>Edit</button>
+          <button
+            className="px-2 py-1 text-xs rounded bg-gray-600 hover:bg-gray-500"
+            onClick={() => setIsEditing(true)}
+          >
+            Edit
+          </button>
           {isActive && (
-            <button className="px-2 py-1 text-xs rounded bg-yellow-600 hover:bg-yellow-500" onClick={() => onStop && onStop()}>Stop</button>
+            <button
+              className="px-2 py-1 text-xs rounded bg-yellow-600 hover:bg-yellow-500"
+              onClick={() => onStop && onStop()}
+            >
+              Stop
+            </button>
           )}
         </div>
       )}
     </div>
   );
 }
-

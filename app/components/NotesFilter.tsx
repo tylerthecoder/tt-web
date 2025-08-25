@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FaBan, FaCheck, FaSearch, FaSpinner, FaTimes } from 'react-icons/fa';
-import { GoogleNote, Note } from 'tt-services/src/services/notes';
+import { GoogleNote, Note } from 'tt-services/src/client-index.ts';
 
 import { useTags } from '@/(panel)/hooks';
 

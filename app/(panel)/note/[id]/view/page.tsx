@@ -37,7 +37,18 @@ export default function NoteViewPage({ params }: { params: Promise<{ id: string 
           </Link>
         </div>
 
-        <h1 className="text-3xl md:text-4xl font-bold mb-4 text-red-400">{note.title}</h1>
+        <h1 className="text-3xl md:text-4xl font-bold mb-2 text-red-400">{note.title}</h1>
+        <div className="mb-4 flex gap-1 flex-wrap">
+          {(note.tags || []).map((tag: string) => (
+            <span
+              key={tag}
+              className="bg-blue-600 px-2 py-0.5 rounded-full text-xs font-medium text-white"
+            >
+              {tag}
+            </span>
+          ))}
+          {(note.tags || []).length === 0 && <span className="text-xs text-gray-500">No tags</span>}
+        </div>
 
         <div className="text-sm text-gray-400 mb-4">
           Last updated {formatDistance(new Date(lastModified), new Date(), { addSuffix: true })}

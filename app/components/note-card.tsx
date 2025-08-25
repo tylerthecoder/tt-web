@@ -2,7 +2,14 @@
 
 import Link from 'next/link';
 import React, { useMemo, useState } from 'react';
-import { FaEdit, FaExternalLinkAlt, FaEye, FaFileAlt, FaGoogle, FaInfoCircle } from 'react-icons/fa';
+import {
+  FaEdit,
+  FaExternalLinkAlt,
+  FaEye,
+  FaFileAlt,
+  FaGoogle,
+  FaInfoCircle,
+} from 'react-icons/fa';
 import { isGoogleNoteMetadata, NoteMetadata } from 'tt-services/src/client-index';
 type LayoutMode = 'grid' | 'list';
 import { BaseCard } from './base-card';
@@ -52,8 +59,13 @@ export function NoteCard({ note, layout = 'grid' }: NoteCardProps) {
   );
 
   const headerExtra = (
-    <div className="flex items-center gap-2">
-      <NoteTagManager note={note} />
+    <div className="flex items-center gap-2 flex-wrap">
+      {(note.tags || []).map((tag) => (
+        <span key={tag} className="px-2 py-0.5 bg-gray-700 text-gray-300 text-xs rounded-full">
+          {tag}
+        </span>
+      ))}
+      {(note.tags || []).length === 0 && <span className="text-xs text-gray-500">No tags</span>}
       <button
         onClick={() => setShowJson(true)}
         className="py-1 px-2 border border-gray-600 rounded text-xs text-gray-300 hover:bg-gray-800 transition-colors flex items-center"
@@ -82,7 +94,12 @@ export function NoteCard({ note, layout = 'grid' }: NoteCardProps) {
         footerButtons={footerButtons}
         accentClassName={isGoogle ? 'border-red-500' : undefined}
       />
-      <JsonModal open={showJson} onClose={() => setShowJson(false)} title="Note Metadata" data={metadata} />
+      <JsonModal
+        open={showJson}
+        onClose={() => setShowJson(false)}
+        title="Note Metadata"
+        data={metadata}
+      />
     </>
   );
 }

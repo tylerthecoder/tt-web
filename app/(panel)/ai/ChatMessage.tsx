@@ -14,7 +14,9 @@ export default function ChatMessageView({ message }: { message: ChatMessage }) {
   const [expanded, setExpanded] = useState(false);
   const isTool = message.role === 'tool';
   return (
-    <div className={`p-3 rounded ${message.role === 'user' ? 'bg-white/5' : 'bg-emerald-500/10'} text-gray-200`}>
+    <div
+      className={`p-3 rounded ${message.role === 'user' ? 'bg-white/5' : 'bg-emerald-500/10'} text-gray-200`}
+    >
       <div className="flex items-center gap-2 mb-1">
         <div className="text-[10px] tracking-wide uppercase text-gray-400">{message.role}</div>
         {isTool && (
@@ -28,7 +30,9 @@ export default function ChatMessageView({ message }: { message: ChatMessage }) {
       </div>
       {isTool ? (
         expanded ? (
-          <pre className="text-xs text-gray-300 whitespace-pre-wrap break-words">{message.content}</pre>
+          <pre className="text-xs text-gray-300 whitespace-pre-wrap break-words">
+            {message.content}
+          </pre>
         ) : (
           <></>
         )
@@ -38,5 +42,3 @@ export default function ChatMessageView({ message }: { message: ChatMessage }) {
     </div>
   );
 }
-
-

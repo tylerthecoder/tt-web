@@ -93,9 +93,7 @@ const Home = () => {
           <div className="flex justify-center z-0">
             <CrazyImage src={headshotPic} alt="Tyler's headshot" width={225} height={337} />
           </div>
-          <div className="w-full">
-            {!!currentSong && <NowPlaying currentSong={currentSong} />}
-          </div>
+          <div className="w-full">{!!currentSong && <NowPlaying currentSong={currentSong} />}</div>
           <div className="pt-3 w-full">
             <HomButton
               text="Resume"
@@ -172,9 +170,7 @@ const Home = () => {
                   All living creatures capable of experiencing suffering deserve to be treated with
                   moral consideration.
                 </li>
-                <li>
-                  Things used to be worse, they are better now, and they could be even better
-                </li>
+                <li>Things used to be worse, they are better now, and they could be even better</li>
               </ul>
 
               <h2> Goals </h2>

@@ -19,12 +19,16 @@ export default function DailyPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const currentNote = selectedNote || dailyNoteQuery.data;
-  const currentIndex = selectedIndex ?? (allDailyNotesMetadata.data?.findIndex((meta) => meta.id === currentNote?.id) ?? -1);
+  const currentIndex =
+    selectedIndex ??
+    allDailyNotesMetadata.data?.findIndex((meta) => meta.id === currentNote?.id) ??
+    -1;
 
   const isPrevDisabled =
-    isPending || !allDailyNotesMetadata.data || currentIndex >= allDailyNotesMetadata.data.length - 1;
+    isPending ||
+    !allDailyNotesMetadata.data ||
+    currentIndex >= allDailyNotesMetadata.data.length - 1;
   const isNextDisabled = isPending || currentIndex <= 0;
-
 
   const fetchAndSetNote = useCallback(
     (noteId: string) => {
@@ -55,7 +59,11 @@ export default function DailyPage() {
   const handleNavigate = (direction: 'prev' | 'next') => {
     if (currentIndex === -1) return;
     const targetIndex = direction === 'prev' ? currentIndex + 1 : currentIndex - 1;
-    if (allDailyNotesMetadata.data && targetIndex >= 0 && targetIndex < allDailyNotesMetadata.data.length) {
+    if (
+      allDailyNotesMetadata.data &&
+      targetIndex >= 0 &&
+      targetIndex < allDailyNotesMetadata.data.length
+    ) {
       const targetNoteId = allDailyNotesMetadata.data[targetIndex].id;
       fetchAndSetNote(targetNoteId);
     }
@@ -170,7 +178,11 @@ export default function DailyPage() {
             >
               <FaBars className="text-xl" />
             </button>
-            {isPending || dailyNoteQuery.isLoading ? <FaSpinner className="animate-spin text-4xl" /> : 'Select a note'}
+            {isPending || dailyNoteQuery.isLoading ? (
+              <FaSpinner className="animate-spin text-4xl" />
+            ) : (
+              'Select a note'
+            )}
           </div>
         )}
       </div>

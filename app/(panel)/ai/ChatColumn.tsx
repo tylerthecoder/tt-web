@@ -5,7 +5,13 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import { useNoteMetadata } from '@/(panel)/hooks';
 
-import { approveTool, continueAfterApprovals, getPendingApprovals, rejectTool, sendUserMessage } from './actions';
+import {
+  approveTool,
+  continueAfterApprovals,
+  getPendingApprovals,
+  rejectTool,
+  sendUserMessage,
+} from './actions';
 import ChatMessageView from './ChatMessage';
 
 type ChatMessage = {
@@ -186,9 +192,22 @@ export default function ChatColumn({ chat }: { chat: Chat }) {
   );
 }
 
-function ApprovalItem({ a, onApprove, onReject, isApproving, isRejecting }: { a: ApprovalPreview; onApprove: () => void; onReject: () => void; isApproving?: boolean; isRejecting?: boolean }) {
+function ApprovalItem({
+  a,
+  onApprove,
+  onReject,
+  isApproving,
+  isRejecting,
+}: {
+  a: ApprovalPreview;
+  onApprove: () => void;
+  onReject: () => void;
+  isApproving?: boolean;
+  isRejecting?: boolean;
+}) {
   const isUpdateNote = a.name === 'update_note';
-  const noteIdParam = isUpdateNote && typeof a.args?.noteId === 'string' ? (a.args.noteId as string) : '';
+  const noteIdParam =
+    isUpdateNote && typeof a.args?.noteId === 'string' ? (a.args.noteId as string) : '';
   const { data: noteMeta, isLoading: loading } = useNoteMetadata(noteIdParam);
   const [viewJson, setViewJson] = useState(false);
 
@@ -200,7 +219,9 @@ function ApprovalItem({ a, onApprove, onReject, isApproving, isRejecting }: { a:
 
   const renderUpdateNote = () => {
     const currentTags: string[] = (noteMeta?.tags as string[]) || [];
-    const proposedTags: string[] | null = Array.isArray(a.args?.tags) ? (a.args.tags as string[]) : null;
+    const proposedTags: string[] | null = Array.isArray(a.args?.tags)
+      ? (a.args.tags as string[])
+      : null;
     const currentSet = new Set(currentTags);
     let toAdd: string[] = [];
     let toRemove: string[] = [];
@@ -216,7 +237,9 @@ function ApprovalItem({ a, onApprove, onReject, isApproving, isRejecting }: { a:
 
     if (viewJson) {
       return (
-        <pre className="text-xs text-gray-300 whitespace-pre-wrap break-words">{JSON.stringify({ name: a.name, args: a.args }, null, 2)}</pre>
+        <pre className="text-xs text-gray-300 whitespace-pre-wrap break-words">
+          {JSON.stringify({ name: a.name, args: a.args }, null, 2)}
+        </pre>
       );
     }
 
@@ -228,7 +251,9 @@ function ApprovalItem({ a, onApprove, onReject, isApproving, isRejecting }: { a:
       <div className="text-sm text-gray-100">
         <div>
           <span>Update </span>
-          <Link href={noteHref} className="text-blue-300 hover:text-blue-200 underline">{noteTitle}</Link>
+          <Link href={noteHref} className="text-blue-300 hover:text-blue-200 underline">
+            {noteTitle}
+          </Link>
         </div>
         {typeof nextTitle === 'string' && nextTitle !== currentTitle && (
           <div className="mt-1 text-xs text-gray-300">
@@ -269,9 +294,7 @@ function ApprovalItem({ a, onApprove, onReject, isApproving, isRejecting }: { a:
           const dateChanged = typeof nextDate === 'string' && nextDate !== currentDate;
           const tagsChanged = proposedTags !== null && (toAdd.length > 0 || toRemove.length > 0);
           return !titleChanged && !dateChanged && !tagsChanged;
-        })() && (
-            <div className="mt-1 text-xs text-gray-400">No changes</div>
-          )}
+        })() && <div className="mt-1 text-xs text-gray-400">No changes</div>}
       </div>
     );
   };
@@ -279,15 +302,15 @@ function ApprovalItem({ a, onApprove, onReject, isApproving, isRejecting }: { a:
   return (
     <div className="border border-white/10 rounded p-2 bg-black/20">
       <div className="flex items-center gap-2">
-        {!isUpdateNote && (
-          <div className="text-sm font-medium text-gray-100">{a.name}</div>
-        )}
+        {!isUpdateNote && <div className="text-sm font-medium text-gray-100">{a.name}</div>}
       </div>
 
       {isUpdateNote ? (
         <div className="mt-1">{renderUpdateNote()}</div>
       ) : (
-        <pre className="mt-1 text-xs text-gray-300 whitespace-pre-wrap break-words">{JSON.stringify(a.args, null, 2)}</pre>
+        <pre className="mt-1 text-xs text-gray-300 whitespace-pre-wrap break-words">
+          {JSON.stringify(a.args, null, 2)}
+        </pre>
       )}
 
       <div className="mt-2 flex gap-2 items-center">
@@ -318,5 +341,3 @@ function ApprovalItem({ a, onApprove, onReject, isApproving, isRejecting }: { a:
     </div>
   );
 }
-
-

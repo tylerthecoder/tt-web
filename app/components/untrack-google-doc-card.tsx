@@ -64,10 +64,11 @@ export function UntrackedGoogleDocCard({ doc, layout = 'grid' }: UntrackedGoogle
 
   const syncButton = (
     <button
-      className={`py-1 px-3 rounded text-sm flex items-center border ${isTracking
+      className={`py-1 px-3 rounded text-sm flex items-center border ${
+        isTracking
           ? 'text-gray-400 border-gray-600 hover:bg-gray-800'
           : 'text-white border-blue-600 hover:bg-blue-900'
-        }`}
+      }`}
       onClick={handleSync}
       disabled={syncing || isTracking}
     >
@@ -120,10 +121,13 @@ export function UntrackedGoogleDocCard({ doc, layout = 'grid' }: UntrackedGoogle
         }
         accentClassName={'border-red-500'}
       />
-      <JsonModal open={showJson} onClose={() => setShowJson(false)} title="Google Doc Metadata" data={metadata} />
-      {error && (
-        <div className="text-sm text-red-500 mt-2">{error}</div>
-      )}
+      <JsonModal
+        open={showJson}
+        onClose={() => setShowJson(false)}
+        title="Google Doc Metadata"
+        data={metadata}
+      />
+      {error && <div className="text-sm text-red-500 mt-2">{error}</div>}
     </>
   );
 }

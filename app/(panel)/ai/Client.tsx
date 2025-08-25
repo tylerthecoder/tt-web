@@ -6,13 +6,18 @@ import { useEffect, useMemo, useState, useTransition } from 'react';
 import { createChat, getChat, listChats } from './actions';
 import ChatColumn from './ChatColumn';
 
-
 type Chat = {
   id: string;
   title?: string;
   createdAt: string;
   updatedAt: string;
-  messages: Array<{ id: string; role: 'user' | 'assistant' | 'tool' | 'system'; content: string; createdAt: string; metadata?: Record<string, unknown> }>;
+  messages: Array<{
+    id: string;
+    role: 'user' | 'assistant' | 'tool' | 'system';
+    content: string;
+    createdAt: string;
+    metadata?: Record<string, unknown>;
+  }>;
   state?: unknown;
 };
 
@@ -30,11 +35,15 @@ export default function Client({
   const [isPending, startTransition] = useTransition();
 
   // Stable date formatter to avoid hydration mismatches between server/client
-  const updatedAtFormatter = useMemo(() => new Intl.DateTimeFormat('en-US', {
-    dateStyle: 'short',
-    timeStyle: 'medium',
-    timeZone: 'UTC',
-  }), []);
+  const updatedAtFormatter = useMemo(
+    () =>
+      new Intl.DateTimeFormat('en-US', {
+        dateStyle: 'short',
+        timeStyle: 'medium',
+        timeZone: 'UTC',
+      }),
+    [],
+  );
 
   const onNewChat = () => {
     startTransition(async () => {
@@ -90,4 +99,3 @@ export default function Client({
     </div>
   );
 }
-

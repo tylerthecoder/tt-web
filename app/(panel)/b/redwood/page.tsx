@@ -6,10 +6,7 @@ export default function MenteesPage() {
   return (
     <div className="p-4">
       <h1 className="text-3xl font-semibold mb-4 text-white text-center">Redwood</h1>
-      <ListView
-        listId="68aa840cd3cabb442c62ac05"
-        showTitle={false}
-      />
+      <ListView listId="68aa840cd3cabb442c62ac05" showTitle={false} />
       <hr className="my-4" />
 
       <h1 className="text-xl font-semibold mb-4 text-white text-center">Main Docs</h1>
@@ -20,7 +17,6 @@ export default function MenteesPage() {
       </div>
 
       <hr className="my-4" />
-
 
       <h1 className="text-xl font-semibold mb-4 text-white text-center">Mentees</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

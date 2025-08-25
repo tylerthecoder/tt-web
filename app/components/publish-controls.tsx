@@ -53,8 +53,11 @@ export function PublishControls({ note, className = '' }: PublishControlsProps) 
       <button
         onClick={togglePublish}
         disabled={isPending}
-        className={`text-xs underline disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 ${isPublished ? 'text-yellow-400 hover:text-yellow-300' : 'text-blue-400 hover:text-blue-300'
-          }`}
+        className={`text-xs underline disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 ${
+          isPublished
+            ? 'text-yellow-400 hover:text-yellow-300'
+            : 'text-blue-400 hover:text-blue-300'
+        }`}
         title={isPublished ? 'Unpublish this note' : 'Publish this note'}
       >
         {isPending ? (
@@ -75,5 +78,3 @@ export function PublishControls({ note, className = '' }: PublishControlsProps) 
     </div>
   );
 }
-
-

@@ -152,9 +152,7 @@ export function ListView({
         const updated: List = {
           ...previousList,
           items: previousList.items.map((it) =>
-            it.id === itemId
-              ? { ...it, archived: true, updatedAt: new Date().toISOString() }
-              : it,
+            it.id === itemId ? { ...it, archived: true, updatedAt: new Date().toISOString() } : it,
           ),
           updatedAt: new Date().toISOString(),
         };
@@ -181,9 +179,7 @@ export function ListView({
         const updated: List = {
           ...previousList,
           items: previousList.items.map((it) =>
-            it.id === itemId
-              ? { ...it, archived: false, updatedAt: new Date().toISOString() }
-              : it,
+            it.id === itemId ? { ...it, archived: false, updatedAt: new Date().toISOString() } : it,
           ),
           updatedAt: new Date().toISOString(),
         };
@@ -212,13 +208,13 @@ export function ListView({
     try {
       const val = localStorage.getItem('tt-hide-completed-archived');
       if (val !== null) setHideCompletedArchived(val === '1');
-    } catch { }
+    } catch {}
   }, []);
 
   React.useEffect(() => {
     try {
       localStorage.setItem('tt-hide-completed-archived', hideCompletedArchived ? '1' : '0');
-    } catch { }
+    } catch {}
   }, [hideCompletedArchived]);
 
   const addItem = (content: string) => {
@@ -367,7 +363,12 @@ export function ListView({
         </div>
       )}
 
-      <NoteModal noteId={openNoteId} onClose={() => setOpenNoteId(null)} hideTitle title="List Item Note" />
+      <NoteModal
+        noteId={openNoteId}
+        onClose={() => setOpenNoteId(null)}
+        hideTitle
+        title="List Item Note"
+      />
     </div>
   );
 }
@@ -428,7 +429,10 @@ function ItemRow({
             </button>
           )}
           {item.noteId && (
-            <button onClick={() => onOpenNote(item.noteId!)} className="text-blue-500 hover:text-blue-400">
+            <button
+              onClick={() => onOpenNote(item.noteId!)}
+              className="text-blue-500 hover:text-blue-400"
+            >
               Open Note
             </button>
           )}

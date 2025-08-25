@@ -116,6 +116,15 @@ export async function updateNoteContent(noteId: string, content: string) {
   await tt.notes.updateNote(noteId, { content });
 }
 
+export async function updateNoteMetadata(
+  noteId: string,
+  updates: { title?: string; date?: string; tags?: string[] },
+) {
+  await requireAuth();
+  const tt = await getTT();
+  await tt.notes.updateNote(noteId, updates as any);
+}
+
 export async function deleteTodo(weekId: string, todoId: string) {
   await requireAuth();
 

@@ -6,5 +6,3 @@ export default async function TimeTrackerPage() {
   await requireAuth();
   return <Client />;
 }
-
-

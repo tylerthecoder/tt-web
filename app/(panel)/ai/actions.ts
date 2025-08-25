@@ -90,8 +90,11 @@ function validateToolArgs(name: ToolName, args: Record<string, any>) {
 // Persist and retrieve pending approvals in chat.state
 function getPendingFromState(chat: Chat): ApprovalPreview[] {
   const state = (chat.state ?? {}) as any;
-  const pending: Array<{ name: ToolName; args: Record<string, any> }> =
-    Array.isArray(state?.pendingTools) ? state.pendingTools : [];
+  const pending: Array<{ name: ToolName; args: Record<string, any> }> = Array.isArray(
+    state?.pendingTools,
+  )
+    ? state.pendingTools
+    : [];
   return pending.map((t, index) => ({ index, name: t.name, args: t.args }));
 }
 
@@ -200,7 +203,12 @@ async function executeTool(chatId: string, tool: ApprovalPreview) {
       return tt.chats.appendMessage(chatId, { role: 'tool', content });
     }
     case 'update_note': {
-      const args = validateToolArgs('update_note', tool.args) as { noteId: string; title?: string; date?: string; tags?: string[] };
+      const args = validateToolArgs('update_note', tool.args) as {
+        noteId: string;
+        title?: string;
+        date?: string;
+        tags?: string[];
+      };
       const update: any = {};
       if (typeof args.title === 'string') update.title = args.title;
       if (typeof args.date === 'string') update.date = args.date;
@@ -264,7 +272,10 @@ async function continueAfterTools(chatId: string) {
 
   if (parsed.type === 'assistant') {
     const contentOut = typeof parsed.content === 'string' ? parsed.content : '';
-    const updated = await tt.chats.appendMessage(chatId, { role: 'assistant', content: contentOut });
+    const updated = await tt.chats.appendMessage(chatId, {
+      role: 'assistant',
+      content: contentOut,
+    });
     await clearState(chatId);
     return { chat: updated, done: true } as const;
   } else {
@@ -294,7 +305,11 @@ export async function approveTool(
   // Remove the approved item from pending and, if any remain, do NOT continue yet
   const remainingRaw = pending.filter((_, idx) => idx !== approvalIndex);
   if (remainingRaw.length > 0) {
-    const remaining: ApprovalPreview[] = remainingRaw.map((t, idx) => ({ index: idx, name: t.name, args: t.args }));
+    const remaining: ApprovalPreview[] = remainingRaw.map((t, idx) => ({
+      index: idx,
+      name: t.name,
+      args: t.args,
+    }));
     await setPendingState(chatId, remaining);
     return { done: false, approvals: remaining };
   }
@@ -325,7 +340,11 @@ export async function rejectTool(
   // Remove the rejected item; if any approvals remain, do NOT continue yet
   const remainingRaw = pending.filter((_, idx) => idx !== approvalIndex);
   if (remainingRaw.length > 0) {
-    const remaining: ApprovalPreview[] = remainingRaw.map((t, idx) => ({ index: idx, name: t.name, args: t.args }));
+    const remaining: ApprovalPreview[] = remainingRaw.map((t, idx) => ({
+      index: idx,
+      name: t.name,
+      args: t.args,
+    }));
     await setPendingState(chatId, remaining);
     return { done: false, approvals: remaining };
   }
@@ -345,5 +364,3 @@ export async function continueAfterApprovals(
   }
   return { done: false, approvals: (result as any).approvals } as any;
 }
-
-

@@ -3,7 +3,16 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo } from 'react';
-import { FaCalendarDay, FaClock, FaFileAlt, FaList, FaListAlt, FaRobot, FaStickyNote, FaTree } from 'react-icons/fa';
+import {
+  FaCalendarDay,
+  FaClock,
+  FaFileAlt,
+  FaList,
+  FaListAlt,
+  FaRobot,
+  FaStickyNote,
+  FaTree,
+} from 'react-icons/fa';
 
 interface Tab {
   id: string;
@@ -15,14 +24,70 @@ interface Tab {
 }
 
 const tabs: Tab[] = [
-  { id: 'daily', label: 'Daily', icon: <FaCalendarDay />, href: '/daily', hotkey: 'd', isActive: (pathname) => pathname.startsWith('/daily') },
-  { id: 'todos', label: 'Todos', icon: <FaListAlt />, href: '/todos', hotkey: 't', isActive: (pathname) => pathname.startsWith('/todos') },
-  { id: 'lists', label: 'Lists', icon: <FaList />, href: '/lists', hotkey: 'l', isActive: (pathname) => pathname.startsWith('/lists') || pathname.startsWith('/list/') },
-  { id: 'jots', label: 'Jots', icon: <FaStickyNote />, href: '/jots', hotkey: 'j', isActive: (pathname) => pathname.startsWith('/jots') },
-  { id: 'notes', label: 'Notes', icon: <FaFileAlt />, href: '/notes', hotkey: 'n', isActive: (pathname) => pathname.startsWith('/notes') || pathname.startsWith('/note/') },
-  { id: 'time', label: 'Time', icon: <FaClock />, href: '/time', hotkey: 'm', isActive: (pathname) => pathname.startsWith('/time') },
-  { id: 'redwood', label: 'Redwood', icon: <FaTree />, href: '/b/redwood', hotkey: 'r', isActive: (pathname) => pathname.startsWith('/b/redwood') },
-  { id: 'ai', label: 'AI Chat', icon: <FaRobot />, href: '/ai', hotkey: 'a', isActive: (pathname) => pathname.startsWith('/ai') },
+  {
+    id: 'daily',
+    label: 'Daily',
+    icon: <FaCalendarDay />,
+    href: '/daily',
+    hotkey: 'd',
+    isActive: (pathname) => pathname.startsWith('/daily'),
+  },
+  {
+    id: 'todos',
+    label: 'Todos',
+    icon: <FaListAlt />,
+    href: '/todos',
+    hotkey: 't',
+    isActive: (pathname) => pathname.startsWith('/todos'),
+  },
+  {
+    id: 'lists',
+    label: 'Lists',
+    icon: <FaList />,
+    href: '/lists',
+    hotkey: 'l',
+    isActive: (pathname) => pathname.startsWith('/lists') || pathname.startsWith('/list/'),
+  },
+  {
+    id: 'jots',
+    label: 'Jots',
+    icon: <FaStickyNote />,
+    href: '/jots',
+    hotkey: 'j',
+    isActive: (pathname) => pathname.startsWith('/jots'),
+  },
+  {
+    id: 'notes',
+    label: 'Notes',
+    icon: <FaFileAlt />,
+    href: '/notes',
+    hotkey: 'n',
+    isActive: (pathname) => pathname.startsWith('/notes') || pathname.startsWith('/note/'),
+  },
+  {
+    id: 'time',
+    label: 'Time',
+    icon: <FaClock />,
+    href: '/time',
+    hotkey: 'm',
+    isActive: (pathname) => pathname.startsWith('/time'),
+  },
+  {
+    id: 'redwood',
+    label: 'Redwood',
+    icon: <FaTree />,
+    href: '/b/redwood',
+    hotkey: 'r',
+    isActive: (pathname) => pathname.startsWith('/b/redwood'),
+  },
+  {
+    id: 'ai',
+    label: 'AI Chat',
+    icon: <FaRobot />,
+    href: '/ai',
+    hotkey: 'a',
+    isActive: (pathname) => pathname.startsWith('/ai'),
+  },
 ];
 
 type TabId = Tab['id'];
@@ -69,16 +134,19 @@ export function TabsNav() {
             key={tab.id}
             href={tab.href}
             className={`flex items-center gap-2 px-3 md:px-4 py-3 text-sm font-medium border-b-2 transition-colors duration-150 ease-in-out whitespace-nowrap \
-                            ${activeId === tab.id
-                ? 'border-blue-500 text-blue-400'
-                : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-500'
-              }
+                            ${
+                              activeId === tab.id
+                                ? 'border-blue-500 text-blue-400'
+                                : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-500'
+                            }
                         `}
             prefetch
           >
             <span className="hidden md:inline">{tab.icon}</span>
             <span className="md:hidden">{tab.label.split(' ')[0]}</span>
-            <span className="hidden md:inline">{tab.label} {tab.hotkey ? `(${tab.hotkey})` : ''}</span>
+            <span className="hidden md:inline">
+              {tab.label} {tab.hotkey ? `(${tab.hotkey})` : ''}
+            </span>
           </Link>
         ))}
       </div>

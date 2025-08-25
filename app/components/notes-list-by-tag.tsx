@@ -37,9 +37,12 @@ export default function NotesListByTag({ tag, title }: NotesListByTagProps) {
         </ul>
       )}
 
-      <NoteModal noteId={activeNoteId} onClose={() => setActiveNoteId(null)} hideTitle title="Note" />
+      <NoteModal
+        noteId={activeNoteId}
+        onClose={() => setActiveNoteId(null)}
+        hideTitle
+        title="Note"
+      />
     </div>
   );
 }
-
-
