@@ -50,7 +50,7 @@ export function BaseCard({
           </div>
           {headerExtra}
         </div>
-        <div className="p-4 flex-grow">{body}</div>
+        {body && <div className="p-4 flex-grow">{body}</div>}
         <div className="p-4 bg-gray-950 flex justify-end gap-2">{footerButtons}</div>
       </div>
     );
@@ -61,9 +61,12 @@ export function BaseCard({
       className={`bg-gray-800 rounded-lg shadow-md overflow-hidden flex flex-col md:flex-row ${accentClassName ? `border-l-4 ${accentClassName}` : ''}`}
     >
       <div className="p-4 md:w-1/3 border-b md:border-b-0 md:border-r border-gray-700">
-        <div className="flex items-center mb-2">
-          {titleIcon}
-          <h3 className="text-xl font-semibold text-red-400">{title}</h3>
+        <div className="flex items-start mb-2 justify-between gap-3">
+          <div className="flex items-center">
+            {titleIcon}
+            <h3 className="text-xl font-semibold text-red-400">{title}</h3>
+          </div>
+          {headerExtra}
         </div>
         {lastModified && (
           <p className="text-sm text-gray-400">
@@ -78,8 +81,8 @@ export function BaseCard({
       </div>
 
       <div className="p-4 flex-grow flex flex-col">
-        {body}
-        <div className="mt-4 flex justify-end gap-2">{footerButtons}</div>
+        {body && <div>{body}</div>}
+        <div className={`${body ? 'mt-4' : ''} flex justify-end gap-2`}>{footerButtons}</div>
       </div>
     </div>
   );

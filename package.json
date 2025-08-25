@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@ai-sdk/openai": "^2.0.19",
     "@milkdown/crepe": "^7.15.3",
     "@milkdown/ctx": "^7.15.3",
     "@milkdown/react": "^7.15.3",
@@ -7,6 +8,7 @@
     "@tailwindcss/typography": "^0.5.16",
     "@tanstack/react-query": "^5.51.1",
     "@vercel/analytics": "^1.5.0",
+    "ai": "^5.0.22",
     "autoprefixer": "^10.4.21",
     "bcrypt": "^5.1.1",
     "caniuse-lite": "^1.0.30001733",
@@ -39,8 +41,9 @@
     "remark-rehype": "^10.1.0",
     "sharp": "^0.30.7",
     "tailwindcss": "^3.4.17",
-    "tt-services": "github:tylerthecoder/tt-services#fb12236de94b3b95ac76ba9bd4a1928030b26b19",
-    "turbo": "^1.13.4"
+    "tt-services": "github:tylerthecoder/tt-services#f0f3a1fa04ba094427486dff8baea65ef02ae7aa",
+    "turbo": "^1.13.4",
+    "zod": "^3.25.67"
   },
   "devDependencies": {
     "@openai/agents": "^0.0.15",

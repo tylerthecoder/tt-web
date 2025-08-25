@@ -15,7 +15,9 @@ import {
   getAllTags,
   getCurrentWeek,
   getListById,
+  getNoteMetadataById,
   getNotesAndUntrackedGoogleDocs,
+  getNotesMetadataByTag,
   getTodayDailyNote,
   pullContentFromGoogleDoc,
   updateNoteContent,
@@ -106,6 +108,15 @@ export function useNotesIndex() {
   });
 }
 
+export function useNotesByTag(tag: string) {
+  return useQuery({
+    queryKey: ['notes-by-tag', tag],
+    queryFn: () => getNotesMetadataByTag(tag),
+    enabled: !!tag,
+    staleTime: 60_000,
+  });
+}
+
 export function useList(listId: string) {
   return useQuery({
     queryKey: ['list', listId],
@@ -134,6 +145,15 @@ export const useNote = (noteId: string) => {
 
   return { note, loading };
 };
+
+export function useNoteMetadata(noteId: string) {
+  return useQuery({
+    queryKey: ['note-metadata', noteId],
+    queryFn: () => getNoteMetadataById(noteId),
+    enabled: !!noteId,
+    staleTime: 60_000,
+  });
+}
 
 export const useUpdateNoteContent = (noteId: string, debounceMs: number = 1000) => {
   const [isSyncing, setIsSyncing] = useState(false);

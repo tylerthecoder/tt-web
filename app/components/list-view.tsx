@@ -6,15 +6,17 @@ import React, { useMemo, useState } from 'react';
 import { FaArrowLeft } from 'react-icons/fa';
 import type { List, ListItem as ListItemType } from 'tt-services';
 
-import { MilkdownEditor } from '@/components/milkdown-note-editor';
+import { NoteModal } from '@/components/note-modal';
 
 import {
   addItemToList,
   addNoteToItem,
+  archiveListItem,
   createNote,
   deleteListItem,
   getListById,
   toggleItemCheck,
+  unarchiveListItem,
 } from '../(panel)/actions';
 
 interface ListViewProps {
@@ -31,6 +33,7 @@ export function ListView({
   backButtonUrl = '/',
 }: ListViewProps) {
   const queryClient = useQueryClient();
+  const [openNoteId, setOpenNoteId] = useState<string | null>(null);
 
   // Unified list hook colocated in this file
   const { data, isLoading, error } = useQuery({
@@ -50,6 +53,7 @@ export function ListView({
         id: `temp-${Date.now()}`,
         content: newContent,
         checked: false,
+        archived: false,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         isOptimistic: true,
@@ -139,10 +143,79 @@ export function ListView({
     },
   });
 
+  const archiveMutation = useMutation({
+    mutationFn: async (itemId: string) => archiveListItem(listId, itemId),
+    onMutate: async (itemId: string) => {
+      await queryClient.cancelQueries({ queryKey: ['list', listId] });
+      const previousList = queryClient.getQueryData<List>(['list', listId]);
+      if (previousList) {
+        const updated: List = {
+          ...previousList,
+          items: previousList.items.map((it) =>
+            it.id === itemId ? { ...it, archived: true, updatedAt: new Date().toISOString() } : it,
+          ),
+          updatedAt: new Date().toISOString(),
+        };
+        queryClient.setQueryData(['list', listId], updated);
+      }
+      return { previousList } as { previousList: List | undefined };
+    },
+    onError: (_err, _id, context) => {
+      if (context?.previousList) {
+        queryClient.setQueryData(['list', listId], context.previousList);
+      }
+    },
+    onSettled: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['list', listId] });
+    },
+  });
+
+  const unarchiveMutation = useMutation({
+    mutationFn: async (itemId: string) => unarchiveListItem(listId, itemId),
+    onMutate: async (itemId: string) => {
+      await queryClient.cancelQueries({ queryKey: ['list', listId] });
+      const previousList = queryClient.getQueryData<List>(['list', listId]);
+      if (previousList) {
+        const updated: List = {
+          ...previousList,
+          items: previousList.items.map((it) =>
+            it.id === itemId ? { ...it, archived: false, updatedAt: new Date().toISOString() } : it,
+          ),
+          updatedAt: new Date().toISOString(),
+        };
+        queryClient.setQueryData(['list', listId], updated);
+      }
+      return { previousList } as { previousList: List | undefined };
+    },
+    onError: (_err, _id, context) => {
+      if (context?.previousList) {
+        queryClient.setQueryData(['list', listId], context.previousList);
+      }
+    },
+    onSettled: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['list', listId] });
+    },
+  });
+
   const list = data;
 
   const [newItemContent, setNewItemContent] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
+  const [hideCompletedArchived, setHideCompletedArchived] = useState<boolean>(true);
+  const [collapsedHidden, setCollapsedHidden] = useState<boolean>(true);
+
+  React.useEffect(() => {
+    try {
+      const val = localStorage.getItem('tt-hide-completed-archived');
+      if (val !== null) setHideCompletedArchived(val === '1');
+    } catch {}
+  }, []);
+
+  React.useEffect(() => {
+    try {
+      localStorage.setItem('tt-hide-completed-archived', hideCompletedArchived ? '1' : '0');
+    } catch {}
+  }, [hideCompletedArchived]);
 
   const addItem = (content: string) => {
     if (!content.trim()) return;
@@ -183,6 +256,17 @@ export function ListView({
           </Link>
         )}
         {showTitle && <h1 className="text-2xl font-bold">{list.name}</h1>}
+        <div className="ml-auto flex items-center gap-3">
+          <label className="flex items-center gap-2 text-sm text-gray-300">
+            <input
+              type="checkbox"
+              checked={hideCompletedArchived}
+              onChange={(e) => setHideCompletedArchived(e.target.checked)}
+              className="w-4 h-4"
+            />
+            Hide completed/archived
+          </label>
+        </div>
       </div>
 
       <div className="mt-4">
@@ -212,19 +296,65 @@ export function ListView({
         {formError && <p className="text-red-400 text-sm mt-2">{formError}</p>}
       </div>
 
-      <div className="mt-6 space-y-3">
-        {itemsWithFlags.map((item) => (
-          <ItemRow
-            key={item.id}
-            item={item}
-            listId={list.id}
-            onToggle={() => toggleItem(item.id)}
-            onDelete={() => removeItem(item.id)}
-            onCreateNote={() => addNoteMutation.mutate({ itemId: item.id, content: item.content })}
-            isCreatingNote={addNoteMutation.isPending}
-          />
-        ))}
-      </div>
+      {(() => {
+        const activeItems = itemsWithFlags.filter((it) => !it.checked && !it.archived);
+        const hiddenItems = itemsWithFlags.filter((it) => it.checked || it.archived);
+        const visibleList = hideCompletedArchived ? activeItems : [...activeItems, ...hiddenItems];
+        return (
+          <>
+            <div className="mt-6 space-y-3">
+              {visibleList.map((item) => (
+                <ItemRow
+                  key={item.id}
+                  item={item}
+                  listId={list.id}
+                  onToggle={() => toggleItem(item.id)}
+                  onDelete={() => removeItem(item.id)}
+                  onArchive={() => archiveMutation.mutate(item.id)}
+                  onUnarchive={() => unarchiveMutation.mutate(item.id)}
+                  isCreatingNote={addNoteMutation.isPending}
+                  onCreateNote={() =>
+                    addNoteMutation.mutate({ itemId: item.id, content: item.content })
+                  }
+                  onOpenNote={(nid) => setOpenNoteId(nid)}
+                />
+              ))}
+            </div>
+            {hideCompletedArchived && hiddenItems.length > 0 && (
+              <div className="mt-6">
+                <button
+                  onClick={() => setCollapsedHidden((v) => !v)}
+                  className="text-sm text-gray-300 hover:text-gray-100"
+                >
+                  {collapsedHidden
+                    ? `Show ${hiddenItems.length} completed/archived`
+                    : `Hide ${hiddenItems.length} completed/archived`}
+                </button>
+                {!collapsedHidden && (
+                  <div className="mt-3 space-y-3">
+                    {hiddenItems.map((item) => (
+                      <ItemRow
+                        key={item.id}
+                        item={item}
+                        listId={list.id}
+                        onToggle={() => toggleItem(item.id)}
+                        onDelete={() => removeItem(item.id)}
+                        onArchive={() => archiveMutation.mutate(item.id)}
+                        onUnarchive={() => unarchiveMutation.mutate(item.id)}
+                        isCreatingNote={addNoteMutation.isPending}
+                        onCreateNote={() =>
+                          addNoteMutation.mutate({ itemId: item.id, content: item.content })
+                        }
+                        onOpenNote={(nid) => setOpenNoteId(nid)}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </>
+        );
+      })()}
 
       {itemsWithFlags.length === 0 && (
         <div className="text-center py-12">
@@ -232,6 +362,13 @@ export function ListView({
           <p className="text-gray-500 text-sm mt-2">Add your first item above.</p>
         </div>
       )}
+
+      <NoteModal
+        noteId={openNoteId}
+        onClose={() => setOpenNoteId(null)}
+        hideTitle
+        title="List Item Note"
+      />
     </div>
   );
 }
@@ -243,6 +380,9 @@ function ItemRow({
   onDelete,
   onCreateNote,
   isCreatingNote,
+  onArchive,
+  onUnarchive,
+  onOpenNote,
 }: {
   item: ListItemType & { isOptimistic?: boolean };
   listId: string;
@@ -250,9 +390,10 @@ function ItemRow({
   onDelete: () => void;
   onCreateNote: () => void;
   isCreatingNote: boolean;
+  onArchive: () => void;
+  onUnarchive: () => void;
+  onOpenNote: (noteId: string) => void;
 }) {
-  const [isExpanded, setIsExpanded] = useState(false);
-
   return (
     <div className="bg-gray-800 p-4 rounded-lg">
       <div className="flex items-center gap-4">
@@ -266,6 +407,11 @@ function ItemRow({
         <span className={item.checked ? 'line-through text-gray-500' : 'text-white'}>
           {item.content}
         </span>
+        {item.archived && (
+          <span className="ml-2 text-xs text-yellow-400 border border-yellow-500/40 px-2 py-0.5 rounded">
+            Archived
+          </span>
+        )}
         {item.isOptimistic && (
           <span className="ml-2 text-gray-400 flex items-center gap-2">
             <span className="w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full animate-spin inline-block" />
@@ -284,10 +430,28 @@ function ItemRow({
           )}
           {item.noteId && (
             <button
-              onClick={() => setIsExpanded(!isExpanded)}
+              onClick={() => onOpenNote(item.noteId!)}
               className="text-blue-500 hover:text-blue-400"
             >
-              {isExpanded ? 'Hide Note' : 'Show Note'}
+              Open Note
+            </button>
+          )}
+          {!item.archived && (
+            <button
+              onClick={onArchive}
+              disabled={item.isOptimistic}
+              className="text-yellow-500 hover:text-yellow-400 disabled:text-gray-500 disabled:cursor-not-allowed"
+            >
+              Archive
+            </button>
+          )}
+          {item.archived && (
+            <button
+              onClick={onUnarchive}
+              disabled={item.isOptimistic}
+              className="text-green-500 hover:text-green-400 disabled:text-gray-500 disabled:cursor-not-allowed"
+            >
+              Unarchive
             </button>
           )}
           <button
@@ -299,11 +463,6 @@ function ItemRow({
           </button>
         </div>
       </div>
-      {isExpanded && item.noteId && (
-        <div className="mt-4 h-[300px]">
-          <MilkdownEditor noteId={item.noteId} />
-        </div>
-      )}
     </div>
   );
 }
