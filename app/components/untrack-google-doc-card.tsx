@@ -1,13 +1,14 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
-import { FaCheck, FaExternalLinkAlt, FaGoogle, FaSync } from 'react-icons/fa';
+import React, { useMemo, useState } from 'react';
+import { FaCheck, FaExternalLinkAlt, FaGoogle, FaInfoCircle, FaSync } from 'react-icons/fa';
 
 import { trackGoogleDoc } from '../google/docs/actions';
 type LayoutMode = 'grid' | 'list';
 import type { GoogleDriveFile } from '../types/google';
 import { BaseCard } from './base-card';
+import { JsonModal } from './json-modal';
 
 interface UntrackedGoogleDocCardProps {
   doc: GoogleDriveFile;
@@ -19,6 +20,8 @@ export function UntrackedGoogleDocCard({ doc, layout = 'grid' }: UntrackedGoogle
   const [syncing, setSyncing] = useState(false);
   const [isTracking, setIsTracking] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showJson, setShowJson] = useState(false);
+  const metadata = useMemo(() => doc, [doc]);
 
   const id = doc.id ?? '';
   const name = doc.name ?? '';
@@ -52,6 +55,7 @@ export function UntrackedGoogleDocCard({ doc, layout = 'grid' }: UntrackedGoogle
       className="py-1 px-3 border border-gray-600 rounded text-sm text-gray-300 hover:bg-gray-800 transition-colors flex items-center"
       onClick={() => webViewLink && window.open(webViewLink, '_blank')}
       disabled={!webViewLink}
+      title="Open Google Doc"
     >
       <FaExternalLinkAlt className="mr-1" size={12} />
       Open
@@ -60,11 +64,10 @@ export function UntrackedGoogleDocCard({ doc, layout = 'grid' }: UntrackedGoogle
 
   const syncButton = (
     <button
-      className={`py-1 px-3 rounded text-sm flex items-center border ${
-        isTracking
+      className={`py-1 px-3 rounded text-sm flex items-center border ${isTracking
           ? 'text-gray-400 border-gray-600 hover:bg-gray-800'
           : 'text-white border-blue-600 hover:bg-blue-900'
-      }`}
+        }`}
       onClick={handleSync}
       disabled={syncing || isTracking}
     >
@@ -87,37 +90,40 @@ export function UntrackedGoogleDocCard({ doc, layout = 'grid' }: UntrackedGoogle
     </button>
   );
 
-  const bodyContent = (
-    <>
-      {error && <p className="text-sm text-red-500 mb-2">{error}</p>}
-      <div className="flex items-center text-gray-300 text-sm mb-2">
-        <span className="px-2 py-1 bg-gray-700 rounded text-xs mr-2">Google Document</span>
-        <span className="text-gray-500">Not synced</span>
-      </div>
-      {webViewLink && (
-        <p className="text-gray-400 text-sm truncate mb-2">
-          <span className="text-gray-500">Link:</span> {webViewLink}
-        </p>
-      )}
-      <div className="mt-3 text-xs text-gray-500">Sync document to add tags</div>
-    </>
+  const headerExtra = (
+    <div className="flex items-center gap-2">
+      <span className="px-2 py-1 bg-gray-700 rounded text-xs">Google Doc</span>
+      <button
+        onClick={() => setShowJson(true)}
+        className="py-1 px-2 border border-gray-600 rounded text-xs text-gray-300 hover:bg-gray-800 transition-colors flex items-center"
+        title="View metadata JSON"
+      >
+        <FaInfoCircle className="mr-1" size={12} /> JSON
+      </button>
+    </div>
   );
 
   return (
-    <BaseCard
-      layout={layout}
-      title={name}
-      titleIcon={<FaGoogle className="text-red-400 mr-2" size={18} />}
-      createdAt={createdTime ?? undefined}
-      updatedAt={modifiedTime ?? undefined}
-      body={bodyContent}
-      footerButtons={
-        <>
-          {openButton}
-          {syncButton}
-        </>
-      }
-      accentClassName={'border-red-500'}
-    />
+    <>
+      <BaseCard
+        layout={layout}
+        title={name}
+        titleIcon={<FaGoogle className="text-red-400 mr-2" size={18} />}
+        createdAt={createdTime ?? undefined}
+        updatedAt={modifiedTime ?? undefined}
+        headerExtra={headerExtra}
+        footerButtons={
+          <>
+            {openButton}
+            {syncButton}
+          </>
+        }
+        accentClassName={'border-red-500'}
+      />
+      <JsonModal open={showJson} onClose={() => setShowJson(false)} title="Google Doc Metadata" data={metadata} />
+      {error && (
+        <div className="text-sm text-red-500 mt-2">{error}</div>
+      )}
+    </>
   );
 }

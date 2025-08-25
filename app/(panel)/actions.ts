@@ -72,6 +72,13 @@ export async function getNote(noteId: string) {
   return tt.notes.getNoteById(noteId);
 }
 
+export async function getNoteMetadataById(noteId: string) {
+  await requireAuth();
+
+  const tt = await getTT();
+  return tt.notes.getNoteMetadataById(noteId);
+}
+
 export async function getNoteContent(noteId: string) {
   await requireAuth();
 
@@ -249,6 +256,20 @@ export async function deleteListItem(listId: string, itemId: string) {
   revalidatePath(`/lists/${listId}`);
 }
 
+export async function archiveListItem(listId: string, itemId: string) {
+  await requireAuth();
+  const tt = await getTT();
+  await tt.lists.archiveItem(listId, itemId);
+  revalidatePath(`/lists/${listId}`);
+}
+
+export async function unarchiveListItem(listId: string, itemId: string) {
+  await requireAuth();
+  const tt = await getTT();
+  await tt.lists.unarchiveItem(listId, itemId);
+  revalidatePath(`/lists/${listId}`);
+}
+
 // Notes actions moved from (panel)/notes/actions.ts
 
 export async function deleteNote(noteId: string) {
@@ -306,6 +327,52 @@ export async function getAllTags() {
     console.error('Error fetching tags:', error);
     return { success: false, error: 'Failed to fetch tags', tags: [] };
   }
+}
+
+export async function getNotesMetadataByTag(tag: string) {
+  await requireAuth();
+  const tt = await getTT();
+  return tt.notes.getNotesMetadataByTag(tag);
+}
+
+// Time tracker actions
+export async function getTimeBlocksForDay(dateIso: string) {
+  await requireAuth();
+  const tt = await getTT();
+  return tt.timeTracker.getTimeBlocksForDay(dateIso);
+}
+
+export async function startTimeBlock(label: string, noteId?: string) {
+  await requireAuth();
+  const tt = await getTT();
+  const block = await tt.timeTracker.startTimeBlock(label, noteId);
+  revalidatePath('/time');
+  return block;
+}
+
+export async function endTimeBlock() {
+  await requireAuth();
+  const tt = await getTT();
+  const block = await tt.timeTracker.endTimeBlock();
+  revalidatePath('/time');
+  return block;
+}
+
+export async function getAllTimeBlocks() {
+  await requireAuth();
+  const tt = await getTT();
+  return tt.timeTracker.getAllTimeBlocks();
+}
+
+export async function updateTimeBlock(
+  blockId: string,
+  updates: { startTime?: string; endTime?: string | null; label?: string; noteId?: string | null },
+) {
+  await requireAuth();
+  const tt = await getTT();
+  const block = await tt.timeTracker.updateTimeBlock(blockId, updates);
+  revalidatePath('/time');
+  return block;
 }
 
 export async function pushNoteToGoogleDrive(

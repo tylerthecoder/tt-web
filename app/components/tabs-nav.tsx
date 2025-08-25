@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo } from 'react';
-import { FaCalendarDay, FaFileAlt, FaList, FaListAlt, FaStickyNote, FaTree } from 'react-icons/fa';
+import { FaCalendarDay, FaClock, FaFileAlt, FaList, FaListAlt, FaRobot, FaStickyNote, FaTree } from 'react-icons/fa';
 
 interface Tab {
   id: string;
@@ -20,7 +20,9 @@ const tabs: Tab[] = [
   { id: 'lists', label: 'Lists', icon: <FaList />, href: '/lists', hotkey: 'l', isActive: (pathname) => pathname.startsWith('/lists') || pathname.startsWith('/list/') },
   { id: 'jots', label: 'Jots', icon: <FaStickyNote />, href: '/jots', hotkey: 'j', isActive: (pathname) => pathname.startsWith('/jots') },
   { id: 'notes', label: 'Notes', icon: <FaFileAlt />, href: '/notes', hotkey: 'n', isActive: (pathname) => pathname.startsWith('/notes') || pathname.startsWith('/note/') },
+  { id: 'time', label: 'Time', icon: <FaClock />, href: '/time', hotkey: 'm', isActive: (pathname) => pathname.startsWith('/time') },
   { id: 'redwood', label: 'Redwood', icon: <FaTree />, href: '/b/redwood', hotkey: 'r', isActive: (pathname) => pathname.startsWith('/b/redwood') },
+  { id: 'ai', label: 'AI Chat', icon: <FaRobot />, href: '/ai', hotkey: 'a', isActive: (pathname) => pathname.startsWith('/ai') },
 ];
 
 type TabId = Tab['id'];

@@ -1,4 +1,5 @@
 import { ListView } from '@/components/list-view';
+import NotesListByTag from '@/components/notes-list-by-tag';
 import { UntrackedGoogleDocCardLoader } from '@/components/untrack-google-doc-card-loader';
 
 export default function MenteesPage() {
@@ -28,6 +29,10 @@ export default function MenteesPage() {
         <UntrackedGoogleDocCardLoader docId="1_Zxn6-7mE0hl70aoUeaxyCihuX1yX0VwvpTtyut9uNA" />
         <UntrackedGoogleDocCardLoader docId="1sc0o6Hrqi4AvJYjN64u3hIVMncrco05L_jrrujimrIQ" />
       </div>
+
+      <hr className="my-6" />
+
+      <NotesListByTag tag="redwood" title="Notes with tag: redwood" />
     </div>
   );
 }

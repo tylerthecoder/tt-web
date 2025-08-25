@@ -1,12 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import React from 'react';
-import { FaEdit, FaExternalLinkAlt, FaEye, FaFileAlt, FaGoogle } from 'react-icons/fa';
+import React, { useMemo, useState } from 'react';
+import { FaEdit, FaExternalLinkAlt, FaEye, FaFileAlt, FaGoogle, FaInfoCircle } from 'react-icons/fa';
 import { isGoogleNoteMetadata, NoteMetadata } from 'tt-services/src/client-index';
 type LayoutMode = 'grid' | 'list';
 import { BaseCard } from './base-card';
 import { DeleteNoteButton } from './delete-note-button';
+import { JsonModal } from './json-modal';
 import { NoteTagManager } from './note-tag-manager';
 
 interface NoteCardProps {
@@ -16,6 +17,8 @@ interface NoteCardProps {
 
 export function NoteCard({ note, layout = 'grid' }: NoteCardProps) {
   const isGoogle = isGoogleNoteMetadata(note);
+  const [showJson, setShowJson] = useState(false);
+  const metadata = useMemo(() => note, [note]);
 
   const footerButtons = (
     <>
@@ -48,28 +51,38 @@ export function NoteCard({ note, layout = 'grid' }: NoteCardProps) {
     </>
   );
 
-  const body = (
-    <>
-      <NoteTagManager note={note} className="mt-3" />
-    </>
+  const headerExtra = (
+    <div className="flex items-center gap-2">
+      <NoteTagManager note={note} />
+      <button
+        onClick={() => setShowJson(true)}
+        className="py-1 px-2 border border-gray-600 rounded text-xs text-gray-300 hover:bg-gray-800 transition-colors flex items-center"
+        title="View metadata JSON"
+      >
+        <FaInfoCircle className="mr-1" size={12} /> JSON
+      </button>
+    </div>
   );
 
   return (
-    <BaseCard
-      layout={layout}
-      title={note.title}
-      titleIcon={
-        isGoogle ? (
-          <FaGoogle className="text-red-400 mr-2" size={18} />
-        ) : (
-          <FaFileAlt className="text-red-400 mr-2" size={18} />
-        )
-      }
-      createdAt={note.createdAt}
-      updatedAt={note.updatedAt}
-      body={body}
-      footerButtons={footerButtons}
-      accentClassName={isGoogle ? 'border-red-500' : undefined}
-    />
+    <>
+      <BaseCard
+        layout={layout}
+        title={note.title}
+        titleIcon={
+          isGoogle ? (
+            <FaGoogle className="text-red-400 mr-2" size={18} />
+          ) : (
+            <FaFileAlt className="text-red-400 mr-2" size={18} />
+          )
+        }
+        createdAt={note.createdAt}
+        updatedAt={note.updatedAt}
+        headerExtra={headerExtra}
+        footerButtons={footerButtons}
+        accentClassName={isGoogle ? 'border-red-500' : undefined}
+      />
+      <JsonModal open={showJson} onClose={() => setShowJson(false)} title="Note Metadata" data={metadata} />
+    </>
   );
 }
