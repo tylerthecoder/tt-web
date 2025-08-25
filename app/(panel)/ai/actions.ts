@@ -19,7 +19,7 @@ const TOOL_NAMES = [
   'get_note',
   'get_all_notes_metadata',
   'get_notes_by_ids',
-  'update_note_tags',
+  'update_note',
 ] as const;
 type ToolName = (typeof TOOL_NAMES)[number];
 
@@ -28,8 +28,13 @@ const ToolArgsByName: Record<ToolName, z.ZodTypeAny> = {
   get_note: z.object({ id: z.string() }).strict(),
   get_all_notes_metadata: z.object({}).strict(),
   get_notes_by_ids: z.object({ ids: z.array(z.string()).min(1) }).strict(),
-  update_note_tags: z
-    .object({ noteId: z.string(), tags: z.array(z.string()) })
+  update_note: z
+    .object({
+      noteId: z.string(),
+      title: z.string().optional(),
+      date: z.string().optional(),
+      tags: z.array(z.string()).optional(),
+    })
     .strict(),
 };
 
@@ -58,7 +63,7 @@ function buildSystemPrompt() {
     '- get_note(id: string): Get a note by id.',
     '- get_all_notes_metadata(): Get all notes metadata.',
     '- get_notes_by_ids(ids: string[]): Get multiple notes by ids.',
-    '- update_note_tags(noteId: string, tags: string[]): Update a note\'s tags (destructive).',
+    '- update_note(noteId: string, title?, date?, tags?): Update note metadata (destructive).',
     'Policy:',
     '- If you can answer directly from prior messages, return {"type":"assistant","content":"..."}.',
     '- If you need external data or to change notes, return {"type":"tool_proposals","tools":[{name, args}, ...]}.',
@@ -194,9 +199,13 @@ async function executeTool(chatId: string, tool: ApprovalPreview) {
       const content = JSON.stringify({ tool: tool.name, args, result: notes });
       return tt.chats.appendMessage(chatId, { role: 'tool', content });
     }
-    case 'update_note_tags': {
-      const args = validateToolArgs('update_note_tags', tool.args) as { noteId: string; tags: string[] };
-      const note = await tt.notes.updateNote(args.noteId, { tags: args.tags });
+    case 'update_note': {
+      const args = validateToolArgs('update_note', tool.args) as { noteId: string; title?: string; date?: string; tags?: string[] };
+      const update: any = {};
+      if (typeof args.title === 'string') update.title = args.title;
+      if (typeof args.date === 'string') update.date = args.date;
+      if (Array.isArray(args.tags)) update.tags = args.tags;
+      const note = await tt.notes.updateNote(args.noteId, update);
       const content = JSON.stringify({ tool: tool.name, args, result: note });
       return tt.chats.appendMessage(chatId, { role: 'tool', content });
     }
@@ -290,13 +299,9 @@ export async function approveTool(
     return { done: false, approvals: remaining };
   }
 
-  // No approvals left; now continue the conversation
-  const result = await continueAfterTools(chatId);
-  if (result.done) {
-    return { chat: result.chat, done: true };
-  } else {
-    return { done: false, approvals: result.approvals };
-  }
+  // No approvals left; clear pending state and let client decide when to continue
+  await clearState(chatId);
+  return { done: false, approvals: [] };
 }
 
 export async function rejectTool(
@@ -325,13 +330,20 @@ export async function rejectTool(
     return { done: false, approvals: remaining };
   }
 
-  // No approvals left; now continue the conversation
+  // No approvals left; clear pending state and let client decide when to continue
+  await clearState(chatId);
+  return { done: false, approvals: [] };
+}
+
+export async function continueAfterApprovals(
+  chatId: string,
+): Promise<{ chat?: any; done: boolean; approvals?: ApprovalPreview[] }> {
+  await requireAuth();
   const result = await continueAfterTools(chatId);
-  if (result.done) {
-    return { chat: result.chat, done: true };
-  } else {
-    return { done: false, approvals: result.approvals };
+  if ((result as any).done) {
+    return { chat: (result as any).chat, done: true } as any;
   }
+  return { done: false, approvals: (result as any).approvals } as any;
 }
 
 

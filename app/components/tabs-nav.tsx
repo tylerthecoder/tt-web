@@ -44,6 +44,8 @@ export function TabsNav() {
       const target = event.target as HTMLElement;
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)
         return;
+      // Ignore when any modifier keys are pressed to avoid overriding browser/system shortcuts
+      if (event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return;
       const key = event.key.toLowerCase();
       const match = tabs.find((t) => t.hotkey === key);
       if (match) {
