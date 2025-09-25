@@ -14,6 +14,8 @@ export default function MenteesPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <UntrackedGoogleDocCardLoader docId="1sN8vn9KA3EqQBvrH8PioqV9t-WjOpOrYVDjyPQ93R5s" />
         <UntrackedGoogleDocCardLoader docId="1Be3Ijy2sKRbffsamRGhtDczjlsHWTU-b6yK-SxgPEwc" />
+        <UntrackedGoogleDocCardLoader docId="1uejXogKpjO8v9BplwOpRT7_oPjmduWac0ELjwXIqU8g" />
+        <UntrackedGoogleDocCardLoader docId="14egOv9piInxufxNBbyXBKGUv0UXdN54C2dHJhJ6J03o" />
       </div>
 
       <hr className="my-4" />
@@ -24,6 +26,21 @@ export default function MenteesPage() {
         <UntrackedGoogleDocCardLoader docId="1-LrScygxXRlAns8gEzcuG2uaYWaDuAb_djwSRqCYyAQ" />
         <UntrackedGoogleDocCardLoader docId="1_Zxn6-7mE0hl70aoUeaxyCihuX1yX0VwvpTtyut9uNA" />
         <UntrackedGoogleDocCardLoader docId="1sc0o6Hrqi4AvJYjN64u3hIVMncrco05L_jrrujimrIQ" />
+      </div>
+
+      <hr className="my-6" />
+
+      <h1 className="text-xl font-semibold mb-4 text-white text-center">Important Links</h1>
+      <div>
+        <a href="https://www.lesswrong.com/posts/kcKrE9mzEHrdqtDpE/the-case-for-ensuring-that-powerful-ais-are-controlled">
+          The case for ensuring powerful AIs are controlled
+        </a>
+        <a href="https://arxiv.org/pdf/2312.06942">AI Control paper</a>
+        <a href="https://www.bashcontrol.com/"> Ctrl-Z </a>
+        <a href="https://www.lesswrong.com/posts/bALBxf3yGGx4bvvem/prompt-optimization-can-enable-ai-control-research">
+          prompt-optimization-can-enable-ai-control-research
+        </a>
+        <a href="https://ukgovernmentbeis.github.io/control-arena">Control Arena</a>
       </div>
 
       <hr className="my-6" />
