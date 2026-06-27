@@ -6,9 +6,17 @@ function hasSessionCookieFromRequest(req: NextRequest): boolean {
   return cookie !== undefined && cookie !== null;
 }
 
+function isAuthDisabled(): boolean {
+  return process.env.AUTH_DISABLED === 'true' || process.env.NODE_ENV === 'development';
+}
+
 const PANEL_PATHS = ['/panel', '/notes', '/lists', '/agent', '/daily', '/jot'];
 
 export async function middleware(request: NextRequest) {
+  if (isAuthDisabled()) {
+    return NextResponse.next();
+  }
+
   if (!PANEL_PATHS.some((path) => request.nextUrl.pathname.startsWith(path))) {
     return NextResponse.next();
   }

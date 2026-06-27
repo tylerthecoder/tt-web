@@ -30,6 +30,13 @@ export async function getTodayDailyNote() {
   return tt.dailyNotes.getToday();
 }
 
+export async function getDailyNoteForDate(day: string) {
+  await requireAuth();
+
+  const tt = await getTT();
+  return tt.dailyNotes.getToday(new Date(`${day}T12:00:00.000Z`));
+}
+
 export async function getAllDailyNotesMetadata() {
   await requireAuth();
 
