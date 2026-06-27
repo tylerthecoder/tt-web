@@ -1,7 +1,15 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowRight, Calendar, Edit, FileText, Home, List, Search, StickyNote } from 'lucide-react';
+import {
+  ArrowRight,
+  Edit,
+  FileText,
+  Home,
+  Link as LinkIcon,
+  List,
+  Search,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
@@ -66,6 +74,17 @@ export function CommandMenu() {
       icon: <List className="w-4 h-4" />,
       action: () => {
         router.push('/lists');
+        handleClose();
+      },
+      type: 'navigation',
+    },
+    {
+      id: 'links',
+      title: 'Links',
+      description: 'Browse saved links',
+      icon: <LinkIcon className="w-4 h-4" />,
+      action: () => {
+        router.push('/links');
         handleClose();
       },
       type: 'navigation',
