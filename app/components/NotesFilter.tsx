@@ -231,10 +231,12 @@ export function NotesFilter({ items, setFilteredItems }: NotesFilterProps) {
             <FaSearch className="text-gray-400" />
           </div>
           <input
+            id="notes-search-input"
             type="text"
             value={search}
             onChange={handleSearchChange}
             placeholder="Search notes..."
+            aria-keyshortcuts="/"
             className="bg-gray-700 text-white pl-10 pr-10 py-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           {search && (

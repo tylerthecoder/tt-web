@@ -223,7 +223,7 @@ export async function getNotesAndUntrackedGoogleDocs() {
   const userId = await getGoogleUserId();
   const result = userId
     ? await tt.googleNotes.getAllNotesAndUntrackedGoogleDocs(userId)
-    : { notes: [], googleDocs: [] };
+    : { notes: await tt.notes.getAllNotesMetadata(), googleDocs: [] };
   return { ...result, showGoogleNotice: !userId };
 }
 

@@ -9,9 +9,10 @@ import { deleteNote as deleteNoteAction } from '../(panel)/actions';
 interface DeleteNoteButtonProps {
   noteId: string;
   title: string;
+  dense?: boolean;
 }
 
-export function DeleteNoteButton({ noteId, title }: DeleteNoteButtonProps) {
+export function DeleteNoteButton({ noteId, title, dense = false }: DeleteNoteButtonProps) {
   const [isPending, startTransition] = useTransition();
   const [showConfirm, setShowConfirm] = useState(false);
 
@@ -40,11 +41,13 @@ export function DeleteNoteButton({ noteId, title }: DeleteNoteButtonProps) {
     <>
       <button
         onClick={handleDeleteClick}
-        className="py-1 px-3 border border-red-700 rounded text-sm text-red-400 hover:bg-red-900/30 transition-colors flex items-center"
+        className={`inline-flex items-center gap-1.5 rounded-md border border-red-700/90 font-medium text-red-300 transition-colors hover:bg-red-950/60 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:cursor-not-allowed disabled:opacity-60 ${
+          dense ? 'h-7 px-2 text-xs' : 'h-9 px-3 text-sm'
+        }`}
         aria-label="Delete note"
         disabled={isDeleting}
       >
-        <FaTrash className="mr-1" size={12} />
+        <FaTrash size={12} />
         Delete
       </button>
 
