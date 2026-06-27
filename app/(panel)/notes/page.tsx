@@ -16,7 +16,7 @@ export type LayoutMode = 'grid' | 'list';
 export default function NotesPage() {
   const router = useRouter();
   const { data, isLoading } = useNotesIndex();
-  const [layoutMode, setLayoutMode] = useState<LayoutMode>('grid');
+  const [layoutMode, setLayoutMode] = useState<LayoutMode>('list');
   const [filteredItems, setFilteredItems] = useState<any[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const itemRefs = useRef<Array<HTMLDivElement | null>>([]);
