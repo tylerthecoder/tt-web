@@ -40,11 +40,11 @@ export function DeleteNoteButton({ noteId, title }: DeleteNoteButtonProps) {
     <>
       <button
         onClick={handleDeleteClick}
-        className="py-1 px-3 border border-red-700 rounded text-sm text-red-400 hover:bg-red-900/30 transition-colors flex items-center"
+        className="inline-flex h-9 items-center gap-2 rounded-md border border-red-700/90 px-3 text-sm font-medium text-red-300 transition-colors hover:bg-red-950/60 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:cursor-not-allowed disabled:opacity-60"
         aria-label="Delete note"
         disabled={isDeleting}
       >
-        <FaTrash className="mr-1" size={12} />
+        <FaTrash size={12} />
         Delete
       </button>
 

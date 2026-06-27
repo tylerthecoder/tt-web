@@ -5,15 +5,19 @@ import React, { useMemo, useState } from 'react';
 import { FaCheck, FaExternalLinkAlt, FaGoogle, FaInfoCircle, FaSync } from 'react-icons/fa';
 
 import { trackGoogleDoc } from '../google/docs/actions';
-type LayoutMode = 'grid' | 'list';
 import type { GoogleDriveFile } from '../types/google';
 import { BaseCard } from './base-card';
 import { JsonModal } from './json-modal';
+
+type LayoutMode = 'grid' | 'list';
 
 interface UntrackedGoogleDocCardProps {
   doc: GoogleDriveFile;
   layout?: LayoutMode;
 }
+
+const actionClassName =
+  'inline-flex h-9 items-center gap-2 rounded-md border border-gray-600/90 px-3 text-sm font-medium text-gray-300 transition-colors hover:border-gray-500 hover:bg-gray-700/70 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:cursor-not-allowed disabled:opacity-60';
 
 export function UntrackedGoogleDocCard({ doc, layout = 'grid' }: UntrackedGoogleDocCardProps) {
   const router = useRouter();
@@ -52,39 +56,39 @@ export function UntrackedGoogleDocCard({ doc, layout = 'grid' }: UntrackedGoogle
 
   const openButton = (
     <button
-      className="py-1 px-3 border border-gray-600 rounded text-sm text-gray-300 hover:bg-gray-800 transition-colors flex items-center"
+      className={actionClassName}
       onClick={() => webViewLink && window.open(webViewLink, '_blank')}
       disabled={!webViewLink}
       title="Open Google Doc"
     >
-      <FaExternalLinkAlt className="mr-1" size={12} />
+      <FaExternalLinkAlt size={12} />
       Open
     </button>
   );
 
   const syncButton = (
     <button
-      className={`py-1 px-3 rounded text-sm flex items-center border ${
+      className={`inline-flex h-9 items-center gap-2 rounded-md border px-3 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:cursor-not-allowed disabled:opacity-60 ${
         isTracking
-          ? 'text-gray-400 border-gray-600 hover:bg-gray-800'
-          : 'text-white border-blue-600 hover:bg-blue-900'
+          ? 'border-gray-600/90 text-gray-400 hover:bg-gray-700/70'
+          : 'border-blue-500 text-white hover:bg-blue-950/70'
       }`}
       onClick={handleSync}
       disabled={syncing || isTracking}
     >
       {syncing ? (
         <>
-          <span className="mr-1 h-3 w-3 inline-block rounded-full border-t-2 border-gray-500 animate-spin"></span>
+          <span className="inline-block h-3 w-3 rounded-full border-t-2 border-gray-500 animate-spin"></span>
           Syncing...
         </>
       ) : isTracking ? (
         <>
-          <FaCheck className="mr-1" size={12} />
+          <FaCheck size={12} />
           Synced
         </>
       ) : (
         <>
-          <FaSync className="mr-1" size={12} />
+          <FaSync size={12} />
           Sync
         </>
       )}
@@ -93,13 +97,13 @@ export function UntrackedGoogleDocCard({ doc, layout = 'grid' }: UntrackedGoogle
 
   const headerExtra = (
     <div className="flex items-center gap-2">
-      <span className="px-2 py-1 bg-gray-700 rounded text-xs">Google Doc</span>
       <button
         onClick={() => setShowJson(true)}
-        className="py-1 px-2 border border-gray-600 rounded text-xs text-gray-300 hover:bg-gray-800 transition-colors flex items-center"
+        className="inline-flex h-7 items-center gap-1.5 rounded-md border border-gray-600/90 px-2 text-xs font-medium text-gray-300 transition-colors hover:border-gray-500 hover:bg-gray-700/70 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900"
         title="View metadata JSON"
       >
-        <FaInfoCircle className="mr-1" size={12} /> JSON
+        <FaInfoCircle size={12} />
+        <span className="sr-only sm:not-sr-only">JSON</span>
       </button>
     </div>
   );
@@ -109,7 +113,8 @@ export function UntrackedGoogleDocCard({ doc, layout = 'grid' }: UntrackedGoogle
       <BaseCard
         layout={layout}
         title={name}
-        titleIcon={<FaGoogle className="text-red-400 mr-2" size={18} />}
+        titleIcon={<FaGoogle size={18} aria-hidden />}
+        typeLabel="Google Doc"
         createdAt={createdTime ?? undefined}
         updatedAt={modifiedTime ?? undefined}
         headerExtra={headerExtra}
