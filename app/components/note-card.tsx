@@ -119,7 +119,6 @@ export function NoteCard({ note, layout = 'grid' }: NoteCardProps) {
         updatedAt={note.updatedAt}
         headerExtra={headerExtra}
         footerButtons={footerButtons}
-        accentClassName={isGoogle ? 'border-red-500' : undefined}
       />
       <JsonModal
         open={showJson}

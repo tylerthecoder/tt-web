@@ -129,7 +129,6 @@ export function UntrackedGoogleDocCard({ doc, layout = 'grid' }: UntrackedGoogle
             {syncButton}
           </>
         }
-        accentClassName={'border-red-500'}
       />
       <JsonModal
         open={showJson}

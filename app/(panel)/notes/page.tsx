@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FaList, FaThLarge } from 'react-icons/fa';
 
 import { NoteCard } from '@/components/note-card';
@@ -18,6 +18,8 @@ export default function NotesPage() {
   const { data, isLoading } = useNotesIndex();
   const [layoutMode, setLayoutMode] = useState<LayoutMode>('grid');
   const [filteredItems, setFilteredItems] = useState<any[]>([]);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const itemRefs = useRef<Array<HTMLDivElement | null>>([]);
 
   const displayItems = useMemo(() => {
     if (!data) return [] as any[];
@@ -45,6 +47,35 @@ export default function NotesPage() {
   }, [data]);
 
   const toggleLayout = () => setLayoutMode((prev) => (prev === 'grid' ? 'list' : 'grid'));
+
+  const openItem = useCallback(
+    (item: any) => {
+      if (!item) return;
+
+      if (item.type === 'note') {
+        router.push(`/note/${item.id}/view`);
+        return;
+      }
+
+      const webViewLink = item.originalItem?.webViewLink;
+      if (webViewLink) {
+        window.open(webViewLink, '_blank', 'noreferrer');
+      }
+    },
+    [router],
+  );
+
+  useEffect(() => {
+    setSelectedIndex((current) => {
+      if (filteredItems.length === 0) return 0;
+      return Math.min(current, filteredItems.length - 1);
+    });
+  }, [filteredItems.length]);
+
+  useEffect(() => {
+    const selectedElement = itemRefs.current[selectedIndex];
+    selectedElement?.scrollIntoView({ block: 'nearest' });
+  }, [selectedIndex]);
 
   useEffect(() => {
     const isEditableTarget = (target: EventTarget | null) => {
@@ -78,11 +109,28 @@ export default function NotesPage() {
         event.preventDefault();
         router.push('/notes/create');
       }
+
+      if (['arrowdown', 'arrowright'].includes(key)) {
+        event.preventDefault();
+        setSelectedIndex((current) =>
+          filteredItems.length === 0 ? 0 : Math.min(current + 1, filteredItems.length - 1),
+        );
+      }
+
+      if (['arrowup', 'arrowleft'].includes(key)) {
+        event.preventDefault();
+        setSelectedIndex((current) => (filteredItems.length === 0 ? 0 : Math.max(current - 1, 0)));
+      }
+
+      if (key === 'enter') {
+        event.preventDefault();
+        openItem(filteredItems[selectedIndex]);
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [router]);
+  }, [filteredItems, openItem, router, selectedIndex]);
 
   if (isLoading) return <div className="p-4 text-gray-300">Loading notes…</div>;
 
@@ -93,6 +141,8 @@ export default function NotesPage() {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="flex flex-wrap items-center gap-2 text-xs text-gray-400">
             <ShortcutKey label="/" text="Search" />
+            <ShortcutKey label="↑↓" text="Select" />
+            <ShortcutKey label="Enter" text="Open" />
             <ShortcutKey label="V" text="View" />
             <ShortcutKey label="N" text="New" />
           </div>
@@ -138,8 +188,18 @@ export default function NotesPage() {
 
       {layoutMode === 'grid' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredItems.map((item) => (
-            <div key={`${item.type}-${item.id}`} className="h-full">
+          {filteredItems.map((item, index) => (
+            <div
+              key={`${item.type}-${item.id}`}
+              ref={(element) => {
+                itemRefs.current[index] = element;
+              }}
+              className={getSelectionClassName(selectedIndex === index, 'grid')}
+              tabIndex={selectedIndex === index ? 0 : -1}
+              aria-selected={selectedIndex === index}
+              onClick={() => setSelectedIndex(index)}
+              onDoubleClick={() => openItem(item)}
+            >
               {item.type === 'note' ? (
                 <NoteCard note={item.originalItem} layout="grid" />
               ) : (
@@ -150,8 +210,18 @@ export default function NotesPage() {
         </div>
       ) : (
         <div className="flex flex-col gap-1.5">
-          {filteredItems.map((item) => (
-            <div key={`${item.type}-${item.id}`}>
+          {filteredItems.map((item, index) => (
+            <div
+              key={`${item.type}-${item.id}`}
+              ref={(element) => {
+                itemRefs.current[index] = element;
+              }}
+              className={getSelectionClassName(selectedIndex === index, 'list')}
+              tabIndex={selectedIndex === index ? 0 : -1}
+              aria-selected={selectedIndex === index}
+              onClick={() => setSelectedIndex(index)}
+              onDoubleClick={() => openItem(item)}
+            >
               {item.type === 'note' ? (
                 <NoteCard note={item.originalItem} layout="list" />
               ) : (
@@ -171,6 +241,15 @@ export default function NotesPage() {
       )}
     </div>
   );
+}
+
+function getSelectionClassName(isSelected: boolean, layout: LayoutMode) {
+  const base = layout === 'grid' ? 'h-full rounded-lg' : 'rounded-lg';
+  return `${base} transition-shadow ${
+    isSelected
+      ? 'ring-2 ring-blue-400 ring-offset-2 ring-offset-gray-900'
+      : 'ring-1 ring-transparent'
+  }`;
 }
 
 function ShortcutKey({ label, text }: { label: string; text: string }) {
