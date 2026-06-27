@@ -5,7 +5,8 @@ import { SessionRecord } from 'tt-services';
 import { getTT } from '@/utils/utils';
 
 export function isAuthDisabled(): boolean {
-  const isAuthDisabled = process.env.AUTH_DISABLED === 'true';
+  const isAuthDisabled =
+    process.env.AUTH_DISABLED === 'true' || process.env.NODE_ENV === 'development';
   if (isAuthDisabled) {
     console.log('AUTH DISABLED');
   }

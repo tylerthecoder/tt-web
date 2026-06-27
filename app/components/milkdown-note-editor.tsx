@@ -68,7 +68,7 @@ const MilkdownEditorWithNote: React.FC<MilkdownEditorWithNoteProps> = ({
   };
 
   return (
-    <div className="h-full overflow-hidden">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden">
       <div className="flex items-start justify-between px-3 md:px-4 py-2 bg-gray-700">
         {!hideTitle && (
           <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3 flex-1 min-w-0">
@@ -160,7 +160,7 @@ const MilkdownEditorWithNote: React.FC<MilkdownEditorWithNoteProps> = ({
           )}
         </div>
       </div>
-      <div className="bg-gray-800 overflow-hidden h-full">
+      <div className="min-h-0 flex-1 overflow-hidden bg-gray-800">
         <div className="flex flex-col h-full [&>*]:h-full">
           <Milkdown />
         </div>
