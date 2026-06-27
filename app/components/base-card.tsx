@@ -76,28 +76,30 @@ export function BaseCard({
     <div
       className={`group overflow-hidden rounded-lg border border-gray-700/80 bg-gray-800/90 shadow-sm transition-colors hover:border-gray-600 ${accentClasses}`}
     >
-      <div className="flex flex-col gap-3 p-4 md:flex-row md:items-center">
-        <div className="flex min-w-0 flex-1 items-start gap-3">
-          <div className="mt-1 shrink-0 text-red-400">{titleIcon}</div>
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-              <h3 className="min-w-0 truncate text-lg font-semibold leading-snug text-red-300">
+      <div className="flex flex-col gap-2 px-3 py-2 md:flex-row md:items-center">
+        <div className="flex min-w-0 flex-1 items-center gap-2">
+          <div className="shrink-0 text-red-400">{titleIcon}</div>
+          <div className="grid min-w-0 flex-1 gap-1 md:grid-cols-[minmax(12rem,1fr)_auto] md:items-center">
+            <div className="flex min-w-0 items-center gap-2">
+              <h3 className="min-w-0 truncate text-sm font-semibold leading-5 text-red-300">
                 {title}
               </h3>
               {typeLabel && (
-                <span className="rounded-md bg-gray-700/80 px-2 py-1 text-[11px] font-medium text-gray-300">
+                <span className="hidden shrink-0 rounded bg-gray-700/70 px-1.5 py-0.5 text-[10px] font-medium text-gray-300 sm:inline">
                   {typeLabel}
                 </span>
               )}
             </div>
-            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-400">
+            <div className="flex shrink-0 flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-400 md:justify-end">
               {modifiedLabel && <span>Modified {modifiedLabel}</span>}
             </div>
           </div>
         </div>
-        <div className="flex flex-col gap-3 md:items-end">
+        <div className="flex flex-wrap items-center gap-2 md:shrink-0 md:flex-nowrap">
           {headerExtra}
-          <div className="flex flex-wrap justify-start gap-2 md:justify-end">{footerButtons}</div>
+          <div className="flex flex-wrap justify-start gap-1.5 md:flex-nowrap md:justify-end">
+            {footerButtons}
+          </div>
         </div>
       </div>
     </div>

@@ -149,7 +149,7 @@ export default function NotesPage() {
           ))}
         </div>
       ) : (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-1.5">
           {filteredItems.map((item) => (
             <div key={`${item.type}-${item.id}`}>
               {item.type === 'note' ? (

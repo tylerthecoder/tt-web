@@ -16,8 +16,10 @@ interface UntrackedGoogleDocCardProps {
   layout?: LayoutMode;
 }
 
-const actionClassName =
-  'inline-flex h-9 items-center gap-2 rounded-md border border-gray-600/90 px-3 text-sm font-medium text-gray-300 transition-colors hover:border-gray-500 hover:bg-gray-700/70 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:cursor-not-allowed disabled:opacity-60';
+const getActionClassName = (layout: LayoutMode) =>
+  `inline-flex items-center gap-1.5 rounded-md border border-gray-600/90 font-medium text-gray-300 transition-colors hover:border-gray-500 hover:bg-gray-700/70 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:cursor-not-allowed disabled:opacity-60 ${
+    layout === 'list' ? 'h-7 px-2 text-xs' : 'h-9 px-3 text-sm'
+  }`;
 
 export function UntrackedGoogleDocCard({ doc, layout = 'grid' }: UntrackedGoogleDocCardProps) {
   const router = useRouter();
@@ -32,6 +34,7 @@ export function UntrackedGoogleDocCard({ doc, layout = 'grid' }: UntrackedGoogle
   const webViewLink = doc.webViewLink ?? '';
   const createdTime = doc.createdTime ?? '';
   const modifiedTime = doc.modifiedTime ?? '';
+  const actionClassName = getActionClassName(layout);
 
   const handleSync = async () => {
     setSyncing(true);
@@ -68,7 +71,9 @@ export function UntrackedGoogleDocCard({ doc, layout = 'grid' }: UntrackedGoogle
 
   const syncButton = (
     <button
-      className={`inline-flex h-9 items-center gap-2 rounded-md border px-3 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:cursor-not-allowed disabled:opacity-60 ${
+      className={`inline-flex items-center gap-1.5 rounded-md border font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:cursor-not-allowed disabled:opacity-60 ${
+        layout === 'list' ? 'h-7 px-2 text-xs' : 'h-9 px-3 text-sm'
+      } ${
         isTracking
           ? 'border-gray-600/90 text-gray-400 hover:bg-gray-700/70'
           : 'border-blue-500 text-white hover:bg-blue-950/70'
@@ -99,11 +104,11 @@ export function UntrackedGoogleDocCard({ doc, layout = 'grid' }: UntrackedGoogle
     <div className="flex items-center gap-2">
       <button
         onClick={() => setShowJson(true)}
-        className="inline-flex h-7 items-center gap-1.5 rounded-md border border-gray-600/90 px-2 text-xs font-medium text-gray-300 transition-colors hover:border-gray-500 hover:bg-gray-700/70 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900"
+        className="inline-flex h-7 items-center gap-1.5 rounded-md border border-gray-600/90 px-1.5 text-xs font-medium text-gray-300 transition-colors hover:border-gray-500 hover:bg-gray-700/70 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900"
         title="View metadata JSON"
       >
         <FaInfoCircle size={12} />
-        <span className="sr-only sm:not-sr-only">JSON</span>
+        <span className={layout === 'list' ? 'sr-only' : 'sr-only sm:not-sr-only'}>JSON</span>
       </button>
     </div>
   );
@@ -113,7 +118,7 @@ export function UntrackedGoogleDocCard({ doc, layout = 'grid' }: UntrackedGoogle
       <BaseCard
         layout={layout}
         title={name}
-        titleIcon={<FaGoogle size={18} aria-hidden />}
+        titleIcon={<FaGoogle size={layout === 'list' ? 14 : 18} aria-hidden />}
         typeLabel="Google Doc"
         createdAt={createdTime ?? undefined}
         updatedAt={modifiedTime ?? undefined}

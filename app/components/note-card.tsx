@@ -23,15 +23,18 @@ interface NoteCardProps {
   layout?: LayoutMode;
 }
 
-const actionClassName =
-  'inline-flex h-9 items-center gap-2 rounded-md border border-gray-600/90 px-3 text-sm font-medium text-gray-300 transition-colors hover:border-gray-500 hover:bg-gray-700/70 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900';
+const getActionClassName = (layout: LayoutMode) =>
+  `inline-flex items-center gap-1.5 rounded-md border border-gray-600/90 font-medium text-gray-300 transition-colors hover:border-gray-500 hover:bg-gray-700/70 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 ${
+    layout === 'list' ? 'h-7 px-2 text-xs' : 'h-9 px-3 text-sm'
+  }`;
 
 export function NoteCard({ note, layout = 'grid' }: NoteCardProps) {
   const isGoogle = isGoogleNoteMetadata(note);
   const [showJson, setShowJson] = useState(false);
   const metadata = useMemo(() => note, [note]);
   const tags = note.tags || [];
-  const visibleTags = tags.slice(0, layout === 'grid' ? 2 : 3);
+  const actionClassName = getActionClassName(layout);
+  const visibleTags = tags.slice(0, layout === 'grid' ? 2 : 2);
   const hiddenTagCount = Math.max(tags.length - visibleTags.length, 0);
 
   const footerButtons = (
@@ -55,7 +58,7 @@ export function NoteCard({ note, layout = 'grid' }: NoteCardProps) {
         <FaEdit size={12} />
         Edit
       </Link>
-      <DeleteNoteButton noteId={note.id} title={note.title} />
+      <DeleteNoteButton noteId={note.id} title={note.title} dense={layout === 'list'} />
     </>
   );
 
@@ -65,14 +68,22 @@ export function NoteCard({ note, layout = 'grid' }: NoteCardProps) {
         {visibleTags.map((tag) => (
           <span
             key={tag}
-            className="max-w-[10rem] truncate rounded-md bg-gray-700/80 px-2 py-1 text-[11px] font-medium text-gray-300"
+            className={`truncate rounded bg-gray-700/80 font-medium text-gray-300 ${
+              layout === 'list'
+                ? 'max-w-[7rem] px-1.5 py-0.5 text-[10px]'
+                : 'max-w-[10rem] px-2 py-1 text-[11px]'
+            }`}
             title={tag}
           >
             {tag}
           </span>
         ))}
         {hiddenTagCount > 0 && (
-          <span className="rounded-md bg-gray-700/60 px-2 py-1 text-[11px] font-medium text-gray-400">
+          <span
+            className={`rounded bg-gray-700/60 font-medium text-gray-400 ${
+              layout === 'list' ? 'px-1.5 py-0.5 text-[10px]' : 'px-2 py-1 text-[11px]'
+            }`}
+          >
             +{hiddenTagCount}
           </span>
         )}
@@ -80,11 +91,13 @@ export function NoteCard({ note, layout = 'grid' }: NoteCardProps) {
       {tags.length === 0 && <span className="text-xs text-gray-500">No tags</span>}
       <button
         onClick={() => setShowJson(true)}
-        className="ml-auto inline-flex h-7 shrink-0 items-center gap-1.5 rounded-md border border-gray-600/90 px-2 text-xs font-medium text-gray-300 transition-colors hover:border-gray-500 hover:bg-gray-700/70 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900"
+        className={`ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-md border border-gray-600/90 font-medium text-gray-300 transition-colors hover:border-gray-500 hover:bg-gray-700/70 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 ${
+          layout === 'list' ? 'h-7 px-1.5 text-xs' : 'h-7 px-2 text-xs'
+        }`}
         title="View metadata JSON"
       >
         <FaInfoCircle size={12} />
-        <span className="sr-only sm:not-sr-only">JSON</span>
+        <span className={layout === 'list' ? 'sr-only' : 'sr-only sm:not-sr-only'}>JSON</span>
       </button>
     </div>
   );
@@ -95,7 +108,11 @@ export function NoteCard({ note, layout = 'grid' }: NoteCardProps) {
         layout={layout}
         title={note.title}
         titleIcon={
-          isGoogle ? <FaGoogle size={18} aria-hidden /> : <FaFileAlt size={18} aria-hidden />
+          isGoogle ? (
+            <FaGoogle size={layout === 'list' ? 14 : 18} aria-hidden />
+          ) : (
+            <FaFileAlt size={layout === 'list' ? 14 : 18} aria-hidden />
+          )
         }
         typeLabel={isGoogle ? 'Google Doc' : 'Note'}
         createdAt={note.createdAt}
