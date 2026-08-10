@@ -67,13 +67,21 @@ const Home = () => {
   const [currentSong, setCurrentSong] = useState<CurrentSong | null>(null);
   const router = useRouter();
 
-  const fetchData = async () => {
-    const song = await API.getCurrentSong();
-    setCurrentSong(song);
-  };
-
   useEffect(() => {
-    fetchData();
+    let isMounted = true;
+
+    const fetchCurrentSong = async () => {
+      const song = await API.getCurrentSong();
+      if (isMounted) {
+        setCurrentSong(song);
+      }
+    };
+
+    void fetchCurrentSong();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleNameDoubleClick = () => {
