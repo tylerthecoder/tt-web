@@ -1,5 +1,6 @@
 import { createHmac } from 'crypto';
 import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 import { SessionRecord } from 'tt-services';
 
 import { getTT } from '@/utils/utils';
@@ -65,13 +66,13 @@ export async function requireAuth(): Promise<void> {
   const session = await getSession();
 
   if (!session) {
-    throw new Error('Authentication required');
+    redirect('/login');
   }
 
   // Enforce admin email restriction for all authenticated access
   const adminEmail = process.env.ADMIN_EMAIL;
   if (adminEmail && session.userEmail !== adminEmail) {
-    throw new Error('Unauthorized');
+    redirect('/login?error=unauthorized_email');
   }
 }
 
