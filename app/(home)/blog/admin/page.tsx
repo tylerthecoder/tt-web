@@ -14,7 +14,7 @@ export default async function Page() {
   return (
     <div>
       <form action={revalidate}>
-        <button type="submit"> Revalidate Blogs </button>;
+        <button type="submit"> Revalidate Blog Posts </button>
       </form>
     </div>
   );

@@ -102,17 +102,17 @@ const Home = () => {
               href={RESUME_URL}
             />
             <HomButton
-              text="Github"
+              text="GitHub"
               href={GITHUB_URL}
               iconSrc="/github.png"
-              iconAlt="Github logo"
+              iconAlt="GitHub logo"
             />
             <HomButton text="Twitter" href={X_URL} iconSrc="/x.svg" iconAlt="X logo" />
             <HomButton
               text="LinkedIn"
               href={LINKEDIN_URL}
               iconSrc="/linkedin.svg"
-              iconAlt="Linkedin logo"
+              iconAlt="LinkedIn logo"
             />
             <HomButton text="Blog" href={BLOG_URL} iconSrc="/blog.png" iconAlt="Blog icon" />
             <HomButton
@@ -155,16 +155,16 @@ const Home = () => {
                 </li>
               </ul>
 
-              <h2> Core beliefs </h2>
+              <h2> Core Beliefs </h2>
               <ul>
                 <li>
-                  AI is the most important invention of humanity and will have dramatic consequences
-                  on the future of the universe
+                  AI is the most important invention in human history and will have dramatic
+                  consequences for the future of the universe
                 </li>
                 <li>We should aim to increase understanding in the universe</li>
                 <li>
                   All software and information that does not pose an existential threat should be
-                  open-sourced for everyone to access
+                  open source and accessible to everyone
                 </li>
                 <li>
                   All living creatures capable of experiencing suffering deserve to be treated with
@@ -184,13 +184,13 @@ const Home = () => {
               <ul>
                 <li> Browsers are an anti-pattern </li>
                 <li> You don't know what consciousness is </li>
-                <li> ML is stupid, Good old fashioned AI would have worked </li>
+                <li> ML is stupid; good old-fashioned AI would have worked </li>
               </ul>
 
               <h2> Phrases </h2>
               <ul>
                 <li> Always in progress </li>
-                <li> I use arch & neovim btw </li>
+                <li> I use Arch &amp; Neovim, btw </li>
                 <li> Everything is a function </li>
               </ul>
             </article>
