@@ -155,6 +155,16 @@ const Home = () => {
                 </li>
               </ul>
 
+              <h2> Projects </h2>
+              <ul>
+                <li>
+                  <a href="https://get2post.vercel.app/" target="_blank" rel="noopener noreferrer">
+                    GET → POST
+                  </a>{' '}
+                  — lets AI agents with GET-only HTTP tools send POST requests.
+                </li>
+              </ul>
+
               <h2> Core Beliefs </h2>
               <ul>
                 <li>
