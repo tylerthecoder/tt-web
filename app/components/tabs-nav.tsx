@@ -7,6 +7,7 @@ import {
   FaCalendarDay,
   FaClock,
   FaFileAlt,
+  FaLink,
   FaList,
   FaListAlt,
   FaRobot,
@@ -47,6 +48,14 @@ const tabs: Tab[] = [
     href: '/lists',
     hotkey: 'l',
     isActive: (pathname) => pathname.startsWith('/lists') || pathname.startsWith('/list/'),
+  },
+  {
+    id: 'links',
+    label: 'Links',
+    icon: <FaLink />,
+    href: '/links',
+    hotkey: 'k',
+    isActive: (pathname) => pathname.startsWith('/links'),
   },
   {
     id: 'jots',
