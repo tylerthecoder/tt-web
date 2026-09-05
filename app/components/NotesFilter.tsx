@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FaBan, FaCheck, FaSearch, FaSpinner, FaTimes } from 'react-icons/fa';
 import { GoogleNote, Note } from 'tt-services/src/client-index.ts';
@@ -23,9 +23,134 @@ interface NotesFilterProps {
   setFilteredItems: (items: DisplayItem[]) => void;
 }
 
+const MAX_CONTENT_WORDS = 600;
+
+const normalizeSearchText = (text: string) =>
+  text
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+
+const getSearchTokens = (text: string) => normalizeSearchText(text).split(/\s+/).filter(Boolean);
+
+const isSubsequence = (needle: string, haystack: string) => {
+  let needleIndex = 0;
+
+  for (let haystackIndex = 0; haystackIndex < haystack.length; haystackIndex += 1) {
+    if (needle[needleIndex] === haystack[haystackIndex]) {
+      needleIndex += 1;
+      if (needleIndex === needle.length) return true;
+    }
+  }
+
+  return false;
+};
+
+const getEditDistance = (left: string, right: string, maxDistance: number) => {
+  if (Math.abs(left.length - right.length) > maxDistance) return maxDistance + 1;
+
+  const previous = Array.from({ length: right.length + 1 }, (_, index) => index);
+  const current = Array.from({ length: right.length + 1 }, () => 0);
+
+  for (let leftIndex = 1; leftIndex <= left.length; leftIndex += 1) {
+    current[0] = leftIndex;
+    let rowMin = current[0];
+
+    for (let rightIndex = 1; rightIndex <= right.length; rightIndex += 1) {
+      const substitutionCost = left[leftIndex - 1] === right[rightIndex - 1] ? 0 : 1;
+      current[rightIndex] = Math.min(
+        previous[rightIndex] + 1,
+        current[rightIndex - 1] + 1,
+        previous[rightIndex - 1] + substitutionCost,
+      );
+      rowMin = Math.min(rowMin, current[rightIndex]);
+    }
+
+    if (rowMin > maxDistance) return maxDistance + 1;
+
+    for (let index = 0; index < previous.length; index += 1) {
+      previous[index] = current[index];
+    }
+  }
+
+  return previous[right.length];
+};
+
+const getMaxEditDistance = (token: string) => {
+  if (token.length <= 2) return 0;
+  if (token.length <= 5) return 1;
+  if (token.length <= 10) return 2;
+  return 3;
+};
+
+const getWordMatchScore = (queryToken: string, word: string) => {
+  if (!queryToken || !word) return 0;
+  if (word === queryToken) return 1;
+  if (word.startsWith(queryToken)) return 0.94;
+  if (word.includes(queryToken)) return 0.88;
+
+  if (queryToken.length >= 3 && isSubsequence(queryToken, word)) {
+    return 0.72;
+  }
+
+  const maxDistance = getMaxEditDistance(queryToken);
+  if (maxDistance === 0) return 0;
+
+  const distance = getEditDistance(queryToken, word, maxDistance);
+  if (distance > maxDistance) return 0;
+
+  return 0.82 - distance * 0.1;
+};
+
+const scoreTokenAgainstWords = (queryToken: string, words: string[]) => {
+  let bestScore = 0;
+
+  for (const word of words) {
+    bestScore = Math.max(bestScore, getWordMatchScore(queryToken, word));
+    if (bestScore === 1) break;
+  }
+
+  return bestScore;
+};
+
+const getItemSearchScore = (item: DisplayItem, queryTokens: string[], itemTags: string[]) => {
+  if (queryTokens.length === 0) return 1;
+
+  const titleWords = getSearchTokens(item.title);
+  const tagWords = itemTags.flatMap(getSearchTokens);
+  const contentWords =
+    item.type === 'note' && item.originalItem.content
+      ? getSearchTokens(item.originalItem.content).slice(0, MAX_CONTENT_WORDS)
+      : [];
+  const normalizedQuery = queryTokens.join(' ');
+  const normalizedTitle = titleWords.join(' ');
+  const normalizedTags = tagWords.join(' ');
+  const normalizedContent = contentWords.join(' ');
+
+  let totalScore = 0;
+
+  for (const token of queryTokens) {
+    const titleScore = scoreTokenAgainstWords(token, titleWords) * 8;
+    const tagScore = scoreTokenAgainstWords(token, tagWords) * 6;
+    const contentScore = scoreTokenAgainstWords(token, contentWords) * 3;
+    const bestTokenScore = Math.max(titleScore, tagScore, contentScore);
+
+    if (bestTokenScore === 0) return 0;
+
+    totalScore += bestTokenScore;
+  }
+
+  if (normalizedTitle.includes(normalizedQuery)) totalScore += 6;
+  if (normalizedTags.includes(normalizedQuery)) totalScore += 4;
+  if (normalizedContent.includes(normalizedQuery)) totalScore += 2;
+
+  return totalScore;
+};
+
 export function NotesFilter({ items, setFilteredItems }: NotesFilterProps) {
   const { tags: availableTags, loading: tagsLoading, error: tagsError } = useTags();
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   // Initialize state with proper null checks
@@ -64,60 +189,63 @@ export function NotesFilter({ items, setFilteredItems }: NotesFilterProps) {
   // Filter items locally
   const filterItems = useCallback(
     (items: DisplayItem[], searchText: string, tagFiltersMap: Record<string, TagFilterState>) => {
-      return items.filter((item) => {
-        // Get the tags from the item
-        let itemTags: string[] = [];
+      const queryTokens = getSearchTokens(searchText);
+      const isSearching = queryTokens.length > 0;
 
-        if (item.type === 'note') {
-          itemTags = item.originalItem.tags || [];
-        } else if (item.type === 'google-doc' && item.originalItem.syncedDoc) {
-          itemTags = item.originalItem.syncedDoc.tags || [];
-        }
+      return items
+        .map((item) => {
+          // Get the tags from the item
+          let itemTags: string[] = [];
 
-        // Apply search filter
-        if (searchText && searchText.trim() !== '') {
-          const searchLower = searchText.toLowerCase();
-          const titleMatches = item.title.toLowerCase().includes(searchLower);
-
-          // For notes, also search in content
-          const contentMatches =
-            item.type === 'note' && item.originalItem.content
-              ? item.originalItem.content.toLowerCase().includes(searchLower)
-              : false;
-
-          // For tags, check if any tag matches the search
-          const tagMatches = itemTags.some((tag) => tag.toLowerCase().includes(searchLower));
-
-          if (!(titleMatches || contentMatches || tagMatches)) {
-            return false;
-          }
-        }
-
-        // Apply tag filters if there are any
-        if (tagFiltersMap && Object.keys(tagFiltersMap).length > 0) {
-          const shownTags = Object.entries(tagFiltersMap)
-            .filter(([_, state]) => state === 'shown')
-            .map(([tag]) => tag);
-
-          const hiddenTags = Object.entries(tagFiltersMap)
-            .filter(([_, state]) => state === 'hidden')
-            .map(([tag]) => tag);
-
-          // If there are shown tags, the item must have at least one of them
-          if (shownTags.length > 0) {
-            const hasShownTag = shownTags.some((tag) => itemTags.includes(tag));
-            if (!hasShownTag) return false;
+          if (item.type === 'note') {
+            itemTags = item.originalItem.tags || [];
+          } else if (item.type === 'google-doc' && item.originalItem.syncedDoc) {
+            itemTags = item.originalItem.syncedDoc.tags || [];
           }
 
-          // If there are hidden tags, the item must not have any of them
-          if (hiddenTags.length > 0) {
-            const hasHiddenTag = hiddenTags.some((tag) => itemTags.includes(tag));
-            if (hasHiddenTag) return false;
+          // Apply search filter
+          const searchScore = getItemSearchScore(item, queryTokens, itemTags);
+          if (isSearching && searchScore === 0) {
+            return null;
           }
-        }
 
-        return true;
-      });
+          // Apply tag filters if there are any
+          if (tagFiltersMap && Object.keys(tagFiltersMap).length > 0) {
+            const shownTags = Object.entries(tagFiltersMap)
+              .filter(([_, state]) => state === 'shown')
+              .map(([tag]) => tag);
+
+            const hiddenTags = Object.entries(tagFiltersMap)
+              .filter(([_, state]) => state === 'hidden')
+              .map(([tag]) => tag);
+
+            // If there are shown tags, the item must have at least one of them
+            if (shownTags.length > 0) {
+              const hasShownTag = shownTags.some((tag) => itemTags.includes(tag));
+              if (!hasShownTag) return null;
+            }
+
+            // If there are hidden tags, the item must not have any of them
+            if (hiddenTags.length > 0) {
+              const hasHiddenTag = hiddenTags.some((tag) => itemTags.includes(tag));
+              if (hasHiddenTag) return null;
+            }
+          }
+
+          return { item, searchScore };
+        })
+        .filter((result): result is { item: DisplayItem; searchScore: number } => result !== null)
+        .sort((left, right) => {
+          if (!isSearching) return 0;
+
+          const scoreDelta = right.searchScore - left.searchScore;
+          if (scoreDelta !== 0) return scoreDelta;
+
+          return (
+            new Date(right.item.modifiedTime).getTime() - new Date(left.item.modifiedTime).getTime()
+          );
+        })
+        .map(({ item }) => item);
     },
     [],
   );
