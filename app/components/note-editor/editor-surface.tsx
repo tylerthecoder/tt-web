@@ -11,19 +11,26 @@ import { docSchema, remarkPreserveEmptyLinePlugin } from '@milkdown/kit/preset/c
 import { type EditorState, Plugin } from '@milkdown/kit/prose/state';
 import { $prose } from '@milkdown/kit/utils';
 import { Milkdown, MilkdownProvider, useEditor } from '@milkdown/react';
-import { useEffect, useRef, useState } from 'react';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
 
 import { EditorToolbar } from './editor-toolbar';
 import { configureNoteMarkdown, noteMarkdownPlugins } from './markdown';
 
 export interface EditorSurfaceProps {
   initialContent: string;
+  saveStatus?: ReactNode;
   readOnly?: boolean;
   onChange: (content: string) => void;
   onSave: () => void;
 }
 
-function Surface({ initialContent, onChange, onSave, readOnly = false }: EditorSurfaceProps) {
+function Surface({
+  initialContent,
+  onChange,
+  onSave,
+  readOnly = false,
+  saveStatus,
+}: EditorSurfaceProps) {
   const [editorError, setEditorError] = useState<string | null>(null);
   const crepeRef = useRef<Crepe>();
   const callbacks = useRef({ onChange, onSave });
@@ -118,7 +125,7 @@ function Surface({ initialContent, onChange, onSave, readOnly = false }: EditorS
           </button>
         </div>
       )}
-      <EditorToolbar state={readOnly ? undefined : state} run={run} />
+      <EditorToolbar saveStatus={saveStatus} state={readOnly ? undefined : state} run={run} />
       <div className="note-editor-surface relative min-h-0 flex-1" aria-busy={loading}>
         {loading && (
           <div className="p-4 text-gray-400" role="status">

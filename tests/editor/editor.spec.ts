@@ -253,7 +253,12 @@ for (const daily of [false, true]) {
     await page.goto(daily ? '/?daily=1' : '/');
     const editor = page.getByRole('textbox', { name: 'Note content' });
     await expect(editor).toBeVisible();
-    const saved = page.getByRole('status').filter({ hasText: /^Saved$/ });
+    const toolbar = page.getByRole('group', { name: 'Formatting' });
+    const saved = toolbar.getByRole('status').filter({ hasText: /^Saved$/ });
+    if (daily) {
+      const navigation = await page.getByRole('button', { name: 'Close editor' }).boundingBox();
+      expect((await toolbar.boundingBox())?.y).toBe(navigation!.y + navigation!.height);
+    }
     await expect(saved).toHaveClass(/text-green-400/);
     await page.evaluate(() => {
       (window as any).fixture.delay = 1200;

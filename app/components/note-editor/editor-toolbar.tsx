@@ -19,11 +19,14 @@ import {
 import { redoDepth, undoDepth } from '@milkdown/kit/prose/history';
 import type { EditorState } from '@milkdown/kit/prose/state';
 import { Bold, Code, Italic, List, ListOrdered, ListTodo, Redo2, Undo2 } from 'lucide-react';
+import type { ReactNode } from 'react';
 
 export function EditorToolbar({
   state,
   run,
+  saveStatus,
 }: {
+  saveStatus?: ReactNode;
   state?: EditorState;
   run: (command: (ctx: Ctx) => void) => void;
 }) {
@@ -105,45 +108,50 @@ export function EditorToolbar({
     <div
       role="group"
       aria-label="Formatting"
-      className="flex shrink-0 flex-wrap items-center gap-0.5 border-b border-gray-700 bg-gray-900 px-2 py-1"
+      className="flex shrink-0 items-start border-b border-gray-700 bg-gray-900 px-2 py-1"
     >
-      <select
-        aria-label="Paragraph style"
-        disabled={!state}
-        value={heading?.type.name === 'heading' ? heading.attrs.level : 0}
-        className="min-h-11 rounded bg-gray-800 px-2 text-base text-gray-100"
-        onChange={(event) => {
-          const level = Number(event.target.value);
-          run((ctx) => {
-            ctx.get(commandsCtx).call(setBlockTypeCommand.key, {
-              nodeType: level ? headingSchema.type(ctx) : paragraphSchema.type(ctx),
-              attrs: level ? { level } : undefined,
+      <div className="flex min-w-0 flex-1 flex-wrap items-center gap-0.5">
+        <select
+          aria-label="Paragraph style"
+          disabled={!state}
+          value={heading?.type.name === 'heading' ? heading.attrs.level : 0}
+          className="min-h-11 rounded bg-gray-800 px-2 text-base text-gray-100"
+          onChange={(event) => {
+            const level = Number(event.target.value);
+            run((ctx) => {
+              ctx.get(commandsCtx).call(setBlockTypeCommand.key, {
+                nodeType: level ? headingSchema.type(ctx) : paragraphSchema.type(ctx),
+                attrs: level ? { level } : undefined,
+              });
             });
-          });
-        }}
-      >
-        <option value="0">Paragraph</option>
-        {[1, 2, 3, 4, 5, 6].map((level) => (
-          <option key={level} value={level}>
-            Heading {level}
-          </option>
-        ))}
-      </select>
-      {buttons.map(({ label, Icon, action, active, disabled }) => (
-        <button
-          key={label}
-          type="button"
-          aria-label={label}
-          title={label}
-          aria-pressed={active}
-          disabled={!state || disabled}
-          className={`flex h-11 w-11 items-center justify-center rounded hover:bg-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-300 disabled:opacity-30 ${active ? 'bg-blue-900 text-blue-100' : 'text-gray-300'}`}
-          onPointerDown={(event) => event.preventDefault()}
-          onClick={() => run(action)}
+          }}
         >
-          <Icon size={19} aria-hidden="true" />
-        </button>
-      ))}
+          <option value="0">Paragraph</option>
+          {[1, 2, 3, 4, 5, 6].map((level) => (
+            <option key={level} value={level}>
+              Heading {level}
+            </option>
+          ))}
+        </select>
+        {buttons.map(({ label, Icon, action, active, disabled }) => (
+          <button
+            key={label}
+            type="button"
+            aria-label={label}
+            title={label}
+            aria-pressed={active}
+            disabled={!state || disabled}
+            className={`flex h-11 w-11 items-center justify-center rounded hover:bg-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-300 disabled:opacity-30 ${active ? 'bg-blue-900 text-blue-100' : 'text-gray-300'}`}
+            onPointerDown={(event) => event.preventDefault()}
+            onClick={() => run(action)}
+          >
+            <Icon size={19} aria-hidden="true" />
+          </button>
+        ))}
+      </div>
+      {saveStatus && (
+        <div className="ml-auto flex h-11 shrink-0 items-center pl-2">{saveStatus}</div>
+      )}
     </div>
   );
 }

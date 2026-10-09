@@ -85,150 +85,164 @@ function LoadedEditor({
     }
   };
 
+  const saveStatus = (
+    <div className="flex h-6 w-28 shrink-0 items-center justify-end gap-2 whitespace-nowrap text-sm">
+      <span
+        aria-hidden="true"
+        className={`h-2 w-2 shrink-0 rounded-full ${
+          autosave.status === 'saved'
+            ? 'bg-green-400'
+            : autosave.status === 'error'
+              ? 'bg-red-400'
+              : 'bg-yellow-400'
+        }`}
+      />
+      <span
+        role="status"
+        aria-live="polite"
+        className={
+          autosave.status === 'saved'
+            ? 'text-green-400'
+            : autosave.status === 'error'
+              ? 'text-red-300'
+              : 'text-yellow-300'
+        }
+      >
+        {autosave.status === 'error' ? (
+          <button
+            className="underline underline-offset-2 focus-visible:outline focus-visible:outline-2"
+            onClick={() => void autosave.flush()}
+          >
+            Retry save
+          </button>
+        ) : autosave.status === 'saved' ? (
+          'Saved'
+        ) : (
+          'Saving…'
+        )}
+      </span>
+    </div>
+  );
+
   return (
     <div className="note-editor flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden bg-gray-900 text-gray-100">
-      <div className="shrink-0 border-b border-gray-700 bg-gray-900 px-3 py-2 md:px-5">
-        <div className="flex flex-wrap items-center justify-between gap-2">
+      {(!hideTitle ||
+        metadataError ||
+        autosave.status === 'error' ||
+        (!autosave.recoveryAvailable && autosave.status !== 'saved')) && (
+        <div className="shrink-0 border-b border-gray-700 bg-gray-900 px-3 py-2 md:px-5">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            {!hideTitle && (
+              <div className="flex min-w-0 flex-1 items-center gap-2">
+                {editingTitle ? (
+                  <form
+                    className="flex min-w-0 flex-1 flex-wrap items-center gap-2"
+                    onSubmit={(event) => {
+                      event.preventDefault();
+                      void saveTitle();
+                    }}
+                  >
+                    <input
+                      autoFocus
+                      aria-label="Note title"
+                      value={titleInput}
+                      disabled={savingMetadata}
+                      onChange={(event) => setTitleInput(event.target.value)}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Escape' && !savingMetadata) cancelTitle();
+                      }}
+                      className="min-h-11 min-w-0 flex-1 rounded border border-gray-600 bg-gray-800 px-2 text-base"
+                    />
+                    <button
+                      className="editor-button"
+                      disabled={savingMetadata || !titleInput.trim()}
+                    >
+                      {savingMetadata ? 'Saving…' : 'Save title'}
+                    </button>
+                    <button
+                      type="button"
+                      className="editor-button"
+                      disabled={savingMetadata}
+                      onClick={cancelTitle}
+                    >
+                      Cancel
+                    </button>
+                  </form>
+                ) : (
+                  <>
+                    <h1 className="min-w-0 truncate text-lg font-medium" title={currentNote.title}>
+                      {currentNote.title}
+                    </h1>
+                    <button
+                      className="editor-button shrink-0"
+                      onClick={() => setEditingTitle(true)}
+                    >
+                      Edit title
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+          {metadataError && (
+            <p role="alert" className="py-2 text-sm text-red-300">
+              {metadataError}
+            </p>
+          )}
           {!hideTitle && (
-            <div className="flex min-w-0 flex-1 items-center gap-2">
-              {editingTitle ? (
-                <form
-                  className="flex min-w-0 flex-1 flex-wrap items-center gap-2"
-                  onSubmit={(event) => {
-                    event.preventDefault();
-                    void saveTitle();
+            <details className="mt-1 text-sm">
+              <summary className="min-h-11 cursor-pointer py-3 text-gray-400">
+                Tags & sharing {currentNote.tags?.length ? `(${currentNote.tags.length} tags)` : ''}
+              </summary>
+              <fieldset
+                disabled={externalBusy || recovery !== null}
+                className="flex flex-wrap items-center gap-3 pb-2"
+              >
+                {currentNote.tags?.map((tag) => (
+                  <span key={tag} className="rounded-full bg-gray-700 px-2 py-1 text-xs">
+                    {tag}
+                  </span>
+                ))}
+                <button
+                  className="editor-button"
+                  onClick={(event) => {
+                    event.currentTarget.focus();
+                    setTagsOpen(true);
                   }}
                 >
-                  <input
-                    autoFocus
-                    aria-label="Note title"
-                    value={titleInput}
-                    disabled={savingMetadata}
-                    onChange={(event) => setTitleInput(event.target.value)}
-                    onKeyDown={(event) => {
-                      if (event.key === 'Escape' && !savingMetadata) cancelTitle();
-                    }}
-                    className="min-h-11 min-w-0 flex-1 rounded border border-gray-600 bg-gray-800 px-2 text-base"
-                  />
-                  <button className="editor-button" disabled={savingMetadata || !titleInput.trim()}>
-                    {savingMetadata ? 'Saving…' : 'Save title'}
-                  </button>
-                  <button
-                    type="button"
-                    className="editor-button"
-                    disabled={savingMetadata}
-                    onClick={cancelTitle}
-                  >
-                    Cancel
-                  </button>
-                </form>
-              ) : (
-                <>
-                  <h1 className="min-w-0 truncate text-lg font-medium" title={currentNote.title}>
-                    {currentNote.title}
-                  </h1>
-                  <button className="editor-button shrink-0" onClick={() => setEditingTitle(true)}>
-                    Edit title
-                  </button>
-                </>
-              )}
-            </div>
-          )}
-          <div className="flex h-6 w-28 shrink-0 items-center justify-end gap-2 whitespace-nowrap text-sm">
-            <span
-              aria-hidden="true"
-              className={`h-2 w-2 shrink-0 rounded-full ${
-                autosave.status === 'saved'
-                  ? 'bg-green-400'
-                  : autosave.status === 'error'
-                    ? 'bg-red-400'
-                    : 'bg-yellow-400'
-              }`}
-            />
-            <span
-              role="status"
-              aria-live="polite"
-              className={
-                autosave.status === 'saved'
-                  ? 'text-green-400'
-                  : autosave.status === 'error'
-                    ? 'text-red-300'
-                    : 'text-yellow-300'
-              }
-            >
-              {autosave.status === 'error' ? (
-                <button
-                  className="underline underline-offset-2 focus-visible:outline focus-visible:outline-2"
-                  onClick={() => void autosave.flush()}
-                >
-                  Retry save
+                  Edit tags
                 </button>
-              ) : autosave.status === 'saved' ? (
-                'Saved'
-              ) : (
-                'Saving…'
-              )}
-            </span>
-          </div>
-        </div>
-        {metadataError && (
-          <p role="alert" className="py-2 text-sm text-red-300">
-            {metadataError}
-          </p>
-        )}
-        {!hideTitle && (
-          <details className="mt-1 text-sm">
-            <summary className="min-h-11 cursor-pointer py-3 text-gray-400">
-              Tags & sharing {currentNote.tags?.length ? `(${currentNote.tags.length} tags)` : ''}
-            </summary>
-            <fieldset
-              disabled={externalBusy || recovery !== null}
-              className="flex flex-wrap items-center gap-3 pb-2"
-            >
-              {currentNote.tags?.map((tag) => (
-                <span key={tag} className="rounded-full bg-gray-700 px-2 py-1 text-xs">
-                  {tag}
-                </span>
-              ))}
-              <button
-                className="editor-button"
-                onClick={(event) => {
-                  event.currentTarget.focus();
-                  setTagsOpen(true);
-                }}
-              >
-                Edit tags
-              </button>
-              <PublishControls
-                note={currentNote}
-                beforeAction={beforeExternalAction}
-                afterAction={() => setExternalBusy(false)}
-                onPublishedChange={(published) =>
-                  setCurrentNote((previous) => ({ ...previous, published }))
-                }
-              />
-              {showGoogleSync && (
-                <GoogleSyncControls
+                <PublishControls
                   note={currentNote}
                   beforeAction={beforeExternalAction}
                   afterAction={() => setExternalBusy(false)}
+                  onPublishedChange={(published) =>
+                    setCurrentNote((previous) => ({ ...previous, published }))
+                  }
                 />
-              )}
-            </fieldset>
-          </details>
-        )}
-        {!autosave.recoveryAvailable && autosave.status !== 'saved' && (
-          <p role="alert" className="py-2 text-sm text-amber-200">
-            Local recovery is unavailable. Keep this page open until your note is saved.
-          </p>
-        )}
-        {autosave.status === 'error' && (
-          <p role="alert" className="py-2 text-sm text-red-300">
-            Your changes have not reached the server.
-            {autosave.recoveryAvailable ? ' A recovery copy is stored on this device.' : ''}
-          </p>
-        )}
-      </div>
+                {showGoogleSync && (
+                  <GoogleSyncControls
+                    note={currentNote}
+                    beforeAction={beforeExternalAction}
+                    afterAction={() => setExternalBusy(false)}
+                  />
+                )}
+              </fieldset>
+            </details>
+          )}
+          {!autosave.recoveryAvailable && autosave.status !== 'saved' && (
+            <p role="alert" className="py-2 text-sm text-amber-200">
+              Local recovery is unavailable. Keep this page open until your note is saved.
+            </p>
+          )}
+          {autosave.status === 'error' && (
+            <p role="alert" className="py-2 text-sm text-red-300">
+              Your changes have not reached the server.
+              {autosave.recoveryAvailable ? ' A recovery copy is stored on this device.' : ''}
+            </p>
+          )}
+        </div>
+      )}
       {externalBusy && (
         <p role="status" className="px-4 py-2 text-sm text-gray-300">
           Finishing note action…
@@ -274,6 +288,7 @@ function LoadedEditor({
         </div>
       ) : (
         <EditorSurface
+          saveStatus={saveStatus}
           readOnly={externalBusy}
           key={generation}
           initialContent={initialContent}
