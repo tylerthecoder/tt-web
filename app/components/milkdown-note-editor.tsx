@@ -175,7 +175,13 @@ function LoadedEditor({
                   {tag}
                 </span>
               ))}
-              <button className="editor-button" onClick={() => setTagsOpen(true)}>
+              <button
+                className="editor-button"
+                onClick={(event) => {
+                  event.currentTarget.focus();
+                  setTagsOpen(true);
+                }}
+              >
                 Edit tags
               </button>
               <PublishControls

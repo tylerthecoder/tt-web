@@ -195,7 +195,7 @@ test('checklist and heading controls work without hover', async ({ page }) => {
   await page.getByRole('button', { name: 'Checklist', exact: true }).click();
   await expect
     .poll(() => page.evaluate(() => (window as any).fixture.notes.one.content))
-    .toMatch(/- \[ \] First note/);
+    .toMatch(/[-*] \[ \] First note/);
   await page.getByRole('button', { name: 'Undo', exact: true }).click();
   await page.getByLabel('Paragraph style').selectOption('2');
   await expect(editor.locator('h2')).toHaveText('First note');
@@ -210,4 +210,38 @@ test('tag dialog contains focus and Escape returns to the editor', async ({ page
   await page.keyboard.press('Escape');
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Edit tags' })).toBeFocused();
+});
+
+test('authored HTML and code examples survive unrelated editing', async ({ page }) => {
+  const source = 'First\n\n<br />\n\n```html\n<br /> &#x20;\n```\n\nLast\n';
+  await page.goto('/?content=' + encodeURIComponent(source));
+  const editor = page.getByRole('textbox', { name: 'Note content' });
+  await expect(editor).toBeVisible();
+  await editor
+    .locator('p')
+    .filter({ hasText: /^Last$/ })
+    .click();
+  await page.keyboard.press('End');
+  await page.keyboard.type(' changed');
+  await expect
+    .poll(() => page.evaluate(() => (window as any).fixture.notes.one.content))
+    .toContain('Last changed');
+  const saved = await page.evaluate(() => (window as any).fixture.notes.one.content);
+  expect(saved).toContain('<br />');
+  expect(saved).toContain('```html\n<br /> &#x20;\n```');
+});
+
+test('short mobile view keeps the end of a long note reachable', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 420 });
+  await page.goto(
+    '/?content=' +
+      encodeURIComponent(Array.from({ length: 50 }, (_, i) => `Paragraph ${i}`).join('\n\n')),
+  );
+  const editor = page.getByRole('textbox', { name: 'Note content' });
+  await expect(editor).toBeVisible();
+  await editor.locator('p').filter({ hasText: 'Paragraph 49' }).scrollIntoViewIfNeeded();
+  await expect(editor.locator('p').filter({ hasText: 'Paragraph 49' })).toBeInViewport();
+  await expect(page.getByRole('button', { name: 'Bold', exact: true })).toBeInViewport();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.screenshot({ path: test.info().outputPath('mobile-editor.png') });
 });

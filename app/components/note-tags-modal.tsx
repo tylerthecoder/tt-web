@@ -81,7 +81,7 @@ export default function NoteTagsModal({ open, initialTags, onClose, onSave }: No
             Close
           </button>
         </div>
-        <div className="p-4 space-y-3">
+        <fieldset disabled={saving} className="p-4 space-y-3">
           <div>
             <div className="text-xs text-gray-400 mb-1">Current tags</div>
             <div className="flex flex-wrap gap-1">
@@ -150,7 +150,7 @@ export default function NoteTagsModal({ open, initialTags, onClose, onSave }: No
               )}
             </div>
           </div>
-        </div>
+        </fieldset>
         {saveError && (
           <p role="alert" className="px-4 py-2 text-sm text-red-300">
             {saveError}

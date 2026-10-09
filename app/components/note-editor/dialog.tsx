@@ -1,6 +1,6 @@
 'use client';
 
-import { type ReactNode, useEffect, useRef } from 'react';
+import { type ReactNode, useLayoutEffect, useRef } from 'react';
 
 /** Native modal semantics provide focus containment, Escape and focus restoration. */
 export function EditorDialog({
@@ -19,11 +19,13 @@ export function EditorDialog({
   className?: string;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
-  useEffect(() => {
+  useLayoutEffect(() => {
+    const previousFocus = document.activeElement;
     const dialog = ref.current;
     if (open && dialog && !dialog.open) dialog.showModal();
     return () => {
       dialog?.close();
+      if (previousFocus instanceof HTMLElement && previousFocus.isConnected) previousFocus.focus();
     };
   }, [open]);
   if (!open) return null;
