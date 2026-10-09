@@ -39,15 +39,52 @@ body,
   }
 }
 
-/* Milkdown */
-.milkdown {
+/* Keep editor scrolling inside the available viewport, including mobile keyboards. */
+.note-editor-surface > div,
+.note-editor-surface .milkdown {
   height: 100%;
-  overflow-x: hidden;
-  overflow-y: auto;
+  min-height: 0;
 }
-
+.note-editor-surface .milkdown {
+  overflow: auto;
+  overscroll-behavior: contain;
+  --crepe-font-default: ui-sans-serif, system-ui, sans-serif;
+  --crepe-font-title: ui-sans-serif, system-ui, sans-serif;
+}
+.note-editor-surface .milkdown .ProseMirror {
+  min-height: calc(100% - 100px);
+  padding: 24px 48px 160px;
+  max-width: 900px;
+  margin: 0 auto;
+  overflow-wrap: anywhere;
+  scroll-margin: 130px 0 100px;
+}
+.editor-button {
+  min-height: 44px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid #4b5563;
+  font-size: 14px;
+  color: #e5e7eb;
+}
+.editor-button:hover {
+  background: #374151;
+}
+.editor-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.editor-button:focus-visible,
+.note-editor summary:focus-visible {
+  outline: 2px solid #93c5fd;
+  outline-offset: 2px;
+}
 @media (max-width: 768px) {
-  .milkdown .ProseMirror {
-    padding: 5px !important;
+  .note-editor-surface .milkdown .ProseMirror {
+    padding: 16px 20px 120px;
+    font-size: 16px;
+  }
+  .note-editor-surface .milkdown .milkdown-block-handle {
+    display: none;
   }
 }

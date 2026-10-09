@@ -9,9 +9,18 @@ import { publishNote, unpublishNote } from '@/(panel)/actions';
 interface PublishControlsProps {
   note: Note;
   className?: string;
+  beforeAction?: () => Promise<void>;
+  afterAction?: () => void;
+  onPublishedChange?: (published: boolean) => void;
 }
 
-export function PublishControls({ note, className = '' }: PublishControlsProps) {
+export function PublishControls({
+  note,
+  className = '',
+  beforeAction,
+  afterAction,
+  onPublishedChange,
+}: PublishControlsProps) {
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const isPublished = !!note.published;
@@ -33,19 +42,22 @@ export function PublishControls({ note, className = '' }: PublishControlsProps) 
     setIsPending(true);
     setError(null);
     try {
+      await beforeAction?.();
       if (isPublished) {
         await unpublishNote(note.id);
       } else {
         await publishNote(note.id);
       }
       // Reload to reflect new published state in the editor header and any SSR bits
-      window.location.reload();
+      if (onPublishedChange) onPublishedChange(!isPublished);
+      else window.location.reload();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to toggle publish state');
     } finally {
       setIsPending(false);
+      afterAction?.();
     }
-  }, [isPublished, isPending, note.id]);
+  }, [isPublished, isPending, note.id, beforeAction, afterAction, onPublishedChange]);
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>

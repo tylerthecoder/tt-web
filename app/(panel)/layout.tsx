@@ -11,7 +11,7 @@ import { requireAuth } from '@/utils/auth';
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   await requireAuth();
   return (
-    <div className="flex min-h-screen w-full flex-col bg-gray-900">
+    <div className="flex h-dvh min-h-0 w-full flex-col overflow-hidden bg-gray-900">
       <QueryProvider>
         <div className="p-4 bg-gray-800 bg-opacity-50 flex-shrink-0 hidden md:block">
           <div className="flex justify-between items-center">
@@ -24,7 +24,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         </div>
         <TabsNav />
         <CommandMenu />
-        <div className="flex min-h-0 flex-1 flex-col">{children}</div>
+        <div className="flex min-h-0 flex-1 flex-col overflow-auto">{children}</div>
       </QueryProvider>
     </div>
   );

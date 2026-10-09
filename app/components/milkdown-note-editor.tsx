@@ -1,207 +1,302 @@
 'use client';
 
-import '@milkdown/crepe/theme/common/style.css';
-import '@milkdown/crepe/theme/frame.css';
-
-import { Crepe } from '@milkdown/crepe';
-import { listenerCtx } from '@milkdown/plugin-listener';
-import { Milkdown, MilkdownProvider, useEditor } from '@milkdown/react';
-import { useEffect, useState } from 'react';
-import { Note } from 'tt-services/src/client-index.ts';
+import { useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
+import type { Note } from 'tt-services/src/client-index.ts';
 
 import { updateNoteMetadata } from '@/(panel)/actions';
+import { useNote } from '@/(panel)/hooks';
 
-import { useNote, useUpdateNoteContent } from '../(panel)/hooks';
 import { GoogleSyncControls } from './google-sync-controls';
+import { draftKey, readDraft } from './note-editor/autosave';
+import { EditorSurface } from './note-editor/editor-surface';
+import { useNoteAutosave } from './note-editor/use-autosave';
 import NoteTagsModal from './note-tags-modal';
 import { PublishControls } from './publish-controls';
 
-interface MilkdownEditorWithNoteProps {
-  note: Note;
-  hideTitle?: boolean;
-  showGoogleSync?: boolean;
-}
+const EMPTY_TAGS: string[] = [];
 
-const MilkdownEditorWithNote: React.FC<MilkdownEditorWithNoteProps> = ({
+function LoadedEditor({
   note,
-  hideTitle = false,
-  showGoogleSync = true,
-}) => {
-  const { updateNote, isSyncing } = useUpdateNoteContent(note.id);
-
-  const { get } = useEditor((root) => {
-    return new Crepe({
-      root,
-      defaultValue: note.content,
-    });
+  hideTitle,
+  showGoogleSync,
+}: {
+  note: Note;
+  hideTitle: boolean;
+  showGoogleSync: boolean;
+}) {
+  const queryClient = useQueryClient();
+  const autosave = useNoteAutosave(note.id);
+  const [currentNote, setCurrentNote] = useState(note);
+  const [initialContent, setInitialContent] = useState(autosave.content ?? note.content);
+  const [generation, setGeneration] = useState(0);
+  const [recovery, setRecovery] = useState(() => {
+    const draft = readDraft(note.id);
+    return autosave.content === undefined && draft !== note.content ? draft : null;
   });
-
-  useEffect(() => {
-    const editor = get();
-    if (!editor) return;
-
-    editor.action((ctx) => {
-      ctx.get(listenerCtx).markdownUpdated((ctx, markdown, prevMarkdown) => {
-        if (markdown !== prevMarkdown) {
-          updateNote(markdown);
-        }
-      });
-    });
-  }, [get, updateNote]);
-
   const [editingTitle, setEditingTitle] = useState(false);
   const [titleInput, setTitleInput] = useState(note.title);
   const [tagsOpen, setTagsOpen] = useState(false);
+  const [externalBusy, setExternalBusy] = useState(false);
+  const [savingMetadata, setSavingMetadata] = useState(false);
+  const [metadataError, setMetadataError] = useState<string | null>(null);
 
-  useEffect(() => {
-    setTitleInput(note.title);
-  }, [note.title]);
-
-  const saveTitle = async () => {
-    const newTitle = titleInput.trim();
-    if (!newTitle || newTitle === note.title) {
-      setEditingTitle(false);
-      return;
+  const updateMetadata = async (updates: { title?: string; tags?: string[] }) => {
+    await updateNoteMetadata(note.id, updates);
+    setCurrentNote((previous) => ({ ...previous, ...updates }));
+    queryClient.setQueryData(
+      ['note', note.id],
+      (previous: Note | undefined) => previous && { ...previous, ...updates },
+    );
+    for (const key of [
+      'notes-index',
+      'daily-notes-metadata',
+      'notes-by-tag',
+      'tags',
+      'note-metadata',
+    ]) {
+      void queryClient.invalidateQueries({ queryKey: [key] });
     }
-    await updateNoteMetadata(note.id, { title: newTitle });
-    window.location.reload();
+  };
+  const cancelTitle = () => {
+    setTitleInput(currentNote.title);
+    setEditingTitle(false);
+    setMetadataError(null);
+  };
+  const saveTitle = async () => {
+    if (savingMetadata || !titleInput.trim()) return;
+    setSavingMetadata(true);
+    setMetadataError(null);
+    try {
+      await updateMetadata({ title: titleInput.trim() });
+      setEditingTitle(false);
+    } catch {
+      setMetadataError('Could not save the title. Please try again.');
+    } finally {
+      setSavingMetadata(false);
+    }
+  };
+  const beforeExternalAction = async () => {
+    if (recovery !== null) throw new Error('Resolve the recovered draft before continuing.');
+    setExternalBusy(true);
+    if (!(await autosave.flush())) {
+      setExternalBusy(false);
+      throw new Error('Save your note successfully before continuing.');
+    }
   };
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden">
-      <div className="flex items-start justify-between px-3 md:px-4 py-2 bg-gray-700">
-        {!hideTitle && (
-          <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3 flex-1 min-w-0">
-            <div className="flex items-center gap-2 min-w-0">
+    <div className="note-editor flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden bg-gray-900 text-gray-100">
+      <div className="shrink-0 border-b border-gray-700 bg-gray-900 px-3 py-2 md:px-5">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          {!hideTitle && (
+            <div className="flex min-w-0 flex-1 items-center gap-2">
               {editingTitle ? (
-                <input
-                  value={titleInput}
-                  onChange={(e) => setTitleInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') saveTitle();
-                    if (e.key === 'Escape') setEditingTitle(false);
+                <form
+                  className="flex min-w-0 flex-1 flex-wrap items-center gap-2"
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    void saveTitle();
                   }}
-                  className="px-2 py-1 rounded bg-black/40 border border-white/10 text-gray-100 text-xl md:text-3xl font-medium min-w-0 flex-1"
-                />
-              ) : (
-                <h1
-                  className="text-xl md:text-3xl text-gray-300 font-medium truncate"
-                  onDoubleClick={() => setEditingTitle(true)}
                 >
-                  {note.title}
-                </h1>
-              )}
-              {editingTitle ? (
-                <>
-                  <button
-                    onClick={saveTitle}
-                    className="px-2 py-1 rounded bg-green-600 hover:bg-green-500 text-white text-sm"
-                  >
-                    Save
+                  <input
+                    autoFocus
+                    aria-label="Note title"
+                    value={titleInput}
+                    disabled={savingMetadata}
+                    onChange={(event) => setTitleInput(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Escape' && !savingMetadata) cancelTitle();
+                    }}
+                    className="min-h-11 min-w-0 flex-1 rounded border border-gray-600 bg-gray-800 px-2 text-base"
+                  />
+                  <button className="editor-button" disabled={savingMetadata || !titleInput.trim()}>
+                    {savingMetadata ? 'Saving…' : 'Save title'}
                   </button>
                   <button
-                    onClick={() => {
-                      setEditingTitle(false);
-                      setTitleInput(note.title);
-                    }}
-                    className="px-2 py-1 rounded border border-white/10 text-gray-300 hover:bg-white/5 text-sm"
+                    type="button"
+                    className="editor-button"
+                    disabled={savingMetadata}
+                    onClick={cancelTitle}
                   >
                     Cancel
                   </button>
+                </form>
+              ) : (
+                <>
+                  <h1 className="min-w-0 truncate text-lg font-medium" title={currentNote.title}>
+                    {currentNote.title}
+                  </h1>
+                  <button className="editor-button shrink-0" onClick={() => setEditingTitle(true)}>
+                    Edit title
+                  </button>
                 </>
-              ) : (
-                <button
-                  onClick={() => setEditingTitle(true)}
-                  className="px-2 py-1 rounded border border-white/10 text-gray-300 hover:bg-white/5 text-sm"
-                >
-                  Edit title
-                </button>
               )}
             </div>
-
-            {/* Publish Controls + Google Sync Controls */}
-            <div className="flex items-center gap-3 flex-wrap">
-              <PublishControls note={note} className="text-xs md:text-sm" />
-              {showGoogleSync && <GoogleSyncControls note={note} className="text-xs md:text-sm" />}
-            </div>
-            <div className="flex items-center gap-2 flex-wrap">
-              {note.tags && note.tags.length > 0 ? (
-                note.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="bg-blue-600 px-2 py-0.5 rounded-full text-xs font-medium text-white"
-                  >
-                    {tag}
-                  </span>
-                ))
-              ) : (
-                <span className="text-xs text-gray-400">No tags</span>
-              )}
-              <button
-                onClick={() => setTagsOpen(true)}
-                className="px-2 py-0.5 rounded border border-white/10 text-gray-300 hover:bg-white/5 text-xs"
-              >
+          )}
+          <div className="flex items-center gap-2 text-sm">
+            <span
+              role="status"
+              aria-live="polite"
+              className={autosave.status === 'error' ? 'text-red-300' : 'text-gray-400'}
+            >
+              {
+                {
+                  saved: 'Saved',
+                  pending: 'Unsaved changes',
+                  saving: 'Saving…',
+                  error: 'Could not save',
+                }[autosave.status]
+              }
+            </span>
+            {autosave.status !== 'saved' && (
+              <button className="editor-button" onClick={() => void autosave.flush()}>
+                {autosave.status === 'error' ? 'Retry save' : 'Save now'}
+              </button>
+            )}
+          </div>
+        </div>
+        {metadataError && (
+          <p role="alert" className="py-2 text-sm text-red-300">
+            {metadataError}
+          </p>
+        )}
+        {!hideTitle && (
+          <details className="mt-1 text-sm">
+            <summary className="min-h-11 cursor-pointer py-3 text-gray-400">
+              Tags & sharing {currentNote.tags?.length ? `(${currentNote.tags.length} tags)` : ''}
+            </summary>
+            <fieldset
+              disabled={externalBusy || recovery !== null}
+              className="flex flex-wrap items-center gap-3 pb-2"
+            >
+              {currentNote.tags?.map((tag) => (
+                <span key={tag} className="rounded-full bg-gray-700 px-2 py-1 text-xs">
+                  {tag}
+                </span>
+              ))}
+              <button className="editor-button" onClick={() => setTagsOpen(true)}>
                 Edit tags
               </button>
-            </div>
-          </div>
+              <PublishControls
+                note={currentNote}
+                beforeAction={beforeExternalAction}
+                afterAction={() => setExternalBusy(false)}
+                onPublishedChange={(published) =>
+                  setCurrentNote((previous) => ({ ...previous, published }))
+                }
+              />
+              {showGoogleSync && (
+                <GoogleSyncControls
+                  note={currentNote}
+                  beforeAction={beforeExternalAction}
+                  afterAction={() => setExternalBusy(false)}
+                />
+              )}
+            </fieldset>
+          </details>
         )}
-        <div className="flex items-center space-x-2 flex-shrink-0 ml-2">
-          {isSyncing ? (
-            <>
-              <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
-              <span className="text-xs md:text-sm text-gray-300">Syncing...</span>
-            </>
-          ) : (
-            <>
-              <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-              <span className="text-xs md:text-sm text-gray-300">Saved</span>
-            </>
-          )}
-        </div>
+        {!autosave.recoveryAvailable && autosave.status !== 'saved' && (
+          <p role="alert" className="py-2 text-sm text-amber-200">
+            Local recovery is unavailable. Keep this page open until your note is saved.
+          </p>
+        )}
+        {autosave.status === 'error' && (
+          <p role="alert" className="py-2 text-sm text-red-300">
+            Your changes have not reached the server.
+            {autosave.recoveryAvailable ? ' A recovery copy is stored on this device.' : ''}
+          </p>
+        )}
       </div>
-      <div className="min-h-0 flex-1 overflow-hidden bg-gray-800">
-        <div className="flex flex-col h-full [&>*]:h-full">
-          <Milkdown />
+      {externalBusy && (
+        <p role="status" className="px-4 py-2 text-sm text-gray-300">
+          Finishing note action…
+        </p>
+      )}
+      {recovery !== null ? (
+        <div className="overflow-auto p-4">
+          <p className="mb-3">
+            This device has an unsaved draft. Restore it or keep the server version before editing.
+          </p>
+          <div className="mb-3 flex flex-wrap gap-2">
+            <button
+              className="editor-button"
+              onClick={() => {
+                setInitialContent(recovery);
+                setGeneration((n) => n + 1);
+                autosave.update(recovery);
+                setRecovery(null);
+              }}
+            >
+              Restore draft
+            </button>
+            <button
+              className="editor-button"
+              onClick={() => {
+                try {
+                  localStorage.removeItem(draftKey(note.id));
+                } catch {
+                  /* Storage may be disabled. */
+                }
+                setRecovery(null);
+              }}
+            >
+              Keep server version
+            </button>
+          </div>
+          <details>
+            <summary className="cursor-pointer py-2">Review recovered Markdown</summary>
+            <pre className="whitespace-pre-wrap break-words rounded bg-gray-800 p-3 text-sm">
+              {recovery}
+            </pre>
+          </details>
         </div>
-      </div>
+      ) : (
+        <EditorSurface
+          readOnly={externalBusy}
+          key={generation}
+          initialContent={initialContent}
+          onChange={autosave.update}
+          onSave={() => void autosave.flush()}
+        />
+      )}
       <NoteTagsModal
         open={tagsOpen}
-        initialTags={note.tags || []}
+        initialTags={currentNote.tags || EMPTY_TAGS}
         onClose={() => setTagsOpen(false)}
-        onSave={async (tags) => {
-          await updateNoteMetadata(note.id, { tags });
-          window.location.reload();
-        }}
+        onSave={(tags) => updateMetadata({ tags })}
       />
     </div>
   );
-};
-
-interface MilkdownEditorProps {
-  noteId: string;
-  hideTitle?: boolean;
-  showGoogleSync?: boolean;
 }
 
-export const MilkdownEditor: React.FC<MilkdownEditorProps> = ({
+export function MilkdownEditor({
   noteId,
   hideTitle = false,
   showGoogleSync = true,
-}) => {
-  const { note, loading } = useNote(noteId);
-
-  if (loading) {
-    return <div className="h-full flex items-center justify-center">Loading note...</div>;
-  }
-
-  if (!note) {
-    return <div className="h-full flex items-center justify-center">Note not found</div>;
-  }
-
+}: {
+  noteId: string;
+  hideTitle?: boolean;
+  showGoogleSync?: boolean;
+}) {
+  const { note, loading, error, refetch } = useNote(noteId);
+  if (loading)
+    return (
+      <div className="p-4" role="status">
+        Loading note…
+      </div>
+    );
+  if (error)
+    return (
+      <div className="p-4" role="alert">
+        Could not load this note.{' '}
+        <button className="editor-button" onClick={() => void refetch()}>
+          Retry
+        </button>
+      </div>
+    );
+  if (!note) return <div className="p-4">Note not found.</div>;
   return (
-    <MilkdownProvider>
-      <MilkdownEditorWithNote note={note} hideTitle={hideTitle} showGoogleSync={showGoogleSync} />
-    </MilkdownProvider>
+    <LoadedEditor key={noteId} note={note} hideTitle={hideTitle} showGoogleSync={showGoogleSync} />
   );
-};
+}

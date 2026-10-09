@@ -4,6 +4,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 
 import { useTags } from '@/(panel)/hooks';
 
+import { EditorDialog } from './note-editor/dialog';
+
 type NoteTagsModalProps = {
   open: boolean;
   initialTags: string[];
@@ -16,11 +18,13 @@ export default function NoteTagsModal({ open, initialTags, onClose, onSave }: No
   const [tags, setTags] = useState<string[]>(initialTags || []);
   const [query, setQuery] = useState('');
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => {
     if (open) {
       setTags(initialTags || []);
       setQuery('');
+      setSaveError(null);
     }
   }, [open, initialTags]);
 
@@ -47,20 +51,33 @@ export default function NoteTagsModal({ open, initialTags, onClose, onSave }: No
 
   const handleSave = async () => {
     setSaving(true);
+    setSaveError(null);
     try {
       await onSave(tags);
       onClose();
+    } catch {
+      setSaveError('Could not save tags. Please try again.');
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-      <div className="bg-gray-900 rounded-lg w-full max-w-lg shadow-xl border border-white/10">
+    <EditorDialog
+      open={open}
+      onClose={onClose}
+      label="Edit tags"
+      busy={saving}
+      className="w-[min(32rem,calc(100vw-2rem))] max-w-none max-h-[90dvh]"
+    >
+      <div className="bg-gray-900 rounded-lg w-full max-w-lg max-h-[90dvh] overflow-y-auto shadow-xl border border-white/10">
         <div className="px-4 py-3 border-b border-white/10 flex items-center justify-between">
           <div className="text-white font-semibold">Edit tags</div>
-          <button onClick={onClose} className="text-gray-300 hover:text-white text-sm">
+          <button
+            disabled={saving}
+            onClick={onClose}
+            className="text-gray-300 hover:text-white text-sm"
+          >
             Close
           </button>
         </div>
@@ -77,7 +94,11 @@ export default function NoteTagsModal({ open, initialTags, onClose, onSave }: No
                     className="px-2 py-0.5 bg-gray-700 text-gray-300 text-xs rounded-full flex items-center gap-1"
                   >
                     <span>{t}</span>
-                    <button onClick={() => removeTag(t)} className="hover:text-white">
+                    <button
+                      aria-label={`Remove tag ${t}`}
+                      onClick={() => removeTag(t)}
+                      className="hover:text-white"
+                    >
                       ×
                     </button>
                   </span>
@@ -90,13 +111,14 @@ export default function NoteTagsModal({ open, initialTags, onClose, onSave }: No
             <div className="text-xs text-gray-400 mb-1">Add tag</div>
             <div className="flex gap-2">
               <input
+                aria-label="Add tag"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && query.trim()) addTag(query);
                 }}
                 placeholder="Search or type a new tag…"
-                className="flex-1 px-3 py-2 rounded bg-black/40 border border-white/10 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+                className="min-w-0 flex-1 px-3 py-2 rounded bg-black/40 border border-white/10 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-600/30"
               />
               <button
                 onClick={() => addTag(query)}
@@ -129,8 +151,14 @@ export default function NoteTagsModal({ open, initialTags, onClose, onSave }: No
             </div>
           </div>
         </div>
+        {saveError && (
+          <p role="alert" className="px-4 py-2 text-sm text-red-300">
+            {saveError}
+          </p>
+        )}
         <div className="px-4 py-3 border-t border-white/10 flex justify-end gap-2 bg-black/30">
           <button
+            disabled={saving}
             onClick={onClose}
             className="px-3 py-1.5 rounded border border-white/10 text-gray-300 hover:bg-white/5"
           >
@@ -145,6 +173,6 @@ export default function NoteTagsModal({ open, initialTags, onClose, onSave }: No
           </button>
         </div>
       </div>
-    </div>
+    </EditorDialog>
   );
 }

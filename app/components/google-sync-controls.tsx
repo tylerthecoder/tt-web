@@ -11,11 +11,16 @@ import {
 } from 'react-icons/fa';
 import { isGoogleNote, Note } from 'tt-services/src/client-index.ts';
 
-import { getAllTags, pushNoteToGoogleDrive } from '@/(panel)/actions';
+import { pushNoteToGoogleDrive } from '@/(panel)/actions';
 import { assignGoogleDocIdToNote, pullContentFromGoogleDoc } from '@/(panel)/actions';
 
 // Hook for Google sync functionality
-export const useGoogleSync = (noteId: string, note?: Note | null) => {
+export const useGoogleSync = (
+  noteId: string,
+  note?: Note | null,
+  beforeAction?: () => Promise<void>,
+  afterAction?: () => void,
+) => {
   const [isPulling, setIsPulling] = useState(false);
   const [isPushing, setIsPushing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -35,6 +40,7 @@ export const useGoogleSync = (noteId: string, note?: Note | null) => {
     setPushSuccess(null);
 
     try {
+      await beforeAction?.();
       const updatedNote = await pullContentFromGoogleDoc(noteId);
       // Refresh the page to show the updated content
       window.location.reload();
@@ -43,11 +49,12 @@ export const useGoogleSync = (noteId: string, note?: Note | null) => {
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to pull content from Google Doc';
       setError(errorMessage);
-      throw err;
+      return null;
     } finally {
       setIsPulling(false);
+      afterAction?.();
     }
-  }, [noteId]);
+  }, [noteId, beforeAction, afterAction]);
 
   const pushToGoogle = useCallback(
     async (
@@ -61,6 +68,7 @@ export const useGoogleSync = (noteId: string, note?: Note | null) => {
       setPushSuccess(null);
 
       try {
+        await beforeAction?.();
         const isGoogle = note ? isGoogleNote(note) : false;
         const result = await pushNoteToGoogleDrive(noteId, {
           convertToGoogleNote: options.convertToGoogleNote ?? !isGoogle,
@@ -96,9 +104,10 @@ export const useGoogleSync = (noteId: string, note?: Note | null) => {
         };
       } finally {
         setIsPushing(false);
+        afterAction?.();
       }
     },
-    [noteId, note],
+    [noteId, note, beforeAction, afterAction],
   );
 
   const assignGoogleDoc = useCallback(
@@ -106,16 +115,20 @@ export const useGoogleSync = (noteId: string, note?: Note | null) => {
       setIsPushing(true);
       setError(null);
       try {
+        await beforeAction?.();
         await assignGoogleDocIdToNote(noteId, googleDocId);
         window.location.reload(); // Refresh to show updated state
+        return true;
       } catch (err) {
         const errorMsg = err instanceof Error ? err.message : 'Failed to assign Google Doc';
         setError(errorMsg);
+        return false;
       } finally {
         setIsPushing(false);
+        afterAction?.();
       }
     },
-    [noteId],
+    [noteId, beforeAction, afterAction],
   );
 
   const clearMessages = useCallback(() => {
@@ -150,44 +163,28 @@ export const useGoogleSync = (noteId: string, note?: Note | null) => {
 
 // Combined Google Sync Modal (handles both create new and sync existing)
 interface GoogleSyncModalProps {
+  beforeAction?: () => Promise<void>;
+  afterAction?: () => void;
   isOpen: boolean;
   onClose: () => void;
   noteId: string;
 }
 
-function GoogleSyncModal({ isOpen, onClose, noteId }: GoogleSyncModalProps) {
-  const googleSync = useGoogleSync(noteId);
+function GoogleSyncModal({
+  isOpen,
+  onClose,
+  noteId,
+  beforeAction,
+  afterAction,
+}: GoogleSyncModalProps) {
+  const googleSync = useGoogleSync(noteId, undefined, beforeAction, afterAction);
   const [showDocSelector, setShowDocSelector] = useState(false);
-  const [googleDocs, setGoogleDocs] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-
-  // Fetch Google Docs when switching to selector view
-  useEffect(() => {
-    if (showDocSelector && googleDocs.length === 0) {
-      fetchGoogleDocs();
-    }
-  }, [showDocSelector, googleDocs.length]);
-
-  const fetchGoogleDocs = async () => {
-    setLoading(true);
-    try {
-      // This would need to be implemented as a server action
-      // const docs = await getGoogleDocs();
-      // setGoogleDocs(docs);
-
-      // For now, mock some data
-      setGoogleDocs([
-        { id: '1', name: 'My Document 1', modifiedTime: '2024-01-15' },
-        { id: '2', name: 'Project Notes', modifiedTime: '2024-01-14' },
-        { id: '3', name: 'Meeting Notes', modifiedTime: '2024-01-13' },
-      ]);
-    } catch (err) {
-      console.error('Failed to fetch Google Docs:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [documentLink, setDocumentLink] = useState('');
+  const documentId = documentLink
+    .trim()
+    .match(
+      /^(?:https:\/\/docs\.google\.com\/document\/d\/)?([A-Za-z0-9_-]{20,})(?:\/[^\s]*)?$/,
+    )?.[1];
 
   const handleCreateNewDoc = async () => {
     const result = await googleSync.pushToGoogle({
@@ -200,15 +197,11 @@ function GoogleSyncModal({ isOpen, onClose, noteId }: GoogleSyncModalProps) {
   };
 
   const handleAssignDoc = async (docId: string) => {
-    await googleSync.assignGoogleDoc(docId);
-    if (!googleSync.error) {
+    const assigned = await googleSync.assignGoogleDoc(docId);
+    if (assigned) {
       onClose();
     }
   };
-
-  const filteredDocs = googleDocs.filter((doc) =>
-    doc.name.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
 
   if (!isOpen) return null;
 
@@ -236,7 +229,7 @@ function GoogleSyncModal({ isOpen, onClose, noteId }: GoogleSyncModalProps) {
               {/* Create new Google Doc */}
               <button
                 onClick={handleCreateNewDoc}
-                disabled={googleSync.isPushing}
+                disabled={googleSync.isSyncing}
                 className="w-full p-4 bg-green-700 hover:bg-green-600 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg text-white flex items-center gap-3 transition-colors"
               >
                 {googleSync.isPushing ? <FaSpinner className="animate-spin" /> : <FaUpload />}
@@ -251,7 +244,7 @@ function GoogleSyncModal({ isOpen, onClose, noteId }: GoogleSyncModalProps) {
               {/* Sync with existing Google Doc */}
               <button
                 onClick={() => setShowDocSelector(true)}
-                disabled={googleSync.isPushing}
+                disabled={googleSync.isSyncing}
                 className="w-full p-4 bg-blue-700 hover:bg-blue-600 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg text-white flex items-center gap-3 transition-colors"
               >
                 <FaGoogle />
@@ -275,40 +268,26 @@ function GoogleSyncModal({ isOpen, onClose, noteId }: GoogleSyncModalProps) {
                 ← Back to options
               </button>
 
+              <label className="block text-sm text-gray-300" htmlFor="google-document-link">
+                Google Doc link or ID
+              </label>
               <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search Google Docs..."
-                className="w-full px-3 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-blue-500 focus:outline-none"
+                id="google-document-link"
+                value={documentLink}
+                onChange={(event) => setDocumentLink(event.target.value)}
+                placeholder="https://docs.google.com/document/d/…"
+                className="mt-2 w-full min-w-0 rounded border border-gray-600 bg-gray-700 px-3 py-3 text-base text-white"
               />
-            </div>
-
-            <div className="flex-1 overflow-y-auto">
-              {loading ? (
-                <div className="flex items-center justify-center py-8">
-                  <FaSpinner className="animate-spin mr-2" />
-                  Loading Google Docs...
-                </div>
-              ) : filteredDocs.length > 0 ? (
-                <div className="space-y-2">
-                  {filteredDocs.map((doc) => (
-                    <button
-                      key={doc.id}
-                      onClick={() => handleAssignDoc(doc.id)}
-                      disabled={googleSync.isPushing}
-                      className="w-full p-3 bg-gray-700 hover:bg-gray-600 disabled:bg-gray-600 disabled:cursor-not-allowed rounded text-left transition-colors"
-                    >
-                      <div className="font-medium text-white">{doc.name}</div>
-                      <div className="text-sm text-gray-400">
-                        Modified {new Date(doc.modifiedTime).toLocaleDateString()}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-gray-400">No Google Docs found</div>
-              )}
+              <p className="my-3 text-sm text-gray-400">
+                Use a document this app has permission to access.
+              </p>
+              <button
+                onClick={() => documentId && handleAssignDoc(documentId)}
+                disabled={!documentId || googleSync.isPushing}
+                className="editor-button"
+              >
+                {googleSync.isPushing ? 'Connecting…' : 'Connect document'}
+              </button>
             </div>
           </div>
         )}
@@ -343,10 +322,17 @@ function GoogleSyncModal({ isOpen, onClose, noteId }: GoogleSyncModalProps) {
 interface GoogleSyncControlsProps {
   note: Note;
   className?: string;
+  beforeAction?: () => Promise<void>;
+  afterAction?: () => void;
 }
 
-export function GoogleSyncControls({ note, className = '' }: GoogleSyncControlsProps) {
-  const googleSync = useGoogleSync(note.id, note);
+export function GoogleSyncControls({
+  note,
+  className = '',
+  beforeAction,
+  afterAction,
+}: GoogleSyncControlsProps) {
+  const googleSync = useGoogleSync(note.id, note, beforeAction, afterAction);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const isGoogle = isGoogleNote(note);
@@ -367,6 +353,8 @@ export function GoogleSyncControls({ note, className = '' }: GoogleSyncControlsP
         <GoogleSyncModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
+          beforeAction={beforeAction}
+          afterAction={afterAction}
           noteId={note.id}
         />
       </div>
@@ -391,7 +379,7 @@ export function GoogleSyncControls({ note, className = '' }: GoogleSyncControlsP
       {/* Pull from Google button */}
       <button
         onClick={googleSync.pullFromGoogle}
-        disabled={googleSync.isPulling}
+        disabled={googleSync.isSyncing}
         className="text-xs text-blue-400 hover:text-blue-300 underline disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
         title="Pull latest content from Google Doc"
       >
@@ -406,7 +394,7 @@ export function GoogleSyncControls({ note, className = '' }: GoogleSyncControlsP
       {/* Push to Google button */}
       <button
         onClick={() => googleSync.pushToGoogle()}
-        disabled={googleSync.isPushing}
+        disabled={googleSync.isSyncing}
         className="text-xs text-green-400 hover:text-green-300 underline disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
         title="Push current content to Google Doc as new section"
       >

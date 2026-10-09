@@ -46,3 +46,7 @@ yarn-error.log*
 !.vscode/extensions.json
 
 *.swp
+
+# Browser test artifacts
+/test-results/
+/playwright-report/
