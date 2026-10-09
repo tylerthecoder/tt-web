@@ -1,8 +1,9 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
+import { flushNoteBeforeRead } from '@/components/note-editor/use-autosave';
 import { getGoogleDriveFileById } from '@/google/docs/actions';
 import type { GoogleDriveFile } from '@/types/google';
 
@@ -20,7 +21,6 @@ import {
   getNotesMetadataByTag,
   getTodayDailyNote,
   pullContentFromGoogleDoc,
-  updateNoteContent,
 } from './actions';
 
 export function useWeek() {
@@ -129,21 +129,26 @@ export function useList(listId: string) {
 // Migrated note-related hooks
 
 export const useNote = (noteId: string) => {
-  const [note, setNote] = useState<any | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!noteId) return;
-    // Reuse panel action getNote from actions via dynamic import
-    (async () => {
+  const query = useQuery({
+    queryKey: ['note', noteId],
+    staleTime: 0,
+    refetchOnMount: 'always',
+    queryFn: async () => {
       const { getNote } = await import('./actions');
-      const n = await getNote(noteId);
-      setNote(n);
-      setLoading(false);
-    })();
-  }, [noteId]);
-
-  return { note, loading };
+      await flushNoteBeforeRead(noteId);
+      return getNote(noteId);
+    },
+    enabled: !!noteId,
+    // Never replace the document under an active cursor on window focus.
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+  return {
+    note: query.data,
+    loading: query.isPending || query.isFetching,
+    error: query.error,
+    refetch: query.refetch,
+  };
 };
 
 export function useNoteMetadata(noteId: string) {
@@ -154,34 +159,6 @@ export function useNoteMetadata(noteId: string) {
     staleTime: 60_000,
   });
 }
-
-export const useUpdateNoteContent = (noteId: string, debounceMs: number = 1000) => {
-  const [isSyncing, setIsSyncing] = useState(false);
-  const updateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  const debouncedUpdate = useCallback(
-    (content: string) => {
-      setIsSyncing(true);
-      if (updateTimeoutRef.current) clearTimeout(updateTimeoutRef.current);
-      updateTimeoutRef.current = setTimeout(async () => {
-        try {
-          await updateNoteContent(noteId, content);
-        } finally {
-          setIsSyncing(false);
-        }
-      }, debounceMs);
-    },
-    [noteId, debounceMs],
-  );
-
-  useEffect(() => {
-    return () => {
-      if (updateTimeoutRef.current) clearTimeout(updateTimeoutRef.current);
-    };
-  }, []);
-
-  return { updateNote: debouncedUpdate, isSyncing };
-};
 
 export const useAssignGoogleDocIdToNote = (noteId: string) => {
   const [isAssigning, setIsAssigning] = useState(false);
