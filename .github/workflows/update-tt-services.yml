@@ -16,6 +16,9 @@ on:
 
 jobs:
   update-tt-services:
+    # Resume only after the Google auth security patch is upstream and the
+    # dependency update also validates the lockfile and runs test:auth.
+    if: ${{ false }}
     runs-on: ubuntu-latest
     permissions:
       contents: write

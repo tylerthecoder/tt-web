@@ -1,22 +1,16 @@
-import { createHmac } from 'crypto';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { SessionRecord } from 'tt-services';
 
 import { getTT } from '@/utils/utils';
 
-export function isAuthDisabled(): boolean {
-  const isAuthDisabled =
-    process.env.AUTH_DISABLED === 'true' || process.env.NODE_ENV === 'development';
-  if (isAuthDisabled) {
-    console.log('AUTH DISABLED');
-  }
-  return isAuthDisabled;
-}
+import { isAdminEmail, isAuthDisabled } from './auth-policy';
+
+export { isAuthDisabled } from './auth-policy';
 
 export async function hasSessionCookie(): Promise<boolean> {
   const cookieStore = await cookies();
-  return cookieStore.get('tt_session') !== null;
+  return Boolean(cookieStore.get('tt_session')?.value);
 }
 
 export async function getSession(): Promise<SessionRecord | null> {
@@ -34,12 +28,13 @@ export async function getSession(): Promise<SessionRecord | null> {
     return null;
   }
 
-  // If the session is expired, delete it
-  if (record.expiresAt < new Date()) {
-    console.log('Session expired, deleting');
-    await tt.sessions.deleteSession(session.value);
+  // Fail closed for expired or malformed records, including legacy data.
+  if (!(record.expiresAt instanceof Date) || !(record.expiresAt.getTime() > Date.now())) {
     return null;
   }
+
+  // GoogleService keys users by email; reject identities mixed by legacy races.
+  if (record.userId !== record.userEmail) return null;
 
   return record;
 }
@@ -49,13 +44,12 @@ export async function getIsLoggedIn(): Promise<boolean> {
     return true;
   }
   const session = await getSession();
-  const adminEmail = process.env.ADMIN_EMAIL;
-  return session?.userEmail === adminEmail;
+  return isAdminEmail(session?.userEmail);
 }
 
 export async function getGoogleUserId(): Promise<string | null> {
   const session = await getSession();
-  return session?.userId ?? null;
+  return session && isAdminEmail(session.userEmail) ? session.userId : null;
 }
 
 export async function requireAuth(): Promise<void> {
@@ -70,47 +64,8 @@ export async function requireAuth(): Promise<void> {
   }
 
   // Enforce admin email restriction for all authenticated access
-  const adminEmail = process.env.ADMIN_EMAIL;
-  if (adminEmail && session.userEmail !== adminEmail) {
+  if (!isAdminEmail(session.userEmail)) {
     redirect('/login?error=unauthorized_email');
-  }
-}
-
-export function isPreviewHost(hostname: string): boolean {
-  return /^[a-zA-Z0-9-]+-tyler-tracys-projects\.vercel\.app$/.test(hostname);
-}
-
-export function isPreviewOrigin(origin: string): boolean {
-  try {
-    const u = new URL(origin);
-    return isPreviewHost(u.hostname);
-  } catch {
-    return false;
-  }
-}
-
-export function signSessionHandoff(sessionId: string, ts: string): string {
-  const secret = process.env.AUTH_SIGNING_SECRET || '';
-  if (!secret) return '';
-  return createHmac('sha256', secret).update(`${sessionId}|${ts}`).digest('base64url');
-}
-
-export function verifySessionHandoff(
-  sessionId: string,
-  ts: string,
-  sig: string | null | undefined,
-): { ok: boolean; reason?: string } {
-  const secret = process.env.AUTH_SIGNING_SECRET || '';
-  if (!secret) return { ok: true };
-  try {
-    const expected = createHmac('sha256', secret).update(`${sessionId}|${ts}`).digest('base64url');
-    if (expected !== sig) return { ok: false, reason: 'invalid_signature' };
-    const tsNum = parseInt(ts, 10);
-    if (!Number.isFinite(tsNum)) return { ok: false, reason: 'invalid_ts' };
-    if (Math.abs(Date.now() - tsNum) > 5 * 60 * 1000) return { ok: false, reason: 'expired' };
-    return { ok: true };
-  } catch {
-    return { ok: false, reason: 'signature_error' };
   }
 }
 

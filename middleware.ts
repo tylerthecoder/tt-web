@@ -1,12 +1,10 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
-function hasSessionCookieFromRequest(request: NextRequest): boolean {
-  return request.cookies.has('tt_session');
-}
+import { isAuthDisabled } from './app/utils/auth-policy';
 
-function isAuthDisabled(): boolean {
-  return process.env.AUTH_DISABLED === 'true' || process.env.NODE_ENV === 'development';
+function hasSessionCookieFromRequest(request: NextRequest): boolean {
+  return Boolean(request.cookies.get('tt_session')?.value);
 }
 
 export function middleware(request: NextRequest) {

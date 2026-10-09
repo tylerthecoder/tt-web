@@ -1,0 +1,144 @@
+--- a/src/connections/google.ts
++++ b/src/connections/google.ts
+@@ -56,11 +56,16 @@
+   /**
+    * Exchange the authorization code for tokens
+    */
+-  public async getTokens(code: string, redirectUri: string): Promise<GoogleToken> {
++  public async getTokens(
++    code: string,
++    redirectUri: string,
++    options: { expectedEmail?: string; codeVerifier?: string } = {},
++  ): Promise<GoogleToken> {
+     try {
+       const { tokens } = await this.oauth2Client.getToken({
+         code,
+         redirect_uri: redirectUri,
++        codeVerifier: options.codeVerifier,
+       });
+ 
+       if (!tokens.refresh_token) {
+@@ -69,11 +74,18 @@
+         );
+       }
+ 
+-      console.log('Token from code: ', tokens);
+-
+       const tokenInfo = await this.oauth2Client.getTokenInfo(tokens.access_token!);
+       const userId = tokenInfo.email || '';
+-      console.log('tokenInfo', tokenInfo);
++      const emailVerified: unknown = tokenInfo.email_verified;
++      // Authorize the identity from this exchange before persisting credentials.
++      if (
++        !userId ||
++        (emailVerified !== true && emailVerified !== 'true') ||
++        tokenInfo.aud !== this.oauth2Client._clientId ||
++        (options.expectedEmail !== undefined && userId !== options.expectedEmail)
++      ) {
++        throw new Error('Unauthorized Google account');
++      }
+ 
+       // Create new token for storage
+       const newToken: NoId<GoogleToken> = {
+@@ -111,8 +123,9 @@
+         return { id: result.insertedId.toString(), ...newToken };
+       }
+     } catch (error) {
+-      this.logger.error(error, 'Error getting tokens');
+-      throw error;
++      // Provider errors may contain request bodies, codes, or credentials.
++      this.logger.error('Error getting tokens');
++      throw new Error('Google token exchange failed');
+     }
+   }
+ 
+@@ -128,7 +141,9 @@
+         throw new Error(`No token found for user ${userId}`);
+       }
+ 
+-      this.oauth2Client.setCredentials({
++      // Never mutate the shared client: concurrent requests can use different users.
++      const auth = new OAuth2Client(this.oauth2Client._clientId, this.oauth2Client._clientSecret);
++      auth.setCredentials({
+         access_token: token.accessToken,
+         refresh_token: token.refreshToken,
+         expiry_date: token.expiryDate,
+@@ -137,7 +152,7 @@
+       // Check if token needs refresh
+       if (Date.now() >= token.expiryDate) {
+         this.logger.info('Token expired, refreshing...');
+-        const { credentials } = await this.oauth2Client.refreshAccessToken();
++        const { credentials } = await auth.refreshAccessToken();
+ 
+         // Update token in DB
+         await tokenCollection.updateOne(
+@@ -152,10 +167,10 @@
+         );
+       }
+ 
+-      return this.oauth2Client;
+-    } catch (error) {
+-      this.logger.error(error, 'Error getting authorized client');
+-      throw error;
++      return auth;
++    } catch (error) {
++      this.logger.error('Error getting authorized client');
++      throw new Error('Google authorization failed');
+     }
+   }
+ 
+@@ -185,8 +200,8 @@
+ 
+       return response.data.files || [];
+     } catch (error) {
+-      this.logger.error(error, 'Error getting user docs');
+-      throw error;
++      this.logger.error('Error getting user docs');
++      throw new Error('Google API request failed');
+     }
+   }
+ 
+@@ -204,8 +219,8 @@
+ 
+       return response.data;
+     } catch (error) {
+-      this.logger.error(error, 'Error getting Drive file metadata');
+-      throw error;
++      this.logger.error('Error getting Drive file metadata');
++      throw new Error('Google API request failed');
+     }
+   }
+ 
+@@ -219,8 +234,8 @@
+ 
+       return response.data;
+     } catch (error) {
+-      this.logger.error(error, 'Error getting Google Doc');
+-      throw error;
++      this.logger.error('Error getting Google Doc');
++      throw new Error('Google API request failed');
+     }
+   }
+ 
+@@ -345,8 +360,8 @@
+           .join('\n') || ''
+       );
+     } catch (error) {
+-      this.logger.error(error, 'Error getting doc content');
+-      throw error;
++      this.logger.error('Error getting doc content');
++      throw new Error('Google API request failed');
+     }
+   }
+ 
+@@ -375,8 +390,8 @@
+         console.log(`- ${doc.name} (ID: ${doc.id})`);
+       });
+     } catch (error) {
+-      console.error(error);
+-      throw error;
++      this.logger.error('Google API request failed');
++      throw new Error('Google API request failed');
+     }
+   }
+ }

@@ -25,8 +25,7 @@ function GoogleAuthContent() {
 
   const handleLogin = async () => {
     try {
-      const returnUrl = encodeURIComponent(window.location.origin);
-      window.location.href = `/api/google/auth?return=${returnUrl}`;
+      window.location.href = '/api/google/auth';
     } catch (err) {
       console.error('Failed to initiate Google login:', err);
       setError('Failed to start Google authentication. Please try again.');
