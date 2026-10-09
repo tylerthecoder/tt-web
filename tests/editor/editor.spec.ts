@@ -245,3 +245,30 @@ test('short mobile view keeps the end of a long note reachable', async ({ page }
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: test.info().outputPath('mobile-editor.png') });
 });
+
+for (const daily of [false, true]) {
+  test(`autosave status keeps editor height stable (${daily ? 'daily' : 'titled'} note)`, async ({
+    page,
+  }) => {
+    await page.goto(daily ? '/?daily=1' : '/');
+    const editor = page.getByRole('textbox', { name: 'Note content' });
+    await expect(editor).toBeVisible();
+    const saved = page.getByRole('status').filter({ hasText: /^Saved$/ });
+    await expect(saved).toHaveClass(/text-green-400/);
+    await page.evaluate(() => {
+      (window as any).fixture.delay = 1200;
+    });
+    const before = await editor.boundingBox();
+    await editor.click();
+    await page.keyboard.press('ControlOrMeta+End');
+    await page.keyboard.type(' more text');
+    await expect(page.getByRole('status').filter({ hasText: 'Saving…' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Save now' })).toHaveCount(0);
+    expect(await editor.boundingBox()).toEqual(before);
+    await expect
+      .poll(() => page.evaluate(() => localStorage.getItem('tt-note-draft:one')), { timeout: 5000 })
+      .toBeNull();
+    await expect(saved).toBeVisible();
+    expect(await editor.boundingBox()).toEqual(before);
+  });
+}

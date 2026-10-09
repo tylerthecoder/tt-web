@@ -134,26 +134,41 @@ function LoadedEditor({
               )}
             </div>
           )}
-          <div className="flex items-center gap-2 text-sm">
+          <div className="flex h-6 w-28 shrink-0 items-center justify-end gap-2 whitespace-nowrap text-sm">
+            <span
+              aria-hidden="true"
+              className={`h-2 w-2 shrink-0 rounded-full ${
+                autosave.status === 'saved'
+                  ? 'bg-green-400'
+                  : autosave.status === 'error'
+                    ? 'bg-red-400'
+                    : 'bg-yellow-400'
+              }`}
+            />
             <span
               role="status"
               aria-live="polite"
-              className={autosave.status === 'error' ? 'text-red-300' : 'text-gray-400'}
-            >
-              {
-                {
-                  saved: 'Saved',
-                  pending: 'Unsaved changes',
-                  saving: 'Saving…',
-                  error: 'Could not save',
-                }[autosave.status]
+              className={
+                autosave.status === 'saved'
+                  ? 'text-green-400'
+                  : autosave.status === 'error'
+                    ? 'text-red-300'
+                    : 'text-yellow-300'
               }
+            >
+              {autosave.status === 'error' ? (
+                <button
+                  className="underline underline-offset-2 focus-visible:outline focus-visible:outline-2"
+                  onClick={() => void autosave.flush()}
+                >
+                  Retry save
+                </button>
+              ) : autosave.status === 'saved' ? (
+                'Saved'
+              ) : (
+                'Saving…'
+              )}
             </span>
-            {autosave.status !== 'saved' && (
-              <button className="editor-button" onClick={() => void autosave.flush()}>
-                {autosave.status === 'error' ? 'Retry save' : 'Save now'}
-              </button>
-            )}
           </div>
         </div>
         {metadataError && (

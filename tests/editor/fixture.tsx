@@ -23,6 +23,7 @@ function Fixture() {
         {open && (
           <MilkdownEditor
             noteId={noteId}
+            hideTitle={new URLSearchParams(location.search).has('daily')}
             showGoogleSync={new URLSearchParams(location.search).has('google')}
           />
         )}
