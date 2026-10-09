@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { localDraftContents } from './helpers';
 
 test('typing saves normal spaces and blank lines without generated HTML', async ({ page }) => {
   const errors: string[] = [];
@@ -52,15 +53,13 @@ test('failed saves display retry and keep a local recovery copy', async ({ page 
   await page.keyboard.press('ControlOrMeta+End');
   await page.keyboard.type(' offline draft');
   await expect(page.getByRole('button', { name: 'Retry save' })).toBeVisible();
-  expect(await page.evaluate(() => localStorage.getItem('tt-note-draft:one'))).toContain(
-    'offline draft',
-  );
+  expect((await localDraftContents(page)).join('\n')).toContain('offline draft');
   await page.evaluate(() => {
     (window as any).fixture.fail = false;
   });
   await page.getByRole('button', { name: 'Retry save' }).click();
   await expect(page.getByRole('status').filter({ hasText: /^Saved$/ })).toBeVisible();
-  expect(await page.evaluate(() => localStorage.getItem('tt-note-draft:one'))).toBeNull();
+  expect(await localDraftContents(page)).toEqual([]);
 });
 
 test('accessible toolbar formats and undoes without losing selection', async ({ page }) => {
@@ -270,9 +269,7 @@ for (const daily of [false, true]) {
     await expect(page.getByRole('status').filter({ hasText: 'Saving…' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Save now' })).toHaveCount(0);
     expect(await editor.boundingBox()).toEqual(before);
-    await expect
-      .poll(() => page.evaluate(() => localStorage.getItem('tt-note-draft:one')), { timeout: 5000 })
-      .toBeNull();
+    await expect.poll(() => localDraftContents(page), { timeout: 5000 }).toEqual([]);
     await expect(saved).toBeVisible();
     expect(await editor.boundingBox()).toEqual(before);
   });

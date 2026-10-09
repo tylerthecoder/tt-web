@@ -6,46 +6,54 @@ import type { Note } from 'tt-services/src/client-index.ts';
 
 import { updateNoteContent } from '@/(panel)/actions';
 
-import { draftKey, NoteAutosave } from './autosave';
+import { NoteAutosave } from './autosave';
+import { NoteDraftStore, type RecoveryDraft } from './recovery';
 
 // Retain writers across rapid close/reopen so two requests for one note cannot race.
-const sessions = new Map<string, NoteAutosave>();
+interface NoteSession {
+  autosave: NoteAutosave;
+  restoreDraft: (draft: RecoveryDraft) => void;
+}
+const sessions = new Map<string, NoteSession>();
 const users = new Map<NoteAutosave, number>();
 export function useNoteAutosave(noteId: string) {
   const queryClient = useQueryClient();
   const session = useMemo(() => {
     let existing = sessions.get(noteId);
     if (!existing) {
-      existing = new NoteAutosave(
-        async (content) => {
-          await updateNoteContent(noteId, content);
-          queryClient.setQueryData(
-            ['note', noteId],
-            (note: Note | undefined) => note && { ...note, content },
-          );
+      const drafts = new NoteDraftStore(noteId);
+      const autosave = new NoteAutosave(async (content) => {
+        await updateNoteContent(noteId, content);
+        queryClient.setQueryData(
+          ['note', noteId],
+          (note: Note | undefined) => note && { ...note, content },
+        );
+      }, drafts.persist);
+      existing = {
+        autosave,
+        restoreDraft: (draft) => {
+          drafts.adopt(draft);
+          autosave.update(draft.content);
         },
-        (content) =>
-          content === null
-            ? localStorage.removeItem(draftKey(noteId))
-            : localStorage.setItem(draftKey(noteId), content),
-      );
+      };
       sessions.set(noteId, existing);
     }
     return existing;
   }, [noteId, queryClient]);
+  const autosave = session.autosave;
   const [, render] = useReducer((n) => n + 1, 0);
-  useEffect(() => session.subscribe(render), [session]);
+  useEffect(() => autosave.subscribe(render), [autosave]);
   useEffect(() => {
-    users.set(session, (users.get(session) ?? 0) + 1);
+    users.set(autosave, (users.get(autosave) ?? 0) + 1);
     sessions.set(noteId, session);
     const flush = () => {
-      void session.flush();
+      void autosave.flush();
     };
     const hide = () => {
       if (document.visibilityState === 'hidden') flush();
     };
     const beforeUnload = (event: BeforeUnloadEvent) => {
-      if (session.status !== 'saved') {
+      if (autosave.status !== 'saved') {
         flush();
         event.preventDefault();
         event.returnValue = '';
@@ -60,20 +68,20 @@ export function useNoteAutosave(noteId: string) {
       window.removeEventListener('pagehide', flush);
       window.removeEventListener('beforeunload', beforeUnload);
       document.removeEventListener('visibilitychange', hide);
-      users.set(session, (users.get(session) ?? 1) - 1);
+      users.set(autosave, (users.get(autosave) ?? 1) - 1);
       // Keep failed/in-flight sessions until their draft is saved. Bounded by notes with unsaved edits.
-      void session.flush().then((saved) => {
+      void autosave.flush().then((saved) => {
         if (
           saved &&
-          !users.get(session) &&
-          session.status === 'saved' &&
+          !users.get(autosave) &&
+          autosave.status === 'saved' &&
           sessions.get(noteId) === session
         ) {
           sessions.delete(noteId);
-          users.delete(session);
+          users.delete(autosave);
         }
       });
     };
-  }, [noteId, session]);
+  }, [noteId, session, autosave]);
   return session;
 }

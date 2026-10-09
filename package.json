@@ -82,7 +82,7 @@
     "start": "next start",
     "start:prod": "bun install && bun run build && bun run start",
     "typecheck": "tsc --noEmit",
-    "test:editor": "bun test tests/editor/autosave.test.ts tests/editor-markdown.test.ts",
+    "test:editor": "bun test tests/editor/autosave.test.ts tests/editor/recovery.test.ts tests/editor-markdown.test.ts",
     "test:editor:browser": "playwright test"
   },
   "version": "1.0.0"

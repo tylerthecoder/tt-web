@@ -8,8 +8,8 @@ import { updateNoteMetadata } from '@/(panel)/actions';
 import { useNote } from '@/(panel)/hooks';
 
 import { GoogleSyncControls } from './google-sync-controls';
-import { draftKey, readDraft } from './note-editor/autosave';
 import { EditorSurface } from './note-editor/editor-surface';
+import { discardDraft, readDrafts } from './note-editor/recovery';
 import { useNoteAutosave } from './note-editor/use-autosave';
 import NoteTagsModal from './note-tags-modal';
 import { PublishControls } from './publish-controls';
@@ -26,14 +26,18 @@ function LoadedEditor({
   showGoogleSync: boolean;
 }) {
   const queryClient = useQueryClient();
-  const autosave = useNoteAutosave(note.id);
+  const { autosave, restoreDraft } = useNoteAutosave(note.id);
   const [currentNote, setCurrentNote] = useState(note);
   const [initialContent, setInitialContent] = useState(autosave.content ?? note.content);
   const [generation, setGeneration] = useState(0);
-  const [recovery, setRecovery] = useState(() => {
-    const draft = readDraft(note.id);
-    return autosave.content === undefined && draft !== note.content ? draft : null;
-  });
+  const [recoveries, setRecoveries] = useState(() =>
+    autosave.content === undefined
+      ? readDrafts(note.id).filter((draft) => draft.content !== note.content)
+      : [],
+  );
+  const [recoveryIndex, setRecoveryIndex] = useState(0);
+  const [recoveryError, setRecoveryError] = useState<string | null>(null);
+  const recovery = recoveries[recoveryIndex] ?? null;
   const [editingTitle, setEditingTitle] = useState(false);
   const [titleInput, setTitleInput] = useState(note.title);
   const [tagsOpen, setTagsOpen] = useState(false);
@@ -251,16 +255,43 @@ function LoadedEditor({
       {recovery !== null ? (
         <div className="overflow-auto p-4">
           <p className="mb-3">
-            This device has an unsaved draft. Restore it or keep the server version before editing.
+            This browser has{' '}
+            {recoveries.length === 1 ? 'an unsaved draft' : `${recoveries.length} unsaved drafts`}.
+            Review a draft before restoring it: restoring replaces the server note when saving
+            succeeds. Other drafts stay on this device.
           </p>
+          {recoveries.length > 1 && (
+            <label className="mb-3 block">
+              Recovery version
+              <select
+                className="ml-2 rounded bg-gray-800 p-2"
+                value={recoveryIndex}
+                onChange={(event) => setRecoveryIndex(Number(event.target.value))}
+              >
+                {recoveries.map((draft, index) => (
+                  <option key={draft.key} value={index}>
+                    Draft {index + 1} —{' '}
+                    {draft.updatedAt === null
+                      ? 'older format'
+                      : new Date(draft.updatedAt).toLocaleString()}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+          {recoveryError && (
+            <p role="alert" className="mb-3 text-red-300">
+              {recoveryError}
+            </p>
+          )}
           <div className="mb-3 flex flex-wrap gap-2">
             <button
               className="editor-button"
               onClick={() => {
-                setInitialContent(recovery);
+                setInitialContent(recovery.content);
                 setGeneration((n) => n + 1);
-                autosave.update(recovery);
-                setRecovery(null);
+                restoreDraft(recovery);
+                setRecoveries([]);
               }}
             >
               Restore draft
@@ -269,20 +300,33 @@ function LoadedEditor({
               className="editor-button"
               onClick={() => {
                 try {
-                  localStorage.removeItem(draftKey(note.id));
+                  if (!discardDraft(recovery)) {
+                    setRecoveries(
+                      readDrafts(note.id).filter((draft) => draft.content !== note.content),
+                    );
+                    setRecoveryIndex(0);
+                    setRecoveryError(
+                      'This draft changed in another tab. Review the updated version.',
+                    );
+                    return;
+                  }
+                  setRecoveries((drafts) => drafts.filter((draft) => draft.key !== recovery.key));
+                  setRecoveryIndex(0);
+                  setRecoveryError(null);
                 } catch {
-                  /* Storage may be disabled. */
+                  setRecoveryError(
+                    'Could not remove the local draft. Browser storage may be unavailable.',
+                  );
                 }
-                setRecovery(null);
               }}
             >
-              Keep server version
+              {recoveries.length === 1 ? 'Keep server version' : 'Discard this draft'}
             </button>
           </div>
           <details>
             <summary className="cursor-pointer py-2">Review recovered Markdown</summary>
             <pre className="whitespace-pre-wrap break-words rounded bg-gray-800 p-3 text-sm">
-              {recovery}
+              {recovery.content}
             </pre>
           </details>
         </div>

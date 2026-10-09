@@ -1,9 +1,9 @@
-import { remarkStringifyOptionsCtx } from '@milkdown/kit/core';
+import { remarkPluginsCtx, remarkStringifyOptionsCtx } from '@milkdown/kit/core';
 import type { Ctx } from '@milkdown/kit/ctx';
 import { trailingConfig } from '@milkdown/kit/plugin/trailing';
 import { paragraphSchema } from '@milkdown/kit/preset/commonmark';
 import type { MarkdownNode } from '@milkdown/kit/transformer';
-import { $node, $remark } from '@milkdown/kit/utils';
+import { $node } from '@milkdown/kit/utils';
 import { defaultHandlers, type Handle, type Join } from 'mdast-util-to-markdown';
 
 const blankLinesKey = 'noteBlankLines';
@@ -56,10 +56,6 @@ export function preserveNoteBlankLines(tree: MarkdownNode, source: string) {
   }
   tree.children = children;
 }
-
-export const noteBlankLinesPlugin = $remark('note-blank-lines', () => () => (tree, file) => {
-  preserveNoteBlankLines(tree as MarkdownNode, String(file));
-});
 
 /** Preserve final blank paragraphs too; the upstream doc serializer always drops one. */
 export const noteDocumentSchema = $node('doc', () => ({
@@ -145,9 +141,20 @@ export const noteRootHandler: Handle = (node, parent, state, info) => {
   }
 };
 
-export const noteMarkdownPlugins = [noteDocumentSchema, ...noteBlankLinesPlugin];
+export const noteMarkdownPlugins = [noteDocumentSchema];
 
 export function configureNoteMarkdown(ctx: Ctx) {
+  // Config runs before Milkdown's remark plugins register at InitReady. Preserve
+  // spacing first: the image and math transforms replace nodes without positions.
+  ctx.update(remarkPluginsCtx, (plugins) => [
+    {
+      plugin: () => (tree, file) => {
+        preserveNoteBlankLines(tree as MarkdownNode, String(file));
+      },
+      options: {},
+    },
+    ...plugins,
+  ]);
   ctx.update(paragraphSchema.key, (previous) => (context) => {
     const schema = previous(context);
     return {

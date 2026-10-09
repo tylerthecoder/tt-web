@@ -80,13 +80,3 @@ export class NoteAutosave {
     return this.running;
   };
 }
-
-export const draftKey = (noteId: string) => `tt-note-draft:${noteId}`;
-
-export function readDraft(noteId: string): string | null {
-  try {
-    return localStorage.getItem(draftKey(noteId));
-  } catch {
-    return null;
-  }
-}

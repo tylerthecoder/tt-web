@@ -8,6 +8,7 @@ export const fixture = {
   writes: [] as { id: string; content: string }[],
   fail: false,
   delay: 0,
+  metadataDelay: 0,
 };
 Object.assign(window, { fixture });
 export async function getNote(id: string) {
@@ -20,6 +21,8 @@ export async function updateNoteContent(id: string, content: string) {
   fixture.notes[id].content = content;
 }
 export async function updateNoteMetadata(id: string, updates: any) {
+  if (fixture.metadataDelay)
+    await new Promise((resolve) => setTimeout(resolve, fixture.metadataDelay));
   if (fixture.fail) throw new Error('Offline');
   Object.assign(fixture.notes[id], updates);
 }

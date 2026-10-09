@@ -2,10 +2,12 @@ import React, { StrictMode, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { QueryProvider } from '../../app/components/query-provider';
 import { MilkdownEditor } from '../../app/components/milkdown-note-editor';
+import { NoteModal } from '../../app/components/note-modal';
 
 function Fixture() {
+  const modal = new URLSearchParams(location.search).has('modal');
   const [noteId, setNoteId] = useState('one');
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(!modal);
   return (
     <QueryProvider>
       <div className="flex h-dvh flex-col bg-gray-900 text-white">
@@ -20,12 +22,21 @@ function Fixture() {
             {open ? 'Close editor' : 'Open editor'}
           </button>
         </div>
-        {open && (
-          <MilkdownEditor
+        {open && modal ? (
+          <NoteModal
             noteId={noteId}
+            onClose={() => setOpen(false)}
             hideTitle={new URLSearchParams(location.search).has('daily')}
-            showGoogleSync={new URLSearchParams(location.search).has('google')}
+            title="Note editor"
           />
+        ) : (
+          open && (
+            <MilkdownEditor
+              noteId={noteId}
+              hideTitle={new URLSearchParams(location.search).has('daily')}
+              showGoogleSync={new URLSearchParams(location.search).has('google')}
+            />
+          )
         )}
       </div>
     </QueryProvider>

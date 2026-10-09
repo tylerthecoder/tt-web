@@ -36,6 +36,9 @@ export function EditorDialog({
       className={`m-auto border-0 bg-transparent p-0 text-inherit backdrop:bg-black/60 ${className}`}
       onCancel={(event) => {
         event.preventDefault();
+        // React propagates cancel through nested dialogs. Escape belongs to
+        // the active dialog, even when it is busy and cannot close yet.
+        event.stopPropagation();
         if (!busy) onClose();
       }}
     >
