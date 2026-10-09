@@ -1,5 +1,7 @@
+export const dynamic = 'force-dynamic';
+
 import Image from 'next/legacy/image';
-import { Creation } from 'tt-services';
+import type { Creation } from 'tt-services';
 
 import { getTT } from '@/utils/utils';
 
@@ -11,8 +13,8 @@ interface IProjectProps {
 const kebabCase = (name: string) => {
   return name
     .toLowerCase()
-    .replace(/[^a-z0-9\'\+]/g, '-')
-    .replace(/[\'\+]/g, '');
+    .replace(/[^a-z0-9'+]/g, '-')
+    .replace(/['+]/g, '');
 };
 
 const Project = ({ creation }: IProjectProps) => {
@@ -33,7 +35,7 @@ const Project = ({ creation }: IProjectProps) => {
       >
         <div className="relative aspect-video">
           <Image
-            src={'/thumbnails/' + kebabCase(creation.name) + '.png'}
+            src={`/thumbnails/${kebabCase(creation.name)}.png`}
             alt={creation.name}
             layout="fill"
             objectFit="cover"

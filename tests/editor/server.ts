@@ -1,9 +1,9 @@
 import { mkdir, readFile } from 'node:fs/promises';
-import { join } from 'node:path';
 import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
-const output = await mkdir(join(tmpdir(), 'tt-web-editor-tests'), { recursive: true }).then(() =>
-  join(tmpdir(), 'tt-web-editor-tests'),
+const output = await mkdir(join(tmpdir(), 'tt-web-editor-tests'), { recursive: true }).then(
+  () => join(tmpdir(), 'tt-web-editor-tests'),
 );
 const mock = await readFile('tests/editor/mock-actions.ts', 'utf8');
 const realActions = await readFile('app/(panel)/actions.ts', 'utf8');
@@ -44,11 +44,13 @@ if (!result.success) {
   console.error(result.logs);
   process.exit(1);
 }
-const css = Bun.spawn(
-  ['bun', 'x', 'tailwindcss', '-i', 'app/global.css', '-o', join(output, 'global.css')],
-  { stdout: 'ignore', stderr: 'inherit' },
-);
-if (await css.exited) process.exit(1);
+const { default: postcss } = await import('postcss');
+const { default: tailwind } = await import('@tailwindcss/postcss');
+const css = await postcss([tailwind()]).process(await readFile('app/global.css', 'utf8'), {
+  from: 'app/global.css',
+  to: join(output, 'global.css'),
+});
+await Bun.write(join(output, 'global.css'), css.css);
 Bun.serve({
   hostname: '127.0.0.1',
   port: 4319,

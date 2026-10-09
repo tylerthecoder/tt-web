@@ -2,8 +2,6 @@
 
 import { getTT } from '@/utils/utils';
 
-import markdownToHtml from './utils';
-
 export async function getBlogs() {
   const tylersThings = await getTT();
   const blogs = await tylersThings.notes.getPublishedNotes();
@@ -29,9 +27,4 @@ export async function getBlog(id: string) {
     throw new Error(`Blog with id ${id} is not published`);
   }
   return blog;
-}
-
-export async function getBlogHtml(id: string) {
-  const blog = await getBlog(id);
-  return markdownToHtml(blog.content);
 }

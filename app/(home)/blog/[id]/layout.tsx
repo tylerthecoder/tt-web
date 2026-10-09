@@ -1,5 +1,4 @@
 /* eslint-disable @next/next/no-html-link-for-pages */
-import 'katex/dist/katex.min.css';
 
 import BlogSidebar from '../blog-sidebar';
 

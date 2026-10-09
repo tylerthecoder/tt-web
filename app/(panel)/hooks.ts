@@ -1,26 +1,22 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useCallback, useEffect, useState } from 'react';
 
 import { flushNoteBeforeRead } from '@/components/note-editor/use-autosave';
 import { getGoogleDriveFileById } from '@/google/docs/actions';
 import type { GoogleDriveFile } from '@/types/google';
 
 import {
-  assignGoogleDocIdToNote,
   createList,
   getAllDailyNotesMetadata,
   getAllJots,
   getAllLists,
   getAllTags,
   getCurrentWeek,
-  getListById,
   getNoteMetadataById,
   getNotesAndUntrackedGoogleDocs,
   getNotesMetadataByTag,
   getTodayDailyNote,
-  pullContentFromGoogleDoc,
 } from './actions';
 
 export function useWeek() {
@@ -117,15 +113,6 @@ export function useNotesByTag(tag: string) {
   });
 }
 
-export function useList(listId: string) {
-  return useQuery({
-    queryKey: ['list', listId],
-    queryFn: () => getListById(listId),
-    enabled: !!listId,
-    staleTime: 30_000,
-  });
-}
-
 // Migrated note-related hooks
 
 export const useNote = (noteId: string) => {
@@ -160,21 +147,6 @@ export function useNoteMetadata(noteId: string) {
   });
 }
 
-export const useAssignGoogleDocIdToNote = (noteId: string) => {
-  const [isAssigning, setIsAssigning] = useState(false);
-
-  const assignGoogleDocId = useCallback(
-    async (googleDocId: string) => {
-      setIsAssigning(true);
-      await assignGoogleDocIdToNote(noteId, googleDocId);
-      setIsAssigning(false);
-    },
-    [noteId],
-  );
-
-  return { assignGoogleDocId, isAssigning };
-};
-
 export const useTags = () => {
   const query = useQuery({
     queryKey: ['tags'],
@@ -195,28 +167,4 @@ export const useTags = () => {
     error: query.error ? (query.error as Error).message : null,
     refetch: () => query.refetch(),
   };
-};
-
-export const usePullFromGoogleDoc = (noteId: string) => {
-  const [isPulling, setIsPulling] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const pullContent = useCallback(async () => {
-    setIsPulling(true);
-    setError(null);
-    try {
-      const updatedNote = await pullContentFromGoogleDoc(noteId);
-      window.location.reload();
-      return updatedNote;
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : 'Failed to pull content from Google Doc';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setIsPulling(false);
-    }
-  }, [noteId]);
-
-  return { pullContent, isPulling, error };
 };

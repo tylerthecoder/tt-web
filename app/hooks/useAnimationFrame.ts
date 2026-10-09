@@ -1,38 +1,30 @@
-// From https://github.com/franciscop/use-animation-frame/blob/master/index.js
-// Based off a tweet and codesandbox:
-// https://mobile.twitter.com/hieuhlc/status/1164369876825169920
-import { useEffect, useRef } from 'react';
+import { useEffect, useEffectEvent } from 'react';
 
-const getNow = () => {
-  if (typeof window !== 'undefined' && window.performance) {
-    return window.performance.now();
-  } else {
-    return Date.now();
-  }
-};
-
-// Reusable component that also takes dependencies
-export const useAnimationFrame = (
-  cb: (data: { time: number; delta: number }) => void,
-  deps: any[],
-) => {
-  const frame = useRef<number>();
-  const last = useRef(getNow());
-  const init = useRef(getNow());
-
-  const animate = () => {
-    const now = getNow();
-    const time = (now - init.current) / 1000;
-    const delta = (now - last.current) / 1000;
-    // In seconds ~> you can do ms or anything in userland
-    cb({ time, delta });
-    last.current = now;
-    frame.current = requestAnimationFrame(animate);
-  };
-
+export function useAnimationFrame(callback: (data: { time: number; delta: number }) => void) {
+  const onFrame = useEffectEvent(callback);
   useEffect(() => {
-    frame.current = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(frame.current ?? 0);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, deps); // Make sure to change it if the deps change
-};
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const start = performance.now();
+    let last = start;
+    let frame = 0;
+    const animate = (now: number) => {
+      onFrame({ time: (now - start) / 1000, delta: Math.min((now - last) / 1000, 0.05) });
+      last = now;
+      if (!reducedMotion.matches && !document.hidden) frame = requestAnimationFrame(animate);
+    };
+    const restart = () => {
+      cancelAnimationFrame(frame);
+      last = performance.now();
+      // Draw one still frame for reduced motion; pause completely in hidden tabs.
+      if (!document.hidden) frame = requestAnimationFrame(animate);
+    };
+    restart();
+    reducedMotion.addEventListener('change', restart);
+    document.addEventListener('visibilitychange', restart);
+    return () => {
+      cancelAnimationFrame(frame);
+      reducedMotion.removeEventListener('change', restart);
+      document.removeEventListener('visibilitychange', restart);
+    };
+  }, []);
+}

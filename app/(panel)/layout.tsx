@@ -13,7 +13,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <div className="flex h-dvh min-h-0 w-full flex-col overflow-hidden bg-gray-900">
       <QueryProvider>
-        <div className="p-4 bg-gray-800 bg-opacity-50 flex-shrink-0 hidden md:block">
+        <div className="p-4 bg-gray-800/50 shrink-0 hidden md:block">
           <div className="flex justify-between items-center">
             <WeeklyProgress />
             <div className="flex flex-col items-end">

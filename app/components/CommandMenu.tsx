@@ -1,9 +1,9 @@
 'use client';
 
-import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowRight, Calendar, Edit, FileText, Home, List, Search, StickyNote } from 'lucide-react';
+import { ArrowRight, Edit, FileText, Home, List, Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import type React from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useNotesIndex } from '../(panel)/hooks';
 
@@ -19,6 +19,16 @@ interface Command {
 export function CommandMenu() {
   const { data } = useNotesIndex();
   const [isOpen, setIsOpen] = useState(false);
+  const [isPresent, setIsPresent] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setIsPresent(true);
+      return;
+    }
+    const timeout = window.setTimeout(() => setIsPresent(false), 160);
+    return () => window.clearTimeout(timeout);
+  }, [isOpen]);
   const [search, setSearch] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const router = useRouter();
@@ -83,7 +93,7 @@ export function CommandMenu() {
       description: `View note`,
       icon: <FileText className="w-4 h-4" />,
       action: () => {
-        router.push(`/note/${note.id}`);
+        router.push(`/note/${note.id}/view`);
         handleClose();
       },
       type: 'note',
@@ -127,7 +137,9 @@ export function CommandMenu() {
 
       if (
         !isOurInput &&
-        (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.isContentEditable)
       ) {
         return;
       }
@@ -146,16 +158,17 @@ export function CommandMenu() {
   // Handle navigation within the menu
   const handleMenuKeyDown = useCallback(
     (event: KeyboardEvent) => {
-      if (!isOpen) return;
+      if (!isOpen || event.target !== inputRef.current) return;
 
       switch (event.key) {
         case 'ArrowDown':
           event.preventDefault();
-          setSelectedIndex((prev) => (prev + 1) % allCommands.length);
+          if (allCommands.length) setSelectedIndex((prev) => (prev + 1) % allCommands.length);
           break;
         case 'ArrowUp':
           event.preventDefault();
-          setSelectedIndex((prev) => (prev - 1 + allCommands.length) % allCommands.length);
+          if (allCommands.length)
+            setSelectedIndex((prev) => (prev - 1 + allCommands.length) % allCommands.length);
           break;
         case 'Enter':
           event.preventDefault();
@@ -190,26 +203,22 @@ export function CommandMenu() {
     }
   }, [isOpen]);
 
-  // Reset selected index when search changes
-  useEffect(() => {
-    setSelectedIndex(0);
-  }, [search]);
-
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-start justify-center pt-20"
+    <>
+      {(isOpen || isPresent) && (
+        <div
+          role="presentation"
+          data-state={isOpen ? 'open' : 'closed'}
+          aria-hidden={!isOpen}
+          inert={!isOpen}
+          className="command-menu-backdrop fixed inset-0 z-50 bg-black/50 flex items-start justify-center pt-20"
           onClick={handleClose}
         >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: -20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: -20 }}
-            className="bg-gray-800 rounded-lg shadow-xl border border-gray-700 w-full max-w-2xl mx-4"
+          <div
+            className="command-menu-panel bg-gray-800 rounded-lg shadow-xl border border-gray-700 w-full max-w-2xl mx-4"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Commands"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Search Input */}
@@ -220,10 +229,13 @@ export function CommandMenu() {
                 type="text"
                 placeholder="Search for commands, notes..."
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="flex-1 bg-transparent text-white placeholder-gray-400 outline-none"
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setSelectedIndex(0);
+                }}
+                className="flex-1 bg-transparent text-white placeholder-gray-400 outline-hidden"
               />
-              <kbd className="px-2 py-1 text-xs text-gray-400 bg-gray-700 rounded">⌘K</kbd>
+              <kbd className="px-2 py-1 text-xs text-gray-400 bg-gray-700 rounded-sm">⌘K</kbd>
             </div>
 
             {/* Results */}
@@ -250,9 +262,10 @@ export function CommandMenu() {
                   )}
 
                   {allCommands.map((command, index) => (
-                    <div
+                    <button
+                      type="button"
                       key={command.id}
-                      className={`flex items-center px-4 py-3 cursor-pointer transition-colors ${
+                      className={`flex w-full text-left items-center px-4 py-3 cursor-pointer transition-colors ${
                         index === selectedIndex
                           ? 'bg-gray-700 text-white'
                           : 'text-gray-300 hover:bg-gray-700 hover:text-white'
@@ -267,7 +280,7 @@ export function CommandMenu() {
                         </div>
                       </div>
                       <ArrowRight className="w-4 h-4 text-gray-400" />
-                    </div>
+                    </button>
                   ))}
                 </div>
               )}
@@ -277,9 +290,9 @@ export function CommandMenu() {
             <div className="px-4 py-2 border-t border-gray-700 text-xs text-gray-400 flex justify-between">
               <span>Use ↑↓ to navigate, ↵ to select, esc to close</span>
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       )}
-    </AnimatePresence>
+    </>
   );
 }

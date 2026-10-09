@@ -2,12 +2,9 @@
 
 import { revalidatePath } from 'next/cache';
 
-import { baseLogger } from '@/utils/logger';
 import { getTT } from '@/utils/utils';
 
 import { getGoogleUserId, requireAuth } from '../utils/auth';
-
-const logger = baseLogger.child({ module: 'panel-actions' });
 
 export async function getCurrentWeek() {
   await requireAuth();
@@ -51,27 +48,6 @@ export async function getAllLists() {
   return tt.lists.getAllLists();
 }
 
-export async function addTodo(weekId: string, content: string) {
-  await requireAuth();
-
-  const tt = await getTT();
-  return tt.weekly.addTodo(weekId, content);
-}
-
-export async function toggleTodo(weekId: string, todoId: string, checked: boolean) {
-  await requireAuth();
-
-  const tt = await getTT();
-  return tt.weekly.toggleTodo(weekId, todoId, checked);
-}
-
-export async function updateTodoContent(weekId: string, todoId: string, content: string) {
-  await requireAuth();
-
-  const tt = await getTT();
-  return tt.weekly.updateTodoContent(weekId, todoId, content);
-}
-
 export async function getNote(noteId: string) {
   await requireAuth();
 
@@ -84,14 +60,6 @@ export async function getNoteMetadataById(noteId: string) {
 
   const tt = await getTT();
   return tt.notes.getNoteMetadataById(noteId);
-}
-
-export async function getNoteContent(noteId: string) {
-  await requireAuth();
-
-  const tt = await getTT();
-  const note = await tt.notes.getNoteById(noteId);
-  return note?.content || '';
 }
 
 export async function publishNote(noteId: string) {
@@ -132,13 +100,6 @@ export async function updateNoteMetadata(
   await tt.notes.updateNote(noteId, updates as any);
 }
 
-export async function deleteTodo(weekId: string, todoId: string) {
-  await requireAuth();
-
-  const tt = await getTT();
-  return tt.weekly.deleteTodo(weekId, todoId);
-}
-
 export async function deleteJotAction(jotId: string) {
   await requireAuth();
 
@@ -159,27 +120,6 @@ export async function deleteJotAction(jotId: string) {
   } catch (error) {
     console.error('Failed to delete jot:', error);
     return { error: 'Failed to delete jot. Please try again.' };
-  }
-}
-
-// Jots create action from (panel)/jot/actions.ts (keeping original for /jot route)
-export async function createJotAction(formData: FormData) {
-  await requireAuth();
-
-  const text = formData.get('jotText') as string;
-
-  if (!text || typeof text !== 'string' || text.trim().length === 0) {
-    return { error: 'Jot text cannot be empty.' };
-  }
-
-  try {
-    const tt = await getTT();
-    await tt.jots.createJot(text.trim());
-    revalidatePath('/jot');
-    return { success: true };
-  } catch (error) {
-    console.error('Failed to create jot:', error);
-    return { error: 'Failed to save jot. Please try again.' };
   }
 }
 
@@ -320,19 +260,6 @@ export async function addTagToNote(noteId: string, tag: string) {
   }
 }
 
-export async function removeTagFromNote(noteId: string, tag: string) {
-  await requireAuth();
-  const tt = await getTT();
-  try {
-    await tt.notes.removeTag(noteId, tag);
-    revalidatePath('/notes');
-    return { success: true };
-  } catch (error) {
-    console.error('Error removing tag:', error);
-    return { success: false, error: 'Failed to remove tag' };
-  }
-}
-
 export async function getAllTags() {
   await requireAuth();
   const tt = await getTT();
@@ -349,13 +276,6 @@ export async function getNotesMetadataByTag(tag: string) {
   await requireAuth();
   const tt = await getTT();
   return tt.notes.getNotesMetadataByTag(tag);
-}
-
-// Time tracker actions
-export async function getTimeBlocksForDay(dateIso: string) {
-  await requireAuth();
-  const tt = await getTT();
-  return tt.timeTracker.getTimeBlocksForDay(dateIso);
 }
 
 export async function startTimeBlock(label: string, noteId?: string) {
@@ -382,7 +302,12 @@ export async function getAllTimeBlocks() {
 
 export async function updateTimeBlock(
   blockId: string,
-  updates: { startTime?: string; endTime?: string | null; label?: string; noteId?: string | null },
+  updates: {
+    startTime?: string;
+    endTime?: string | null;
+    label?: string;
+    noteId?: string | null;
+  },
 ) {
   await requireAuth();
   const tt = await getTT();

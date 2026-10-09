@@ -1,8 +1,8 @@
-import React, { StrictMode, useState } from 'react';
+import { StrictMode, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { QueryProvider } from '../../app/components/query-provider';
 import { MilkdownEditor } from '../../app/components/milkdown-note-editor';
 import { NoteModal } from '../../app/components/note-modal';
+import { QueryProvider } from '../../app/components/query-provider';
 
 function Fixture() {
   const modal = new URLSearchParams(location.search).has('modal');
@@ -13,12 +13,17 @@ function Fixture() {
       <div className="flex h-dvh flex-col bg-gray-900 text-white">
         <div className="flex shrink-0 gap-2">
           <button
+            type="button"
             className="editor-button"
             onClick={() => setNoteId((id) => (id === 'one' ? 'two' : 'one'))}
           >
             Switch note
           </button>
-          <button className="editor-button" onClick={() => setOpen((value) => !value)}>
+          <button
+            type="button"
+            className="editor-button"
+            onClick={() => setOpen((value) => !value)}
+          >
             {open ? 'Close editor' : 'Open editor'}
           </button>
         </div>

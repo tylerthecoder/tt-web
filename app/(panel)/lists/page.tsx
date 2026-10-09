@@ -1,9 +1,9 @@
 'use client';
 
+import { List as FaList } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
-import { FaList } from 'react-icons/fa';
+import { useState } from 'react';
 
 import CreateListForm from '@/components/create-list-form';
 import ListCard from '@/components/list-card';
@@ -19,10 +19,11 @@ export default function ListsPage() {
     <div className="min-h-full bg-gray-900 text-white p-4 md:p-6">
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-2">
-          <FaList className="text-blue-400" />
+          <FaList size="1em" className="text-blue-400" />
           <h1 className="text-2xl md:text-3xl font-bold">Lists</h1>
         </div>
         <button
+          type="button"
           onClick={() => setIsCreateOpen(true)}
           className="bg-blue-600 px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
         >
@@ -53,11 +54,12 @@ export default function ListsPage() {
         )}
       </div>
       {isCreateOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-gray-800 p-6 rounded-lg max-w-md w-full mx-4">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-white">Create List</h2>
               <button
+                type="button"
                 onClick={() => setIsCreateOpen(false)}
                 className="px-3 py-1 text-gray-400 hover:text-white"
               >

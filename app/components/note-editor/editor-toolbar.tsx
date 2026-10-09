@@ -33,7 +33,11 @@ export function EditorToolbar({
   const marks = state?.storedMarks ?? state?.selection.$from.marks() ?? [];
   const marked = (name: string) =>
     state && !state.selection.empty
-      ? state.doc.rangeHasMark(state.selection.from, state.selection.to, state.schema.marks[name])
+      ? state.doc.rangeHasMark(
+          state.selection.from,
+          state.selection.to,
+          state.schema.marks[name],
+        )
       : marks.some((mark) => mark.type.name === name);
   const buttons = [
     {
@@ -105,6 +109,7 @@ export function EditorToolbar({
   ];
   const heading = state?.selection.$from.parent;
   return (
+    // biome-ignore lint/a11y/useSemanticElements: A toolbar group is not a form fieldset.
     <div
       role="group"
       aria-label="Formatting"
@@ -115,7 +120,7 @@ export function EditorToolbar({
           aria-label="Paragraph style"
           disabled={!state}
           value={heading?.type.name === 'heading' ? heading.attrs.level : 0}
-          className="min-h-11 rounded bg-gray-800 px-2 text-base text-gray-100"
+          className="min-h-11 rounded-sm bg-gray-800 px-2 text-base text-gray-100"
           onChange={(event) => {
             const level = Number(event.target.value);
             run((ctx) => {
@@ -141,7 +146,7 @@ export function EditorToolbar({
             title={label}
             aria-pressed={active}
             disabled={!state || disabled}
-            className={`flex h-11 w-11 items-center justify-center rounded hover:bg-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-300 disabled:opacity-30 ${active ? 'bg-blue-900 text-blue-100' : 'text-gray-300'}`}
+            className={`flex h-11 w-11 items-center justify-center rounded-sm hover:bg-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-300 disabled:opacity-30 ${active ? 'bg-blue-900 text-blue-100' : 'text-gray-300'}`}
             onPointerDown={(event) => event.preventDefault()}
             onClick={() => run(action)}
           >

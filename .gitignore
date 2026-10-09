@@ -50,3 +50,6 @@ yarn-error.log*
 # Browser test artifacts
 /test-results/
 /playwright-report/
+
+# Tool caches
+/.turbo/

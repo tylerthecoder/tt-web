@@ -34,7 +34,7 @@
 - Use `loading.tsx` files within route directories for skeleton loading UIs, matching the style of existing ones (Tailwind `animate-pulse`).
 - Use `react-markdown` and `remark-gfm` for rendering Markdown content.
 - Date formatting often uses `date-fns`.
-- Icons are typically from `react-icons`.
+- Icons use `lucide-react`.
 
 # Dependencies/Tools
 
@@ -43,7 +43,7 @@
 - `tailwindcss`: CSS Framework
 - `bun`: Package manager & runtime
 - `date-fns`: Date utility library
-- `react-icons`: Icon library
+- `lucide-react`: Icon library
 - `react-markdown`, `remark-gfm`: Markdown rendering
 - `tt-services`: Internal service layer (likely connects to MongoDB via `DatabaseSingleton`).
 

@@ -1,12 +1,11 @@
 'use client';
 
+import { List as FaList, LayoutGrid as FaThLarge } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { FaList, FaThLarge } from 'react-icons/fa';
-
-import { NoteCard } from '@/components/note-card';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { NotesFilter } from '@/components/NotesFilter';
+import { NoteCard } from '@/components/note-card';
 import { UntrackedGoogleDocCard } from '@/components/untrack-google-doc-card';
 
 import { useNotesIndex } from '../hooks';
@@ -42,7 +41,9 @@ export default function NotesPage() {
         originalItem: doc,
       });
     });
-    items.sort((a, b) => new Date(b.modifiedTime).getTime() - new Date(a.modifiedTime).getTime());
+    items.sort(
+      (a, b) => new Date(b.modifiedTime).getTime() - new Date(a.modifiedTime).getTime(),
+    );
     return items;
   }, [data]);
 
@@ -119,7 +120,9 @@ export default function NotesPage() {
 
       if (['arrowup', 'arrowleft'].includes(key)) {
         event.preventDefault();
-        setSelectedIndex((current) => (filteredItems.length === 0 ? 0 : Math.max(current - 1, 0)));
+        setSelectedIndex((current) =>
+          filteredItems.length === 0 ? 0 : Math.max(current - 1, 0),
+        );
       }
 
       if (key === 'enter') {
@@ -148,8 +151,9 @@ export default function NotesPage() {
           </div>
           <div className="flex gap-3 items-center">
             <button
+              type="button"
               onClick={toggleLayout}
-              className="inline-flex h-10 items-center gap-2 rounded-lg border border-gray-700 bg-gray-800 px-3 text-sm text-gray-300 transition-colors hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900"
+              className="inline-flex h-10 items-center gap-2 rounded-lg border border-gray-700 bg-gray-800 px-3 text-sm text-gray-300 transition-colors hover:bg-gray-700 focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900"
               title={`Switch to ${layoutMode === 'grid' ? 'list' : 'grid'} view`}
               aria-label={`Switch to ${layoutMode === 'grid' ? 'list' : 'grid'} view`}
               aria-keyshortcuts="V"
@@ -160,17 +164,17 @@ export default function NotesPage() {
                 <FaThLarge className="text-gray-300" size={16} />
               )}
               <span>{layoutMode === 'grid' ? 'List' : 'Grid'}</span>
-              <kbd className="rounded border border-gray-600 bg-gray-900 px-1.5 py-0.5 text-[10px] text-gray-400">
+              <kbd className="rounded-sm border border-gray-600 bg-gray-900 px-1.5 py-0.5 text-[10px] text-gray-400">
                 V
               </kbd>
             </button>
             <Link
               href="/notes/create"
-              className="inline-flex h-10 items-center gap-2 rounded-lg bg-blue-600 px-3 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900"
+              className="inline-flex h-10 items-center gap-2 rounded-lg bg-blue-600 px-3 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900"
               aria-keyshortcuts="N"
             >
               Create Note
-              <kbd className="rounded border border-blue-300/40 bg-blue-950/40 px-1.5 py-0.5 text-[10px] text-blue-100">
+              <kbd className="rounded-sm border border-blue-300/40 bg-blue-950/40 px-1.5 py-0.5 text-[10px] text-blue-100">
                 N
               </kbd>
             </Link>
@@ -189,14 +193,16 @@ export default function NotesPage() {
       {layoutMode === 'grid' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredItems.map((item, index) => (
+            // biome-ignore lint/a11y/useSemanticElements: Each focusable card groups links and actions, not form controls.
             <div
+              role="group"
               key={`${item.type}-${item.id}`}
               ref={(element) => {
                 itemRefs.current[index] = element;
               }}
               className={getSelectionClassName(selectedIndex === index, 'grid')}
               tabIndex={selectedIndex === index ? 0 : -1}
-              aria-selected={selectedIndex === index}
+              aria-current={selectedIndex === index}
               onClick={() => setSelectedIndex(index)}
               onDoubleClick={() => openItem(item)}
             >
@@ -211,14 +217,16 @@ export default function NotesPage() {
       ) : (
         <div className="flex flex-col gap-1.5">
           {filteredItems.map((item, index) => (
+            // biome-ignore lint/a11y/useSemanticElements: Each focusable card groups links and actions, not form controls.
             <div
+              role="group"
               key={`${item.type}-${item.id}`}
               ref={(element) => {
                 itemRefs.current[index] = element;
               }}
               className={getSelectionClassName(selectedIndex === index, 'list')}
               tabIndex={selectedIndex === index ? 0 : -1}
-              aria-selected={selectedIndex === index}
+              aria-current={selectedIndex === index}
               onClick={() => setSelectedIndex(index)}
               onDoubleClick={() => openItem(item)}
             >

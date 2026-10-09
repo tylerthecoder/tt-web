@@ -1,7 +1,7 @@
-import { createHmac } from 'crypto';
+import { createHmac } from 'node:crypto';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { SessionRecord } from 'tt-services';
+import type { SessionRecord } from 'tt-services';
 
 import { getTT } from '@/utils/utils';
 
@@ -12,11 +12,6 @@ export function isAuthDisabled(): boolean {
     console.log('AUTH DISABLED');
   }
   return isAuthDisabled;
-}
-
-export async function hasSessionCookie(): Promise<boolean> {
-  const cookieStore = await cookies();
-  return cookieStore.get('tt_session') !== null;
 }
 
 export async function getSession(): Promise<SessionRecord | null> {
@@ -42,15 +37,6 @@ export async function getSession(): Promise<SessionRecord | null> {
   }
 
   return record;
-}
-
-export async function getIsLoggedIn(): Promise<boolean> {
-  if (isAuthDisabled()) {
-    return true;
-  }
-  const session = await getSession();
-  const adminEmail = process.env.ADMIN_EMAIL;
-  return session?.userEmail === adminEmail;
 }
 
 export async function getGoogleUserId(): Promise<string | null> {
@@ -103,7 +89,9 @@ export function verifySessionHandoff(
   const secret = process.env.AUTH_SIGNING_SECRET || '';
   if (!secret) return { ok: true };
   try {
-    const expected = createHmac('sha256', secret).update(`${sessionId}|${ts}`).digest('base64url');
+    const expected = createHmac('sha256', secret)
+      .update(`${sessionId}|${ts}`)
+      .digest('base64url');
     if (expected !== sig) return { ok: false, reason: 'invalid_signature' };
     const tsNum = parseInt(ts, 10);
     if (!Number.isFinite(tsNum)) return { ok: false, reason: 'invalid_ts' };
@@ -111,28 +99,5 @@ export function verifySessionHandoff(
     return { ok: true };
   } catch {
     return { ok: false, reason: 'signature_error' };
-  }
-}
-
-export async function isAuthenticated(): Promise<boolean> {
-  try {
-    await requireAuth();
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-export async function logout(): Promise<void> {
-  try {
-    const cookieStore = await cookies();
-    const session = cookieStore.get('tt_session');
-    if (session?.value) {
-      const tt = await getTT();
-      await tt.sessions.deleteSession(session.value);
-    }
-    cookieStore.delete('tt_session');
-  } catch (error) {
-    console.error('Error during logout:', error);
   }
 }

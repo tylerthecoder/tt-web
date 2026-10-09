@@ -1,9 +1,9 @@
 'use client';
 
 import { formatDistance } from 'date-fns';
+import { ArrowLeft as FaArrowLeft, Pencil as FaEdit } from 'lucide-react';
 import Link from 'next/link';
 import { use } from 'react';
-import { FaArrowLeft, FaEdit } from 'react-icons/fa';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
@@ -24,15 +24,18 @@ export default function NoteViewPage({ params }: { params: Promise<{ id: string 
     <div className="min-h-full bg-gray-900 text-white p-4 md:p-6">
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-6">
-          <Link href="/notes" className="text-blue-400 hover:text-blue-300 flex items-center gap-2">
-            <FaArrowLeft />
+          <Link
+            href="/notes"
+            className="text-blue-400 hover:text-blue-300 flex items-center gap-2"
+          >
+            <FaArrowLeft size="1em" />
             Back to Notes
           </Link>
           <Link
             href={`/note/${note.id}/edit`}
             className="bg-gray-700 px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors flex items-center gap-2"
           >
-            <FaEdit />
+            <FaEdit size="1em" />
             Edit
           </Link>
         </div>
@@ -47,7 +50,9 @@ export default function NoteViewPage({ params }: { params: Promise<{ id: string 
               {tag}
             </span>
           ))}
-          {(note.tags || []).length === 0 && <span className="text-xs text-gray-500">No tags</span>}
+          {(note.tags || []).length === 0 && (
+            <span className="text-xs text-gray-500">No tags</span>
+          )}
         </div>
 
         <div className="text-sm text-gray-400 mb-4">
@@ -55,7 +60,8 @@ export default function NoteViewPage({ params }: { params: Promise<{ id: string 
           {note.createdAt && note.createdAt !== lastModified && (
             <span>
               {' '}
-              | Created {formatDistance(new Date(note.createdAt), new Date(), { addSuffix: true })}
+              | Created{' '}
+              {formatDistance(new Date(note.createdAt), new Date(), { addSuffix: true })}
             </span>
           )}
         </div>

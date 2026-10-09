@@ -8,7 +8,7 @@ export default async function Page() {
   async function revalidate() {
     'use server';
     console.log('Revalidating blogs');
-    revalidateTag('blog');
+    revalidateTag('blog', 'max');
   }
 
   return (

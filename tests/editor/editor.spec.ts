@@ -75,7 +75,9 @@ test('accessible toolbar formats and undoes without losing selection', async ({ 
   await expect(editor.locator('strong')).toHaveText('First note');
   await page.getByRole('button', { name: 'Undo', exact: true }).click();
   await expect(editor.locator('strong')).toHaveCount(0);
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+    true,
+  );
 });
 
 test('rename and tags preserve body edits without reloading', async ({ page }) => {
@@ -102,7 +104,9 @@ test('rename and tags preserve body edits without reloading', async ({ page }) =
     .toContain('new-tag');
 });
 
-test('reopen fetches remote changes instead of reusing stale cached content', async ({ page }) => {
+test('reopen fetches remote changes instead of reusing stale cached content', async ({
+  page,
+}) => {
   await page.goto('/');
   await expect(page.getByRole('textbox', { name: 'Note content' })).toBeVisible();
   await page.getByRole('button', { name: 'Close editor' }).click();
@@ -110,16 +114,22 @@ test('reopen fetches remote changes instead of reusing stale cached content', as
     (window as any).fixture.notes.one.content = 'Changed elsewhere\n';
   });
   await page.getByRole('button', { name: 'Open editor' }).click();
-  await expect(page.getByRole('textbox', { name: 'Note content' })).toHaveText('Changed elsewhere');
+  await expect(page.getByRole('textbox', { name: 'Note content' })).toHaveText(
+    'Changed elsewhere',
+  );
 });
 
 test('restores a local draft after reopening the app', async ({ page }) => {
-  await page.addInitScript(() => localStorage.setItem('tt-note-draft:one', 'Recovered draft\n'));
+  await page.addInitScript(() =>
+    localStorage.setItem('tt-note-draft:one', 'Recovered draft\n'),
+  );
   await page.goto('/');
   await expect(page.getByRole('button', { name: 'Restore draft' })).toBeVisible();
   await expect(page.getByRole('textbox', { name: 'Note content' })).toHaveCount(0);
   await page.getByRole('button', { name: 'Restore draft' }).click();
-  await expect(page.getByRole('textbox', { name: 'Note content' })).toHaveText('Recovered draft');
+  await expect(page.getByRole('textbox', { name: 'Note content' })).toHaveText(
+    'Recovered draft',
+  );
   await expect
     .poll(() => page.evaluate(() => (window as any).fixture.notes.one.content))
     .toBe('Recovered draft\n');
@@ -127,7 +137,7 @@ test('restores a local draft after reopening the app', async ({ page }) => {
 
 test('preserves original top-level spacing through repeated editing', async ({ page }) => {
   const original = '\n\nFirst\n\n\nSecond\n\n\n';
-  await page.goto('/?content=' + encodeURIComponent(original));
+  await page.goto(`/?content=${encodeURIComponent(original)}`);
   const editor = page.getByRole('textbox', { name: 'Note content' });
   await expect(editor).toBeVisible();
   expect(await page.evaluate(() => (window as any).fixture.writes)).toEqual([]);
@@ -213,7 +223,7 @@ test('tag dialog contains focus and Escape returns to the editor', async ({ page
 
 test('authored HTML and code examples survive unrelated editing', async ({ page }) => {
   const source = 'First\n\n<br />\n\n```html\n<br /> &#x20;\n```\n\nLast\n';
-  await page.goto('/?content=' + encodeURIComponent(source));
+  await page.goto(`/?content=${encodeURIComponent(source)}`);
   const editor = page.getByRole('textbox', { name: 'Note content' });
   await expect(editor).toBeVisible();
   await editor
@@ -241,7 +251,9 @@ test('short mobile view keeps the end of a long note reachable', async ({ page }
   await editor.locator('p').filter({ hasText: 'Paragraph 49' }).scrollIntoViewIfNeeded();
   await expect(editor.locator('p').filter({ hasText: 'Paragraph 49' })).toBeInViewport();
   await expect(page.getByRole('button', { name: 'Bold', exact: true })).toBeInViewport();
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+    true,
+  );
   await page.screenshot({ path: test.info().outputPath('mobile-editor.png') });
 });
 

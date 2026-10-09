@@ -1,6 +1,24 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss" source(none);
+@plugin "@tailwindcss/typography";
+@source "./**/*.{ts,tsx}";
+
+@theme {
+  --color-vibage: #f97316;
+  --color-vibageDark: #ea580c;
+  --color-terminal: #41ff00;
+  --font-terminal: "VT323";
+}
+
+/* Tailwind 3 used gray-200 as the default border color. */
+@layer base {
+  *,
+  ::before,
+  ::after,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
+}
 
 html,
 body,
@@ -86,5 +104,66 @@ body,
   }
   .note-editor-surface .milkdown .milkdown-block-handle {
     display: none;
+  }
+}
+
+@keyframes command-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes command-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.command-menu-backdrop {
+  animation: command-backdrop-in 150ms ease-out both;
+}
+.command-menu-panel {
+  animation: command-panel-in 150ms ease-out both;
+}
+@keyframes command-backdrop-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes command-panel-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+}
+.command-menu-backdrop[data-state="closed"] {
+  animation: command-backdrop-out 150ms ease-in both;
+}
+.command-menu-backdrop[data-state="closed"] .command-menu-panel {
+  animation: command-panel-out 150ms ease-in both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .command-menu-backdrop,
+  .command-menu-panel,
+  .command-menu-backdrop[data-state="closed"],
+  .command-menu-backdrop[data-state="closed"] .command-menu-panel {
+    animation: none;
+    transition: none;
+  }
+  .command-menu-backdrop[data-state="closed"] {
+    opacity: 0;
   }
 }

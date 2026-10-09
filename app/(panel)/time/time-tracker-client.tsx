@@ -2,11 +2,10 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
-import React, { useMemo, useState } from 'react';
-import { FaPause, FaPlay } from 'react-icons/fa';
+import { Pause as FaPause, Play as FaPlay } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import type { TimeBlock } from 'tt-services';
 
-import { MilkdownEditor } from '@/components/milkdown-note-editor';
 import { NoteModal } from '@/components/note-modal';
 
 import {
@@ -53,7 +52,8 @@ export default function TimeTrackerClient() {
       setNoteId('');
       await queryClient.invalidateQueries({ queryKey: ['timeblocks'] });
     },
-    onError: (e: any) => setError(e instanceof Error ? e.message : 'Failed to start time block'),
+    onError: (e: any) =>
+      setError(e instanceof Error ? e.message : 'Failed to start time block'),
   });
 
   const endMutation = useMutation({
@@ -76,7 +76,8 @@ export default function TimeTrackerClient() {
     onMutate: async () => {
       setError(null);
     },
-    onError: (e: any) => setError(e instanceof Error ? e.message : 'Failed to update time block'),
+    onError: (e: any) =>
+      setError(e instanceof Error ? e.message : 'Failed to update time block'),
     onSettled: async () => {
       await queryClient.invalidateQueries({ queryKey: ['timeblocks'] });
     },
@@ -111,48 +112,58 @@ export default function TimeTrackerClient() {
           <input
             type="text"
             placeholder="What are you working on?"
-            className="flex-1 bg-gray-900 border border-gray-700 rounded px-3 py-2 text-gray-100"
+            className="flex-1 bg-gray-900 border border-gray-700 rounded-sm px-3 py-2 text-gray-100"
             value={label}
             onChange={(e) => setLabel(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && label.trim())
-                startMutation.mutate({ label: label.trim(), noteId: noteId.trim() || undefined });
+                startMutation.mutate({
+                  label: label.trim(),
+                  noteId: noteId.trim() || undefined,
+                });
             }}
           />
           <input
             type="text"
             placeholder="Optional Note ID"
-            className="w-full md:w-60 bg-gray-900 border border-gray-700 rounded px-3 py-2 text-gray-100"
+            className="w-full md:w-60 bg-gray-900 border border-gray-700 rounded-sm px-3 py-2 text-gray-100"
             value={noteId}
             onChange={(e) => setNoteId(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && label.trim())
-                startMutation.mutate({ label: label.trim(), noteId: noteId.trim() || undefined });
+                startMutation.mutate({
+                  label: label.trim(),
+                  noteId: noteId.trim() || undefined,
+                });
             }}
           />
           <button
+            type="button"
             onClick={() =>
               label.trim() &&
               startMutation.mutate({ label: label.trim(), noteId: noteId.trim() || undefined })
             }
             disabled={!label.trim() || startMutation.isPending}
-            className="px-3 py-2 rounded bg-green-600 hover:bg-green-500 disabled:opacity-50 flex items-center gap-2"
+            className="px-3 py-2 rounded-sm bg-green-600 hover:bg-green-500 disabled:opacity-50 flex items-center gap-2"
             title="Start time block"
           >
-            <FaPlay /> Start
+            <FaPlay size="1em" /> Start
           </button>
           <button
+            type="button"
             onClick={() => endMutation.mutate()}
             disabled={endMutation.isPending}
-            className="px-3 py-2 rounded bg-yellow-600 hover:bg-yellow-500 disabled:opacity-50 flex items-center gap-2"
+            className="px-3 py-2 rounded-sm bg-yellow-600 hover:bg-yellow-500 disabled:opacity-50 flex items-center gap-2"
             title="End current block"
           >
-            <FaPause /> Stop
+            <FaPause size="1em" /> Stop
           </button>
         </div>
       </div>
 
-      {error && <div className="bg-red-700 text-red-100 p-2 rounded mb-4">Error: {error}</div>}
+      {error && (
+        <div className="bg-red-700 text-red-100 p-2 rounded-sm mb-4">Error: {error}</div>
+      )}
 
       <div className="space-y-2">
         <div className="text-gray-300 font-medium">All Time Blocks</div>
@@ -162,7 +173,7 @@ export default function TimeTrackerClient() {
             <span>Loading…</span>
           </div>
         ) : (
-          <ul className="divide-y divide-white/10 rounded bg-gray-800/40 max-h-[70vh] overflow-auto">
+          <ul className="divide-y divide-white/10 rounded-sm bg-gray-800/40 max-h-[70vh] overflow-auto">
             {allBlocks.length === 0 ? (
               <li className="p-3 text-gray-400">No time blocks yet.</li>
             ) : (
@@ -275,11 +286,11 @@ function BlockRow({
 
   const containerClass = compact
     ? isActive
-      ? 'flex flex-col gap-2 rounded bg-green-800/50 border border-green-500'
+      ? 'flex flex-col gap-2 rounded-sm bg-green-800/50 border border-green-500'
       : 'flex flex-col gap-2'
     : isActive
-      ? 'p-3 rounded flex flex-col gap-2 bg-green-800/50 border border-green-500'
-      : 'p-3 bg-gray-700 rounded flex flex-col gap-2';
+      ? 'p-3 rounded-sm flex flex-col gap-2 bg-green-800/50 border border-green-500'
+      : 'p-3 bg-gray-700 rounded-sm flex flex-col gap-2';
 
   return (
     <div className={containerClass}>
@@ -296,9 +307,13 @@ function BlockRow({
         </div>
         <div className="flex items-center gap-2">
           {isActive && (
-            <span className="px-2 py-0.5 text-xs rounded bg-green-700 text-white">Active</span>
+            <span className="px-2 py-0.5 text-xs rounded-sm bg-green-700 text-white">
+              Active
+            </span>
           )}
-          <div className="text-gray-200 whitespace-nowrap">{formatDuration(block.durationMs)}</div>
+          <div className="text-gray-200 whitespace-nowrap">
+            {formatDuration(block.durationMs)}
+          </div>
         </div>
       </div>
       {isEditing ? (
@@ -307,7 +322,7 @@ function BlockRow({
             <span>Start</span>
             <input
               type="datetime-local"
-              className="bg-gray-900 border border-gray-700 rounded px-2 py-1 text-gray-100"
+              className="bg-gray-900 border border-gray-700 rounded-sm px-2 py-1 text-gray-100"
               value={startLocal}
               onChange={(e) => setStartLocal(e.target.value)}
             />
@@ -316,7 +331,7 @@ function BlockRow({
             <span>End</span>
             <input
               type="datetime-local"
-              className="bg-gray-900 border border-gray-700 rounded px-2 py-1 text-gray-100"
+              className="bg-gray-900 border border-gray-700 rounded-sm px-2 py-1 text-gray-100"
               value={endLocal}
               onChange={(e) => setEndLocal(e.target.value)}
             />
@@ -325,20 +340,29 @@ function BlockRow({
             <span>Note ID</span>
             <input
               type="text"
-              className="bg-gray-900 border border-gray-700 rounded px-2 py-1 text-gray-100"
+              className="bg-gray-900 border border-gray-700 rounded-sm px-2 py-1 text-gray-100"
               value={noteId}
               onChange={(e) => setNoteId(e.target.value)}
             />
           </label>
           <div className="flex items-end gap-2">
-            <button className="px-3 py-2 rounded bg-green-700 hover:bg-green-600" onClick={save}>
+            <button
+              type="button"
+              className="px-3 py-2 rounded-sm bg-green-700 hover:bg-green-600"
+              onClick={save}
+            >
               Save
             </button>
-            <button className="px-3 py-2 rounded bg-gray-700 hover:bg-gray-600" onClick={cancel}>
+            <button
+              type="button"
+              className="px-3 py-2 rounded-sm bg-gray-700 hover:bg-gray-600"
+              onClick={cancel}
+            >
               Cancel
             </button>
             <button
-              className="px-3 py-2 rounded bg-red-700 hover:bg-red-600"
+              type="button"
+              className="px-3 py-2 rounded-sm bg-red-700 hover:bg-red-600"
               onClick={() => {
                 setEndLocal('');
               }}
@@ -351,28 +375,32 @@ function BlockRow({
         <div className="flex items-center gap-2 flex-wrap">
           {block.noteId ? (
             <button
-              className="px-2 py-1 text-xs rounded bg-blue-700 hover:bg-blue-600"
+              type="button"
+              className="px-2 py-1 text-xs rounded-sm bg-blue-700 hover:bg-blue-600"
               onClick={() => onOpenNote && onOpenNote()}
             >
               Open Note
             </button>
           ) : (
             <button
-              className="px-2 py-1 text-xs rounded bg-blue-700 hover:bg-blue-600"
+              type="button"
+              className="px-2 py-1 text-xs rounded-sm bg-blue-700 hover:bg-blue-600"
               onClick={() => onAddNote && onAddNote()}
             >
               Add Note
             </button>
           )}
           <button
-            className="px-2 py-1 text-xs rounded bg-gray-600 hover:bg-gray-500"
+            type="button"
+            className="px-2 py-1 text-xs rounded-sm bg-gray-600 hover:bg-gray-500"
             onClick={() => setIsEditing(true)}
           >
             Edit
           </button>
           {isActive && (
             <button
-              className="px-2 py-1 text-xs rounded bg-yellow-600 hover:bg-yellow-500"
+              type="button"
+              className="px-2 py-1 text-xs rounded-sm bg-yellow-600 hover:bg-yellow-500"
               onClick={() => onStop && onStop()}
             >
               Stop

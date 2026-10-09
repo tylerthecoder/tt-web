@@ -1,0 +1,87 @@
+diff --git a/src/services/MarkdownToGoogleDocConverter.ts b/src/services/MarkdownToGoogleDocConverter.ts
+--- a/src/services/MarkdownToGoogleDocConverter.ts
++++ b/src/services/MarkdownToGoogleDocConverter.ts
+@@ -1,4 +1,4 @@
+-import { docs_v1 } from 'googleapis';
++import type { docs_v1 } from '@googleapis/docs';
+ 
+ export interface GoogleDocRequest {
+   title?: string;
+diff --git a/src/agent/agent.ts b/src/agent/agent.ts
+--- a/src/agent/agent.ts
++++ b/src/agent/agent.ts
+@@ -1,5 +1,5 @@
+ import { Agent, tool } from '@openai/agents';
+-import { z } from '@openai/zod/v3';
++import { z } from 'zod/v3';
+ 
+ import { TylersThings } from '../lib.ts';
+ 
+diff --git a/src/services/ChatsService.ts b/src/services/ChatsService.ts
+--- a/src/services/ChatsService.ts
++++ b/src/services/ChatsService.ts
+@@ -21,6 +21,7 @@
+   messages: ChatMessage[];
+   // Serialized agent run state to resume conversations
+   state?: unknown;
++  runLease?: { token: string; expiresAt: string };
+ }
+ 
+ export type CreatableChat = Omit<Chat, 'id' | 'createdAt' | 'updatedAt' | 'messages'> & {
+@@ -112,6 +113,56 @@
+     return convertChat(result);
+   }
+ 
++  async acquireRun(chatId: string, token: string, expiresAt: string): Promise<boolean> {
++    const result = await this.chatsCollection.updateOne(
++      { _id: new ObjectId(chatId), $or: [
++        { runLease: { $exists: false } },
++        { 'runLease.expiresAt': { $lte: new Date().toISOString() } },
++      ] },
++      { $set: { runLease: { token, expiresAt } } },
++    );
++    return result.matchedCount === 1;
++  }
++
++  async renewRun(chatId: string, token: string, expiresAt: string): Promise<boolean> {
++    const result = await this.chatsCollection.updateOne(
++      { _id: new ObjectId(chatId), 'runLease.token': token,
++        'runLease.expiresAt': { $gt: new Date().toISOString() } },
++      { $set: { 'runLease.expiresAt': expiresAt } },
++    );
++    return result.matchedCount === 1;
++  }
++
++  // Save the structured state and its UI transcript together, fenced by the lease.
++  async commitRun(
++    chatId: string,
++    token: string,
++    state: unknown,
++    messages: Array<Omit<ChatMessage, 'id' | 'createdAt'>> = [],
++  ): Promise<Chat> {
++    const now = new Date().toISOString();
++    const added = messages.map(message => ({
++      ...message, id: new ObjectId().toString(), createdAt: now,
++    }));
++    const result = await this.chatsCollection.findOneAndUpdate(
++      { _id: new ObjectId(chatId), 'runLease.token': token,
++        'runLease.expiresAt': { $gt: now } },
++      { $set: { state, updatedAt: now },
++        ...(added.length ? { $push: { messages: { $each: added } } } : {}),
++      },
++      { returnDocument: 'after' },
++    );
++    if (!result) throw new Error('Chat ownership was lost. Reload before continuing.');
++    return convertChat(result);
++  }
++
++  async releaseRun(chatId: string, token: string): Promise<void> {
++    await this.chatsCollection.updateOne(
++      { _id: new ObjectId(chatId), 'runLease.token': token },
++      { $unset: { runLease: '' } },
++    );
++  }
++
+   async renameChat(chatId: string, title: string): Promise<Chat> {
+     const now = new Date().toISOString();
+     const result = await this.chatsCollection.findOneAndUpdate(

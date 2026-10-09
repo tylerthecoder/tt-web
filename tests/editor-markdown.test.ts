@@ -1,9 +1,9 @@
 import { describe, expect, test } from 'bun:test';
-import { unified } from 'unified';
+import type { MarkdownNode } from '@milkdown/kit/transformer';
+import { toMarkdown } from 'mdast-util-to-markdown';
 import remarkParse from 'remark-parse';
 import remarkStringify from 'remark-stringify';
-import { toMarkdown } from 'mdast-util-to-markdown';
-import type { MarkdownNode } from '@milkdown/kit/transformer';
+import { unified } from 'unified';
 import {
   noteRootHandler,
   noteTextHandler,
@@ -69,7 +69,10 @@ describe('note Markdown spacing', () => {
 
   test('a single empty editor paragraph is an empty note', () => {
     expect(
-      toMarkdown({ type: 'root', children: [{ type: 'paragraph', children: [] }] }, { handlers }),
+      toMarkdown(
+        { type: 'root', children: [{ type: 'paragraph', children: [] }] },
+        { handlers },
+      ),
     ).toBe('');
   });
 

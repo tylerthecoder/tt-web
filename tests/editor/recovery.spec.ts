@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, type Page, test } from '@playwright/test';
 import { localDraftContents } from './helpers';
 
 async function openEditor(page: Page) {
@@ -90,11 +90,15 @@ test('discarding a reviewed version does not erase newer typing in its source ta
   await append(page, ' newer');
   await expect(page.getByRole('button', { name: 'Retry save' })).toBeVisible();
   await reopened.getByRole('button', { name: 'Keep server version' }).click();
-  await expect(reopened.getByRole('textbox', { name: 'Note content' })).toHaveText('First note');
+  await expect(reopened.getByRole('textbox', { name: 'Note content' })).toHaveText(
+    'First note',
+  );
   expect(await localDraftContents(reopened)).toEqual(['First note original newer\n']);
 });
 
-test('legacy draft can be explicitly discarded without writing to the server', async ({ page }) => {
+test('legacy draft can be explicitly discarded without writing to the server', async ({
+  page,
+}) => {
   await page.addInitScript(() => localStorage.setItem('tt-note-draft:one', 'Legacy draft'));
   await page.goto('/');
   await page.getByRole('button', { name: 'Keep server version' }).click();

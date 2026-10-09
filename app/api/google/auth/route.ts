@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 
 import { isPreviewHost } from '@/utils/auth';
 import { getTT } from '@/utils/utils';

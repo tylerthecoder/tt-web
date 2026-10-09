@@ -1,7 +1,7 @@
 'use client';
 
 import { differenceInDays, differenceInHours, format } from 'date-fns';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useWeek } from '../(panel)/hooks';
 

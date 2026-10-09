@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useMemo, useState, useTransition } from 'react';
+import { useMemo, useState, useTransition } from 'react';
 
 import { createChat, getChat, listChats } from './actions';
 import ChatColumn from './ChatColumn';
@@ -70,8 +70,9 @@ export default function Client({
         <div className="col-span-4 md:col-span-1 h-full min-h-0 flex flex-col">
           <div className="flex gap-2">
             <button
+              type="button"
               onClick={onNewChat}
-              className="flex-1 py-2 px-3 rounded bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-50"
+              className="flex-1 py-2 px-3 rounded-sm bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-50"
               disabled={isPending}
             >
               New chat
@@ -80,9 +81,10 @@ export default function Client({
           <div className="mt-2 flex-1 min-h-0 overflow-y-auto pr-1">
             {chats.map((c: Chat) => (
               <button
+                type="button"
                 key={c.id}
                 onClick={() => onSelectChat(c.id)}
-                className={`w-full text-left px-3 py-2 rounded transition ${c.id === chat.id ? 'bg-blue-600/20 text-blue-200' : 'hover:bg-white/5 text-gray-200'}`}
+                className={`w-full text-left px-3 py-2 rounded-sm transition ${c.id === chat.id ? 'bg-blue-600/20 text-blue-200' : 'hover:bg-white/5 text-gray-200'}`}
               >
                 <div className="truncate font-medium">{c.title || 'Untitled'}</div>
                 <div className="text-xs text-gray-400">
@@ -94,7 +96,7 @@ export default function Client({
         </div>
 
         {/* Chat column */}
-        <ChatColumn chat={chat} />
+        <ChatColumn key={chat.id} chat={chat} />
       </div>
     </div>
   );

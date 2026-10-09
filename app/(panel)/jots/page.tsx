@@ -1,8 +1,8 @@
 'use client';
 
 import { format } from 'date-fns';
+import { Trash2 as FaTrash } from 'lucide-react';
 import React, { useState, useTransition } from 'react';
-import { FaTrash } from 'react-icons/fa';
 
 import { deleteJotAction } from '../actions';
 import { useJots } from '../hooks';
@@ -34,7 +34,9 @@ export default function JotsPage() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl md:text-3xl font-bold">My Jots</h1>
       </div>
-      {error && <div className="bg-red-700 text-red-100 p-2 rounded mb-4">Error: {error}</div>}
+      {error && (
+        <div className="bg-red-700 text-red-100 p-2 rounded-sm mb-4">Error: {error}</div>
+      )}
       {!jotsQuery.data ? (
         <div className="flex items-center gap-3 text-gray-300">
           <span className="animate-spin inline-block w-5 h-5 border-2 border-gray-500 border-t-transparent rounded-full" />
@@ -45,7 +47,10 @@ export default function JotsPage() {
       ) : (
         <ul className="space-y-3">
           {jots.map((jot) => (
-            <li key={jot.id} className="flex items-start justify-between p-3 bg-gray-700 rounded">
+            <li
+              key={jot.id}
+              className="flex items-start justify-between p-3 bg-gray-700 rounded-sm"
+            >
               <div className="flex-1 mr-3">
                 <p className="text-gray-100 break-words whitespace-pre-wrap">{jot.text}</p>
                 <p className="text-xs text-gray-400 mt-1">
@@ -53,12 +58,13 @@ export default function JotsPage() {
                 </p>
               </div>
               <button
+                type="button"
                 onClick={() => handleDelete(jot.id)}
                 disabled={isPending}
                 className="p-2 text-gray-400 hover:text-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Delete Jot"
               >
-                <FaTrash />
+                <FaTrash size="1em" />
               </button>
             </li>
           ))}
