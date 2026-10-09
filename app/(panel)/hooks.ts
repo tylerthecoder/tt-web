@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useState } from 'react';
 
+import { flushNoteBeforeRead } from '@/components/note-editor/use-autosave';
 import { getGoogleDriveFileById } from '@/google/docs/actions';
 import type { GoogleDriveFile } from '@/types/google';
 
@@ -134,6 +135,7 @@ export const useNote = (noteId: string) => {
     refetchOnMount: 'always',
     queryFn: async () => {
       const { getNote } = await import('./actions');
+      await flushNoteBeforeRead(noteId);
       return getNote(noteId);
     },
     enabled: !!noteId,

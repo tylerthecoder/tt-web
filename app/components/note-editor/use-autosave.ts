@@ -16,6 +16,13 @@ interface NoteSession {
 }
 const sessions = new Map<string, NoteSession>();
 const users = new Map<NoteAutosave, number>();
+
+/** Fetch only after a closing editor's queued writes settle, never before its final save. */
+export async function flushNoteBeforeRead(noteId: string): Promise<void> {
+  // Failed writers stay in sessions, so the editor can still reopen their latest local text.
+  await sessions.get(noteId)?.autosave.flush();
+}
+
 export function useNoteAutosave(noteId: string) {
   const queryClient = useQueryClient();
   const session = useMemo(() => {

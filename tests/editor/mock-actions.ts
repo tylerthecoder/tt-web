@@ -9,10 +9,14 @@ export const fixture = {
   fail: false,
   delay: 0,
   metadataDelay: 0,
+  readDelay: 0,
 };
 Object.assign(window, { fixture });
 export async function getNote(id: string) {
-  return { ...fixture.notes[id] };
+  // Snapshot before delay to model a response that becomes stale while a save finishes.
+  const note = { ...fixture.notes[id] };
+  if (fixture.readDelay) await new Promise((resolve) => setTimeout(resolve, fixture.readDelay));
+  return note;
 }
 export async function updateNoteContent(id: string, content: string) {
   if (fixture.delay) await new Promise((resolve) => setTimeout(resolve, fixture.delay));

@@ -14,6 +14,8 @@ import { isGoogleNote, Note } from 'tt-services/src/client-index.ts';
 import { pushNoteToGoogleDrive } from '@/(panel)/actions';
 import { assignGoogleDocIdToNote, pullContentFromGoogleDoc } from '@/(panel)/actions';
 
+import { parseGoogleDocId } from './google-doc-link';
+
 // Hook for Google sync functionality
 export const useGoogleSync = (
   noteId: string,
@@ -180,11 +182,7 @@ function GoogleSyncModal({
   const googleSync = useGoogleSync(noteId, undefined, beforeAction, afterAction);
   const [showDocSelector, setShowDocSelector] = useState(false);
   const [documentLink, setDocumentLink] = useState('');
-  const documentId = documentLink
-    .trim()
-    .match(
-      /^(?:https:\/\/docs\.google\.com\/document\/d\/)?([A-Za-z0-9_-]{20,})(?:\/[^\s]*)?$/,
-    )?.[1];
+  const documentId = parseGoogleDocId(documentLink);
 
   const handleCreateNewDoc = async () => {
     const result = await googleSync.pushToGoogle({
