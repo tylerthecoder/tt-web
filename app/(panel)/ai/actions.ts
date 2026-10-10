@@ -4,7 +4,7 @@ import { openai } from '@ai-sdk/openai';
 import { withChatRun } from '@/services/chat-run';
 import { requireAuth } from '@/utils/auth';
 import { getTT } from '@/utils/utils';
-import { createConversation } from './conversation';
+import { createConversation, readConversationStatus } from './conversation';
 
 async function withChat<T>(
   id: string,
@@ -43,5 +43,6 @@ export async function continueAfterApprovals(id: string) {
 }
 
 export async function getConversationStatus(id: string) {
-  return withChat(id, (chat) => chat.status(id));
+  await requireAuth();
+  return readConversationStatus((await getTT()).chats, id);
 }

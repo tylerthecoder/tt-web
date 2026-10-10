@@ -1,5 +1,35 @@
 import { expect, test } from '@playwright/test';
 
+for (const decision of ['Approve', 'Reject']) {
+  test(`${decision} and status failure can refresh unresolved approvals`, async ({ page }) => {
+    await page.goto('/chat?mode=decision-double-failure&approval=pending');
+    await page.getByRole('button', { name: decision, exact: true }).click();
+    await expect(page.getByRole('alert')).toContainText('Decision unavailable');
+    await expect(page.getByText('Loading approvals…')).toBeVisible();
+    const refresh = page.getByRole('button', { name: 'Refresh status' });
+    await expect(refresh).toBeEnabled();
+    await refresh.click();
+    await expect(page.getByRole('button', { name: 'Approve', exact: true })).toBeEnabled();
+    await expect(page.getByRole('button', { name: 'Reject', exact: true })).toBeEnabled();
+    await page.getByRole('button', { name: decision, exact: true }).click();
+    await expect(page.getByText('Reply for one')).toBeVisible();
+    await expect(page.getByPlaceholder('Type a message...')).toBeEnabled();
+  });
+
+  test(`${decision} recovery blocks concurrent status refreshes`, async ({ page }) => {
+    await page.goto('/chat?mode=decision-paused-recovery&approval=pending');
+    await page.getByRole('button', { name: decision, exact: true }).click();
+    const refresh = page.getByRole('button', { name: 'Refresh status' });
+    await expect(refresh).toBeDisabled();
+    const requests = await page.evaluate(() => (window as any).chatTest.statusRequests);
+    await refresh.evaluate((button: HTMLButtonElement) => button.click());
+    expect(await page.evaluate(() => (window as any).chatTest.statusRequests)).toBe(requests);
+    await page.evaluate(() => (window as any).chatTest.releaseRecovery());
+    await expect(page.getByRole('button', { name: decision, exact: true })).toBeEnabled();
+    await expect(refresh).toBeEnabled();
+  });
+}
+
 test('an abandoned mount status response cannot replace a completed turn', async ({ page }) => {
   await page.goto('/chat?mode=stale-initial-status');
   await page.getByPlaceholder('Type a message...').fill('Keep completed turn');

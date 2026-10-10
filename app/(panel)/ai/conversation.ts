@@ -76,12 +76,22 @@ function loadState(chat: Chat): State {
   return state;
 }
 
+async function readConversation(chats: Pick<Services['chats'], 'getChatById'>, id: string) {
+  const chat = await chats.getChatById(id);
+  if (!chat) throw new Error('Chat not found');
+  return { chat, state: loadState(chat) };
+}
+
+export async function readConversationStatus(
+  chats: Pick<Services['chats'], 'getChatById'>,
+  id: string,
+) {
+  const { chat, state } = await readConversation(chats, id);
+  return { chat, approvals: state.pending, ready: state.ready };
+}
+
 export function createConversation(services: Services, model: LanguageModel, lease: RunLease) {
-  const read = async (id: string) => {
-    const chat = await services.chats.getChatById(id);
-    if (!chat) throw new Error('Chat not found');
-    return { chat, state: loadState(chat) };
-  };
+  const read = (id: string) => readConversation(services.chats, id);
   let saving = Promise.resolve();
   type TranscriptMessage = Omit<ChatMessage, 'id' | 'createdAt'>;
   const save = (id: string, state: State, messages: TranscriptMessage[] = []) => {
@@ -219,12 +229,8 @@ export function createConversation(services: Services, model: LanguageModel, lea
     return { chat, done: state.pending.length === 0, approvals: state.pending };
   };
 
-  const status = async (id: string) => {
-    const { state } = await read(id);
-    // Persist synthetic IDs before exposing legacy approval controls.
-    const chat = await save(id, state);
-    return { chat, approvals: state.pending, ready: state.ready };
-  };
+  // Legacy approval IDs are deterministic; migration can wait for a fenced decision.
+  const status = (id: string) => readConversationStatus(services.chats, id);
 
   return {
     status,

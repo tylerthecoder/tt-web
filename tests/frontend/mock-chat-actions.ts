@@ -10,8 +10,23 @@ const ready = new Set(mode === 'reload' ? ['one'] : []);
 let failStatus = false;
 let statusRequests = 0;
 let failedOnce = false;
+let decisionFailed = false;
+let decisionResolved = false;
+let pauseRecovery = false;
+export const chatTest = {
+  statusRequests: 0,
+  releaseRecovery: () => {},
+};
 export async function getConversationStatus(id: string) {
+  Object.assign(window, { chatTest });
   statusRequests++;
+  chatTest.statusRequests = statusRequests;
+  if (pauseRecovery) {
+    pauseRecovery = false;
+    await new Promise<void>((resolve) => {
+      chatTest.releaseRecovery = resolve;
+    });
+  }
   if (mode === 'stale-initial-status' && statusRequests === 1) {
     const chat = structuredClone(chats[id]);
     await new Promise((resolve) => setTimeout(resolve, 500));
@@ -28,9 +43,16 @@ export async function getConversationStatus(id: string) {
     failStatus = false;
     throw new Error('Status unavailable');
   }
-  const approvals = new URLSearchParams(location.search).has('approval')
-    ? [{ index: 0, name: 'update_note', args: { noteId: 'example-note', title: 'New title' } }]
-    : [];
+  const approvals =
+    new URLSearchParams(location.search).has('approval') && !decisionResolved
+      ? [
+          {
+            index: 0,
+            name: 'update_note',
+            args: { noteId: 'example-note', title: 'New title' },
+          },
+        ]
+      : [];
   return { chat: structuredClone(chats[id]), approvals, ready: ready.has(id) };
 }
 export async function sendUserMessage(id: string, content: string) {
@@ -55,9 +77,19 @@ export async function continueAfterApprovals(id: string) {
   });
   return { ...(await getConversationStatus(id)), done: true };
 }
-export async function approveTool() {
+async function decideTool() {
+  if (mode?.startsWith('decision-') && !decisionFailed) {
+    decisionFailed = true;
+    failStatus = mode === 'decision-double-failure';
+    pauseRecovery = mode === 'decision-paused-recovery';
+    throw new Error('Decision unavailable');
+  }
+  decisionResolved = true;
   return { approvals: [] };
 }
+export async function approveTool() {
+  return decideTool();
+}
 export async function rejectTool() {
-  return { approvals: [] };
+  return decideTool();
 }

@@ -216,7 +216,11 @@ export default function ChatColumn({ chat }: { chat: Chat }) {
         {(error || ready) && (
           <div role="alert" className="text-red-300">
             {error}{' '}
-            <button type="button" onClick={retry} disabled={isThinking || approvals.length > 0}>
+            <button
+              type="button"
+              onClick={retry}
+              disabled={isThinking || approvingIndex !== null || rejectingIndex !== null}
+            >
               {ready ? 'Resume turn' : 'Refresh status'}
             </button>
           </div>

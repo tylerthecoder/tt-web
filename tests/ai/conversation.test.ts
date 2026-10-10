@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'bun:test';
 import { MockLanguageModelV4 } from 'ai/test';
 import type { Chat, ChatMessage } from 'tt-services';
-import { createConversation } from '../../app/(panel)/ai/conversation';
-import type { RunLease } from '../../app/services/chat-run';
+import { createConversation, readConversationStatus } from '../../app/(panel)/ai/conversation';
+import { type RunLease, withChatRun } from '../../app/services/chat-run';
 
 type GenerateResult = Awaited<ReturnType<MockLanguageModelV4['doGenerate']>>;
 const response = (content: GenerateResult['content']): GenerateResult => ({
@@ -148,6 +148,85 @@ describe('native AI tool approvals', () => {
 });
 
 describe('AI persistence and recovery', () => {
+  test('concurrent status reads preserve fresh and legacy chats without writes', async () => {
+    for (const state of [
+      undefined,
+      { pendingTools: [{ name: 'update_note', args: { noteId: 'note', title: 'Proposal' } }] },
+    ]) {
+      const f = fixture([], state);
+      f.chat().updatedAt = '2026-10-01T12:00:00.000Z';
+      const before = structuredClone(f.chat());
+      f.services.chats.commitRun = async () => {
+        throw new Error('Status must not write');
+      };
+      f.lease.assertOwned = async () => {
+        throw new Error('Status must not need a lease');
+      };
+      const [first, second] = await Promise.all([
+        readConversationStatus(f.services.chats, 'chat'),
+        f.engine().status('chat'),
+      ]);
+      expect(first).toEqual(second);
+      expect(first.chat).toEqual(before);
+      expect(f.chat()).toEqual(before);
+      expect(f.model.doGenerateCalls).toHaveLength(0);
+    }
+  });
+  test('status remains readable while another request holds the chat lease', async () => {
+    const f = fixture([]);
+    const store = {
+      ...f.services.chats,
+      async acquireRun(_id: string, token: string, expiresAt: string) {
+        if (f.chat().runLease) return false;
+        f.chat().runLease = { token, expiresAt };
+        return true;
+      },
+      async renewRun() {
+        return true;
+      },
+      async releaseRun() {
+        delete f.chat().runLease;
+      },
+    };
+    await withChatRun(store, 'chat', async () => {
+      const before = structuredClone(f.chat());
+      await expect(withChatRun(store, 'chat', async () => {})).rejects.toThrow(
+        'already processing',
+      );
+      const results = await Promise.all([
+        readConversationStatus(store, 'chat'),
+        readConversationStatus(store, 'chat'),
+      ]);
+      expect(results[0]).toEqual(results[1]);
+      expect(results[0].chat).toEqual(before);
+      expect(f.chat()).toEqual(before);
+    });
+  });
+  test('legacy previews stay stable until a decision persists their migration', async () => {
+    const legacy = {
+      pendingTools: [
+        { name: 'update_note', args: { noteId: 'note', title: 'First' } },
+        { name: 'update_note', args: { noteId: 'note', title: 'Second' } },
+      ],
+    };
+    const f = fixture([answer], legacy);
+    const first = await readConversationStatus(f.services.chats, 'chat');
+    const reloaded = await readConversationStatus(f.services.chats, 'chat');
+    expect(first.approvals).toEqual(reloaded.approvals);
+    expect(first.approvals.map((item) => item.approvalId)).toEqual([
+      'legacy-chat-0',
+      'legacy-chat-1',
+    ]);
+    expect(f.chat().state).toEqual(legacy);
+    await f.engine().decide('chat', first.approvals[0].index, false);
+    const migrated = await readConversationStatus(f.services.chats, 'chat');
+    expect(migrated.approvals).toEqual([reloaded.approvals[1]]);
+    await f.engine().decide('chat', reloaded.approvals[1].index, true);
+    expect((await readConversationStatus(f.services.chats, 'chat')).ready).toBe(true);
+    await f.engine().resume('chat');
+    expect(f.writes).toEqual([{ id: 'note', update: { title: 'Second' } }]);
+    expect((await readConversationStatus(f.services.chats, 'chat')).ready).toBe(false);
+  });
   test('the status exposes an accepted turn after a provider failure', async () => {
     const f = fixture([]);
     f.model.doGenerate = async () => {
