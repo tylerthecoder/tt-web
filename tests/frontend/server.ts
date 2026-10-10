@@ -7,7 +7,11 @@ import postcss from 'postcss';
 const output = join(tmpdir(), 'tt-web-frontend-tests');
 await mkdir(output, { recursive: true });
 const result = await Bun.build({
-  entrypoints: ['tests/frontend/fixture.tsx', 'tests/frontend/chat-fixture.tsx'],
+  entrypoints: [
+    'tests/frontend/fixture.tsx',
+    'tests/frontend/chat-fixture.tsx',
+    'tests/frontend/agent-fixture.tsx',
+  ],
   outdir: output,
   target: 'browser',
   define: { 'process.env.NODE_ENV': JSON.stringify('development') },
@@ -23,6 +27,10 @@ const result = await Bun.build({
         build.onLoad({ filter: /\/app\/\(panel\)\/ai\/actions\.ts$/ }, async () => ({
           loader: 'ts',
           contents: await readFile('tests/frontend/mock-chat-actions.ts', 'utf8'),
+        }));
+        build.onLoad({ filter: /\/app\/\(panel\)\/agent\/actions\.ts$/ }, async () => ({
+          loader: 'ts',
+          contents: await readFile('tests/frontend/mock-agent-actions.ts', 'utf8'),
         }));
         build.onLoad({ filter: /\/app\/\(panel\)\/hooks\.ts$/ }, () => ({
           loader: 'ts',
@@ -48,14 +56,20 @@ Bun.serve({
   port: 4320,
   fetch(request) {
     const pathname = new URL(request.url).pathname;
-    if (pathname === '/' || pathname === '/chat')
+    if (pathname === '/' || pathname === '/chat' || pathname === '/agent')
       return new Response(
         '<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/global.css"></head><body><div id="root"></div><script type="module" src="/' +
-          (pathname === '/chat' ? 'chat-fixture' : 'fixture') +
+          (pathname === '/chat'
+            ? 'chat-fixture'
+            : pathname === '/agent'
+              ? 'agent-fixture'
+              : 'fixture') +
           '.js"></script></body></html>',
         { headers: { 'content-type': 'text/html' } },
       );
-    if (['/fixture.js', '/chat-fixture.js', '/global.css'].includes(pathname))
+    if (
+      ['/fixture.js', '/chat-fixture.js', '/agent-fixture.js', '/global.css'].includes(pathname)
+    )
       return new Response(Bun.file(join(output, pathname.slice(1))));
     return new Response('Not found', { status: 404 });
   },

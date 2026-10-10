@@ -16,6 +16,7 @@ let pauseRecovery = false;
 export const chatTest = {
   statusRequests: 0,
   releaseRecovery: () => {},
+  releaseContinuation: () => {},
 };
 export async function getConversationStatus(id: string) {
   Object.assign(window, { chatTest });
@@ -68,6 +69,13 @@ export async function sendUserMessage(id: string, content: string) {
   return continueAfterApprovals(id);
 }
 export async function continueAfterApprovals(id: string) {
+  if (mode?.startsWith('continuation-')) {
+    ready.add(id);
+    await new Promise<void>((resolve) => {
+      chatTest.releaseContinuation = resolve;
+    });
+    if (mode === 'continuation-failure') throw new Error('Continuation unavailable');
+  }
   ready.delete(id);
   chats[id].messages.push({
     id: 'assistant',

@@ -1,6 +1,42 @@
 import { expect, test } from '@playwright/test';
 
 for (const decision of ['Approve', 'Reject']) {
+  for (const outcome of ['success', 'failure']) {
+    test(`${decision} shows progress until continuation ${outcome}`, async ({ page }) => {
+      await page.addInitScript(() => {
+        const original = Element.prototype.scrollIntoView;
+        (window as any).chatScrolls = [];
+        Element.prototype.scrollIntoView = function () {
+          (window as any).chatScrolls.push(this.parentElement?.textContent ?? '');
+          original.call(this, { behavior: 'instant' });
+        };
+      });
+      await page.goto(`/chat?mode=continuation-${outcome}&approval=pending`);
+      await page.getByRole('button', { name: decision, exact: true }).click();
+      await expect(page.getByText('Thinking…', { exact: true })).toBeVisible();
+      await expect
+        .poll(() =>
+          page.evaluate(() =>
+            (window as any).chatScrolls.some((text: string) => text.includes('Thinking…')),
+          ),
+        )
+        .toBe(true);
+      await expect(page.getByPlaceholder('Type a message...')).toBeDisabled();
+      await expect(page.getByRole('button', { name: 'Send', exact: true })).toBeDisabled();
+      await expect(page.getByRole('button', { name: 'Approve', exact: true })).toHaveCount(0);
+      await expect(page.getByRole('button', { name: 'Reject', exact: true })).toHaveCount(0);
+      await page.evaluate(() => (window as any).chatTest.releaseContinuation());
+      await expect(page.getByText('Thinking…', { exact: true })).toHaveCount(0);
+      if (outcome === 'success') {
+        await expect(page.getByText('Reply for one')).toBeVisible();
+        await expect(page.getByPlaceholder('Type a message...')).toBeEnabled();
+      } else {
+        await expect(page.getByRole('alert')).toContainText('Continuation unavailable');
+        await expect(page.getByRole('button', { name: 'Resume turn' })).toBeEnabled();
+      }
+    });
+  }
+
   test(`${decision} and status failure can refresh unresolved approvals`, async ({ page }) => {
     await page.goto('/chat?mode=decision-double-failure&approval=pending');
     await page.getByRole('button', { name: decision, exact: true }).click();

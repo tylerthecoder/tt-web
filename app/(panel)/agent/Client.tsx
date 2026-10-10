@@ -45,7 +45,8 @@ export default function Client({
   const [approvals, setApprovals] = useState<ApprovalPreview[]>([]);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
-  const itemCount = chat.messages.length + approvals.length;
+  const messages = chat.messages;
+  const chatId = chat.id;
 
   useEffect(() => {
     startTransition(async () => {
@@ -55,8 +56,9 @@ export default function Client({
   }, [chat.id]);
 
   useEffect(() => {
-    if (itemCount) bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [itemCount]);
+    if (chatId && (messages.length || approvals.length))
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatId, messages, approvals]);
 
   const onSend = () => {
     if (!input.trim()) return;
@@ -72,7 +74,6 @@ export default function Client({
       }
       const freshList = await listChats();
       setChats(freshList as Chat[]);
-      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     });
   };
 
@@ -83,7 +84,6 @@ export default function Client({
       const freshList = await listChats();
       setChats(freshList as Chat[]);
       setApprovals([]);
-      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     });
   };
 
@@ -93,7 +93,6 @@ export default function Client({
       if (c) setChat(c as Chat);
       const res = await getPendingApprovals(id);
       setApprovals(res || []);
-      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     });
   };
 
@@ -106,7 +105,6 @@ export default function Client({
       } else {
         setApprovals(res.approvals || []);
       }
-      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     });
   };
 
@@ -119,7 +117,6 @@ export default function Client({
       } else {
         setApprovals(res.approvals || []);
       }
-      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     });
   };
 

@@ -94,9 +94,11 @@ export default function ChatColumn({ chat }: { chat: Chat }) {
   }, [chat.id, applyResult, showError]);
 
   const messageCount = chatLocal.messages.length;
+  const approvalCount = approvals.length;
   useEffect(() => {
-    if (messageCount) bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messageCount]);
+    if (messageCount || approvalCount || isThinking)
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messageCount, approvalCount, isThinking]);
 
   // A server failure may follow a persisted message or decision. Reload before offering
   // another send so a retry cannot submit the same draft twice.
@@ -139,13 +141,17 @@ export default function ChatColumn({ chat }: { chat: Chat }) {
       const result = await (approved ? approveTool : rejectTool)(chatLocal.id, index);
       if (!mounted.current) return;
       applyResult(result);
-      if (!result.approvals.length) applyResult(await continueAfterApprovals(chatLocal.id));
+      if (!result.approvals.length) {
+        setIsThinking(true);
+        applyResult(await continueAfterApprovals(chatLocal.id));
+      }
     } catch (error) {
       await recover(error);
     } finally {
       if (mounted.current) {
         setApprovingIndex(null);
         setRejectingIndex(null);
+        setIsThinking(false);
       }
     }
   };
