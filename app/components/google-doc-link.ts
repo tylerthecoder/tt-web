@@ -20,8 +20,9 @@ export function parseGoogleDocId(input: string): string | null {
     // Account switching adds /u/<index>/; query parameters and fragments are
     // navigation details, not part of the document ID.
     return (
-      url.pathname.match(/^\/document\/(?:u\/\d+\/)?d\/([A-Za-z0-9_-]{20,})(?:\/[^\s]*)?$/)?.[1] ??
-      null
+      url.pathname.match(
+        /^\/document\/(?:u\/\d+\/)?d\/([A-Za-z0-9_-]{20,})(?:\/[^\s]*)?$/,
+      )?.[1] ?? null
     );
   } catch {
     return null;

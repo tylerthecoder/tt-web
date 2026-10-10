@@ -1,7 +1,7 @@
 'use client';
 
 import { Bubblegum_Sans } from 'next/font/google';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
 
 const bubblegum = Bubblegum_Sans({
@@ -12,7 +12,6 @@ const bubblegum = Bubblegum_Sans({
 
 function LoginContent() {
   const [error, setError] = useState<string>('');
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   useEffect(() => {
@@ -53,8 +52,10 @@ function LoginContent() {
 
   return (
     <div className="flex min-h-screen items-center justify-center">
-      <div className="w-full max-w-md p-8 rounded-lg bg-gray-400 bg-opacity-70">
-        <h1 className={`text-4xl text-white text-center mb-8 ${bubblegum.className}`}>Sign In</h1>
+      <div className="w-full max-w-md p-8 rounded-lg bg-gray-400/70">
+        <h1 className={`text-4xl text-white text-center mb-8 ${bubblegum.className}`}>
+          Sign In
+        </h1>
 
         <div className="space-y-6">
           <p className="text-white text-center text-sm">
@@ -62,18 +63,19 @@ function LoginContent() {
           </p>
 
           {error && (
-            <div className="bg-red-500 bg-opacity-80 border border-red-600 rounded-lg p-3">
+            <div className="bg-red-500/80 border border-red-600 rounded-lg p-3">
               <p className="text-white text-sm text-center">{error}</p>
             </div>
           )}
 
           <button
+            type="button"
             onClick={handleGoogleSignIn}
             className="w-full py-3 px-4 border-2 border-white rounded-lg shadow-md
                      text-white bg-blue-600 hover:bg-blue-700 font-semibold
                      transform transition duration-150 flex items-center justify-center space-x-2"
           >
-            <svg className="w-5 h-5" viewBox="0 0 24 24">
+            <svg aria-hidden="true" className="w-5 h-5" viewBox="0 0 24 24">
               <path
                 fill="currentColor"
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"

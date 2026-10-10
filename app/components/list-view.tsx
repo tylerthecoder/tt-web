@@ -1,9 +1,9 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { ArrowLeft as FaArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import React, { useMemo, useState } from 'react';
-import { FaArrowLeft } from 'react-icons/fa';
 import type { List, ListItem as ListItemType } from 'tt-services';
 
 import { NoteModal } from '@/components/note-modal';
@@ -152,7 +152,9 @@ export function ListView({
         const updated: List = {
           ...previousList,
           items: previousList.items.map((it) =>
-            it.id === itemId ? { ...it, archived: true, updatedAt: new Date().toISOString() } : it,
+            it.id === itemId
+              ? { ...it, archived: true, updatedAt: new Date().toISOString() }
+              : it,
           ),
           updatedAt: new Date().toISOString(),
         };
@@ -179,7 +181,9 @@ export function ListView({
         const updated: List = {
           ...previousList,
           items: previousList.items.map((it) =>
-            it.id === itemId ? { ...it, archived: false, updatedAt: new Date().toISOString() } : it,
+            it.id === itemId
+              ? { ...it, archived: false, updatedAt: new Date().toISOString() }
+              : it,
           ),
           updatedAt: new Date().toISOString(),
         };
@@ -252,7 +256,7 @@ export function ListView({
       <div className="flex items-center gap-2">
         {showBackButton && (
           <Link href={backButtonUrl} className="text-gray-400 hover:text-gray-200">
-            <FaArrowLeft />
+            <FaArrowLeft size="1em" />
           </Link>
         )}
         {showTitle && <h1 className="text-2xl font-bold">{list.name}</h1>}
@@ -281,7 +285,7 @@ export function ListView({
             type="text"
             value={newItemContent}
             onChange={(e) => setNewItemContent(e.target.value)}
-            className="flex-grow px-3 py-2 text-white bg-gray-800 rounded-lg border border-gray-700 focus:border-blue-500 focus:outline-none"
+            className="grow px-3 py-2 text-white bg-gray-800 rounded-lg border border-gray-700 focus:border-blue-500 focus:outline-hidden"
             placeholder="Add new item"
             disabled={isAdding}
           />
@@ -299,7 +303,9 @@ export function ListView({
       {(() => {
         const activeItems = itemsWithFlags.filter((it) => !it.checked && !it.archived);
         const hiddenItems = itemsWithFlags.filter((it) => it.checked || it.archived);
-        const visibleList = hideCompletedArchived ? activeItems : [...activeItems, ...hiddenItems];
+        const visibleList = hideCompletedArchived
+          ? activeItems
+          : [...activeItems, ...hiddenItems];
         return (
           <>
             <div className="mt-6 space-y-3">
@@ -307,7 +313,6 @@ export function ListView({
                 <ItemRow
                   key={item.id}
                   item={item}
-                  listId={list.id}
                   onToggle={() => toggleItem(item.id)}
                   onDelete={() => removeItem(item.id)}
                   onArchive={() => archiveMutation.mutate(item.id)}
@@ -323,6 +328,7 @@ export function ListView({
             {hideCompletedArchived && hiddenItems.length > 0 && (
               <div className="mt-6">
                 <button
+                  type="button"
                   onClick={() => setCollapsedHidden((v) => !v)}
                   className="text-sm text-gray-300 hover:text-gray-100"
                 >
@@ -336,7 +342,6 @@ export function ListView({
                       <ItemRow
                         key={item.id}
                         item={item}
-                        listId={list.id}
                         onToggle={() => toggleItem(item.id)}
                         onDelete={() => removeItem(item.id)}
                         onArchive={() => archiveMutation.mutate(item.id)}
@@ -375,7 +380,6 @@ export function ListView({
 
 function ItemRow({
   item,
-  listId,
   onToggle,
   onDelete,
   onCreateNote,
@@ -385,7 +389,6 @@ function ItemRow({
   onOpenNote,
 }: {
   item: ListItemType & { isOptimistic?: boolean };
-  listId: string;
   onToggle: () => void;
   onDelete: () => void;
   onCreateNote: () => void;
@@ -401,14 +404,14 @@ function ItemRow({
           type="checkbox"
           checked={item.checked}
           onChange={() => !item.isOptimistic && onToggle()}
-          className="w-5 h-5 rounded"
+          className="w-5 h-5 rounded-sm"
           disabled={item.isOptimistic}
         />
         <span className={item.checked ? 'line-through text-gray-500' : 'text-white'}>
           {item.content}
         </span>
         {item.archived && (
-          <span className="ml-2 text-xs text-yellow-400 border border-yellow-500/40 px-2 py-0.5 rounded">
+          <span className="ml-2 text-xs text-yellow-400 border border-yellow-500/40 px-2 py-0.5 rounded-sm">
             Archived
           </span>
         )}
@@ -421,6 +424,7 @@ function ItemRow({
         <div className="ml-auto flex items-center gap-2">
           {!item.noteId && (
             <button
+              type="button"
               onClick={onCreateNote}
               disabled={item.isOptimistic || isCreatingNote}
               className="text-blue-500 hover:text-blue-400 disabled:text-gray-500 disabled:cursor-not-allowed"
@@ -430,6 +434,7 @@ function ItemRow({
           )}
           {item.noteId && (
             <button
+              type="button"
               onClick={() => onOpenNote(item.noteId!)}
               className="text-blue-500 hover:text-blue-400"
             >
@@ -438,6 +443,7 @@ function ItemRow({
           )}
           {!item.archived && (
             <button
+              type="button"
               onClick={onArchive}
               disabled={item.isOptimistic}
               className="text-yellow-500 hover:text-yellow-400 disabled:text-gray-500 disabled:cursor-not-allowed"
@@ -447,6 +453,7 @@ function ItemRow({
           )}
           {item.archived && (
             <button
+              type="button"
               onClick={onUnarchive}
               disabled={item.isOptimistic}
               className="text-green-500 hover:text-green-400 disabled:text-gray-500 disabled:cursor-not-allowed"
@@ -455,6 +462,7 @@ function ItemRow({
             </button>
           )}
           <button
+            type="button"
             onClick={onDelete}
             disabled={item.isOptimistic}
             className="text-red-500 hover:text-red-400 disabled:text-gray-500 disabled:cursor-not-allowed"

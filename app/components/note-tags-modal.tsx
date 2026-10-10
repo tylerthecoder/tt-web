@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { useTags } from '@/(panel)/hooks';
 
@@ -13,8 +13,13 @@ type NoteTagsModalProps = {
   onSave: (tags: string[]) => Promise<void> | void;
 };
 
-export default function NoteTagsModal({ open, initialTags, onClose, onSave }: NoteTagsModalProps) {
-  const { tags: allTags, loading: tagsLoading, error } = useTags();
+export default function NoteTagsModal({
+  open,
+  initialTags,
+  onClose,
+  onSave,
+}: NoteTagsModalProps) {
+  const { tags: allTags, loading: tagsLoading } = useTags();
   const [tags, setTags] = useState<string[]>(initialTags || []);
   const [query, setQuery] = useState('');
   const [saving, setSaving] = useState(false);
@@ -74,6 +79,7 @@ export default function NoteTagsModal({ open, initialTags, onClose, onSave }: No
         <div className="px-4 py-3 border-b border-white/10 flex items-center justify-between">
           <div className="text-white font-semibold">Edit tags</div>
           <button
+            type="button"
             disabled={saving}
             onClick={onClose}
             className="text-gray-300 hover:text-white text-sm"
@@ -95,6 +101,7 @@ export default function NoteTagsModal({ open, initialTags, onClose, onSave }: No
                   >
                     <span>{t}</span>
                     <button
+                      type="button"
                       aria-label={`Remove tag ${t}`}
                       onClick={() => removeTag(t)}
                       className="hover:text-white"
@@ -118,12 +125,13 @@ export default function NoteTagsModal({ open, initialTags, onClose, onSave }: No
                   if (e.key === 'Enter' && query.trim()) addTag(query);
                 }}
                 placeholder="Search or type a new tag…"
-                className="min-w-0 flex-1 px-3 py-2 rounded bg-black/40 border border-white/10 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+                className="min-w-0 flex-1 px-3 py-2 rounded-sm bg-black/40 border border-white/10 text-gray-100 focus:outline-hidden focus:ring-2 focus:ring-blue-600/30"
               />
               <button
+                type="button"
                 onClick={() => addTag(query)}
                 disabled={!query.trim()}
-                className="px-3 py-2 rounded bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-50"
+                className="px-3 py-2 rounded-sm bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-50"
               >
                 Add
               </button>
@@ -140,6 +148,7 @@ export default function NoteTagsModal({ open, initialTags, onClose, onSave }: No
               ) : (
                 suggestions.map((t) => (
                   <button
+                    type="button"
                     key={t}
                     onClick={() => addTag(t)}
                     className="px-2 py-0.5 bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs rounded-full"
@@ -158,16 +167,18 @@ export default function NoteTagsModal({ open, initialTags, onClose, onSave }: No
         )}
         <div className="px-4 py-3 border-t border-white/10 flex justify-end gap-2 bg-black/30">
           <button
+            type="button"
             disabled={saving}
             onClick={onClose}
-            className="px-3 py-1.5 rounded border border-white/10 text-gray-300 hover:bg-white/5"
+            className="px-3 py-1.5 rounded-sm border border-white/10 text-gray-300 hover:bg-white/5"
           >
             Cancel
           </button>
           <button
+            type="button"
             onClick={handleSave}
             disabled={saving}
-            className="px-3 py-1.5 rounded bg-green-600 hover:bg-green-500 text-white disabled:opacity-50"
+            className="px-3 py-1.5 rounded-sm bg-green-600 hover:bg-green-500 text-white disabled:opacity-50"
           >
             {saving ? 'Saving…' : 'Save'}
           </button>

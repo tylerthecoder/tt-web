@@ -1,8 +1,14 @@
 'use client';
 
+import {
+  Check as FaCheck,
+  ExternalLink as FaExternalLinkAlt,
+  FileSymlink as FaGoogle,
+  Info as FaInfoCircle,
+  RefreshCw as FaSync,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import React, { useMemo, useState } from 'react';
-import { FaCheck, FaExternalLinkAlt, FaGoogle, FaInfoCircle, FaSync } from 'react-icons/fa';
+import { useMemo, useState } from 'react';
 
 import { trackGoogleDoc } from '../google/docs/actions';
 import type { GoogleDriveFile } from '../types/google';
@@ -17,7 +23,7 @@ interface UntrackedGoogleDocCardProps {
 }
 
 const getActionClassName = (layout: LayoutMode) =>
-  `inline-flex items-center gap-1.5 rounded-md border border-gray-600/90 font-medium text-gray-300 transition-colors hover:border-gray-500 hover:bg-gray-700/70 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:cursor-not-allowed disabled:opacity-60 ${
+  `inline-flex items-center gap-1.5 rounded-md border border-gray-600/90 font-medium text-gray-300 transition-colors hover:border-gray-500 hover:bg-gray-700/70 focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:cursor-not-allowed disabled:opacity-60 ${
     layout === 'list' ? 'h-7 px-2 text-xs' : 'h-9 px-3 text-sm'
   }`;
 
@@ -59,6 +65,7 @@ export function UntrackedGoogleDocCard({ doc, layout = 'grid' }: UntrackedGoogle
 
   const openButton = (
     <button
+      type="button"
       className={actionClassName}
       onClick={() => webViewLink && window.open(webViewLink, '_blank')}
       disabled={!webViewLink}
@@ -71,7 +78,8 @@ export function UntrackedGoogleDocCard({ doc, layout = 'grid' }: UntrackedGoogle
 
   const syncButton = (
     <button
-      className={`inline-flex items-center gap-1.5 rounded-md border font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:cursor-not-allowed disabled:opacity-60 ${
+      type="button"
+      className={`inline-flex items-center gap-1.5 rounded-md border font-medium transition-colors focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:cursor-not-allowed disabled:opacity-60 ${
         layout === 'list' ? 'h-7 px-2 text-xs' : 'h-9 px-3 text-sm'
       } ${
         isTracking
@@ -103,8 +111,9 @@ export function UntrackedGoogleDocCard({ doc, layout = 'grid' }: UntrackedGoogle
   const headerExtra = (
     <div className="flex items-center gap-2">
       <button
+        type="button"
         onClick={() => setShowJson(true)}
-        className="inline-flex h-7 items-center gap-1.5 rounded-md border border-gray-600/90 px-1.5 text-xs font-medium text-gray-300 transition-colors hover:border-gray-500 hover:bg-gray-700/70 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900"
+        className="inline-flex h-7 items-center gap-1.5 rounded-md border border-gray-600/90 px-1.5 text-xs font-medium text-gray-300 transition-colors hover:border-gray-500 hover:bg-gray-700/70 focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900"
         title="View metadata JSON"
       >
         <FaInfoCircle size={12} />

@@ -1,8 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 
 import { useAnimationFrame } from '../../hooks/useAnimationFrame';
-import { useWindowResize } from '../../hooks/useWindowResize';
-import { drawRect, Vector } from '../../services/drawingService';
 
 type Grid = boolean[][];
 
@@ -78,33 +76,33 @@ const GridService = {
   },
 };
 
-const STATE: {
-  grid?: Grid;
-} = {};
-
 export const GameOfLifeBackground = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const gridRef = useRef<Grid>([]);
 
-  useAnimationFrame(() => {
-    if (!canvasRef.current) {
-      return;
-    }
-
-    if (!STATE.grid) {
-      STATE.grid = GridService.makeRandomGrid(
-        window.innerWidth / CONFIG.CELL_SIZE,
-        window.innerHeight / CONFIG.CELL_SIZE,
-      );
-      canvasRef.current.width = window.innerWidth;
-      canvasRef.current.height = window.innerHeight;
-    }
-
+  useEffect(() => {
     const canvas = canvasRef.current;
-
-    STATE.grid = GridService.update(STATE.grid);
-
-    GridService.draw(STATE.grid, canvas);
+    if (!canvas) return;
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      gridRef.current = GridService.makeRandomGrid(
+        Math.ceil(canvas.width / CONFIG.CELL_SIZE),
+        Math.ceil(canvas.height / CONFIG.CELL_SIZE),
+      );
+      GridService.draw(gridRef.current, canvas);
+    };
+    resize();
+    window.addEventListener('resize', resize);
+    return () => window.removeEventListener('resize', resize);
   }, []);
 
-  return <canvas className="w-full h-full" ref={canvasRef}></canvas>;
+  useAnimationFrame(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || !gridRef.current.length) return;
+    gridRef.current = GridService.update(gridRef.current);
+    GridService.draw(gridRef.current, canvas);
+  });
+
+  return <canvas className="w-full h-full" data-background="game-of-life" ref={canvasRef} />;
 };

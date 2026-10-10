@@ -1,7 +1,13 @@
 'use client';
 
-import React, { useCallback, useMemo, useState } from 'react';
-import { FaCheckCircle, FaEye, FaEyeSlash, FaSpinner, FaTimesCircle } from 'react-icons/fa';
+import {
+  CircleCheck as FaCheckCircle,
+  Eye as FaEye,
+  EyeOff as FaEyeSlash,
+  LoaderCircle as FaSpinner,
+  CircleX as FaTimesCircle,
+} from 'lucide-react';
+import { useCallback, useMemo, useState } from 'react';
 import type { Note } from 'tt-services/src/client-index.ts';
 
 import { publishNote, unpublishNote } from '@/(panel)/actions';
@@ -63,6 +69,7 @@ export function PublishControls({
     <div className={`flex items-center gap-2 ${className}`}>
       {status}
       <button
+        type="button"
         onClick={togglePublish}
         disabled={isPending}
         className={`text-xs underline disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 ${

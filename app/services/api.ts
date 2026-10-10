@@ -9,28 +9,11 @@ export type CurrentSong = {
   imageUrl: string;
 };
 
-export type SearchTrack = {
-  trackName: string;
-  imgUrl: string;
-  artist: string;
-  id: string;
-};
-
 class ApiClass {
   async getCurrentSong(): Promise<CurrentSong> {
     const res = await fetch(`${SERVER_URL}/me/listening-to`);
     const data = await res.json();
     return data;
-  }
-
-  async getLights(): Promise<any[]> {
-    const res = await fetch(`${SERVER_URL}/lights`);
-    return res.json();
-  }
-
-  async searchTracks(query: string): Promise<SearchTrack[]> {
-    const res = await fetch(`${SERVER_URL}/vibage/search?q=${query}`);
-    return res.json();
   }
 }
 

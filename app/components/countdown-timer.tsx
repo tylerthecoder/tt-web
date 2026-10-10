@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const TARGET_DATE = new Date('2028-01-01T00:00:00Z'); // Target end of 2027
 

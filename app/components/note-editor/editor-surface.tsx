@@ -32,7 +32,7 @@ function Surface({
   saveStatus,
 }: EditorSurfaceProps) {
   const [editorError, setEditorError] = useState<string | null>(null);
-  const crepeRef = useRef<Crepe>();
+  const crepeRef = useRef<Crepe | undefined>(undefined);
   const callbacks = useRef({ onChange, onSave });
   callbacks.current = { onChange, onSave };
   const [state, setState] = useState<EditorState>();
@@ -120,7 +120,7 @@ function Surface({
           className="flex items-center justify-between gap-2 bg-amber-950 px-3 py-2 text-sm text-amber-100"
         >
           {editorError}
-          <button className="editor-button" onClick={() => setEditorError(null)}>
+          <button type="button" className="editor-button" onClick={() => setEditorError(null)}>
             Dismiss
           </button>
         </div>

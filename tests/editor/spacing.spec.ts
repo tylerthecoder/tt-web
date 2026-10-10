@@ -8,7 +8,7 @@ for (const [name, block] of [
     page,
   }) => {
     const source = `\n\n${block}\n\n\nLast\n\n\n${block}\n\n\n`;
-    await page.goto('/?content=' + encodeURIComponent(source));
+    await page.goto(`/?content=${encodeURIComponent(source)}`);
     const editor = page.getByRole('textbox', { name: 'Note content' });
     await expect(editor).toBeVisible();
 

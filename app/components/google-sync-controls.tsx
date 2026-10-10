@@ -1,18 +1,20 @@
 'use client';
 
-import React, { useCallback, useEffect, useState } from 'react';
 import {
-  FaDownload,
-  FaExternalLinkAlt,
-  FaGoogle,
-  FaSpinner,
-  FaTimes,
-  FaUpload,
-} from 'react-icons/fa';
-import { isGoogleNote, Note } from 'tt-services/src/client-index.ts';
-
-import { pushNoteToGoogleDrive } from '@/(panel)/actions';
-import { assignGoogleDocIdToNote, pullContentFromGoogleDoc } from '@/(panel)/actions';
+  Download as FaDownload,
+  ExternalLink as FaExternalLinkAlt,
+  FileSymlink as FaGoogle,
+  LoaderCircle as FaSpinner,
+  X as FaTimes,
+  Upload as FaUpload,
+} from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { isGoogleNote, type Note } from 'tt-services/src/client-index.ts';
+import {
+  assignGoogleDocIdToNote,
+  pullContentFromGoogleDoc,
+  pushNoteToGoogleDrive,
+} from '@/(panel)/actions';
 
 import { parseGoogleDocId } from './google-doc-link';
 
@@ -59,12 +61,7 @@ export const useGoogleSync = (
   }, [noteId, beforeAction, afterAction]);
 
   const pushToGoogle = useCallback(
-    async (
-      options: {
-        convertToGoogleNote?: boolean;
-        tabName?: string;
-      } = {},
-    ) => {
+    async (options: { convertToGoogleNote?: boolean; tabName?: string } = {}) => {
       setIsPushing(true);
       setError(null);
       setPushSuccess(null);
@@ -204,15 +201,15 @@ function GoogleSyncModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4 max-h-[80vh] flex flex-col">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-            <FaGoogle className="text-red-400" />
+            <FaGoogle size="1em" className="text-red-400" />
             {showDocSelector ? 'Select Google Doc' : 'Sync with Google Docs'}
           </h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-white">
-            <FaTimes />
+          <button type="button" onClick={onClose} className="text-gray-400 hover:text-white">
+            <FaTimes size="1em" />
           </button>
         </div>
 
@@ -226,11 +223,16 @@ function GoogleSyncModal({
             <div className="space-y-3">
               {/* Create new Google Doc */}
               <button
+                type="button"
                 onClick={handleCreateNewDoc}
                 disabled={googleSync.isSyncing}
                 className="w-full p-4 bg-green-700 hover:bg-green-600 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg text-white flex items-center gap-3 transition-colors"
               >
-                {googleSync.isPushing ? <FaSpinner className="animate-spin" /> : <FaUpload />}
+                {googleSync.isPushing ? (
+                  <FaSpinner size="1em" className="animate-spin" />
+                ) : (
+                  <FaUpload size="1em" />
+                )}
                 <div className="text-left">
                   <div className="font-medium">Create New Google Doc</div>
                   <div className="text-sm text-green-200">
@@ -241,11 +243,12 @@ function GoogleSyncModal({
 
               {/* Sync with existing Google Doc */}
               <button
+                type="button"
                 onClick={() => setShowDocSelector(true)}
                 disabled={googleSync.isSyncing}
                 className="w-full p-4 bg-blue-700 hover:bg-blue-600 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg text-white flex items-center gap-3 transition-colors"
               >
-                <FaGoogle />
+                <FaGoogle size="1em" />
                 <div className="text-left">
                   <div className="font-medium">Sync with Existing Doc</div>
                   <div className="text-sm text-blue-200">
@@ -260,6 +263,7 @@ function GoogleSyncModal({
           <div className="flex flex-col h-full">
             <div className="mb-4">
               <button
+                type="button"
                 onClick={() => setShowDocSelector(false)}
                 className="text-blue-400 hover:text-blue-300 text-sm mb-3"
               >
@@ -274,12 +278,13 @@ function GoogleSyncModal({
                 value={documentLink}
                 onChange={(event) => setDocumentLink(event.target.value)}
                 placeholder="https://docs.google.com/document/d/…"
-                className="mt-2 w-full min-w-0 rounded border border-gray-600 bg-gray-700 px-3 py-3 text-base text-white"
+                className="mt-2 w-full min-w-0 rounded-sm border border-gray-600 bg-gray-700 px-3 py-3 text-base text-white"
               />
               <p className="my-3 text-sm text-gray-400">
                 Use a document this app has permission to access.
               </p>
               <button
+                type="button"
                 onClick={() => documentId && handleAssignDoc(documentId)}
                 disabled={!documentId || googleSync.isPushing}
                 className="editor-button"
@@ -292,14 +297,14 @@ function GoogleSyncModal({
 
         {/* Error message */}
         {googleSync.error && (
-          <div className="mt-4 p-3 bg-red-900 border border-red-500 rounded text-red-200 text-sm">
+          <div className="mt-4 p-3 bg-red-900 border border-red-500 rounded-sm text-red-200 text-sm">
             {googleSync.error}
           </div>
         )}
 
         {/* Success message */}
         {googleSync.pushSuccess && (
-          <div className="mt-4 p-3 bg-green-900 border border-green-500 rounded text-green-200 text-sm">
+          <div className="mt-4 p-3 bg-green-900 border border-green-500 rounded-sm text-green-200 text-sm">
             Successfully created Google Doc!{' '}
             <a
               href={googleSync.pushSuccess.url}
@@ -341,6 +346,7 @@ export function GoogleSyncControls({
       <div className={`flex items-center gap-2 ${className}`}>
         <span className="text-xs text-gray-400">Not synced with Google</span>
         <button
+          type="button"
           onClick={() => setIsModalOpen(true)}
           className="text-xs text-blue-400 hover:text-blue-300 underline flex items-center gap-1"
         >
@@ -376,6 +382,7 @@ export function GoogleSyncControls({
 
       {/* Pull from Google button */}
       <button
+        type="button"
         onClick={googleSync.pullFromGoogle}
         disabled={googleSync.isSyncing}
         className="text-xs text-blue-400 hover:text-blue-300 underline disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
@@ -391,6 +398,7 @@ export function GoogleSyncControls({
 
       {/* Push to Google button */}
       <button
+        type="button"
         onClick={() => googleSync.pushToGoogle()}
         disabled={googleSync.isSyncing}
         className="text-xs text-green-400 hover:text-green-300 underline disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"

@@ -1,0 +1,78 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "ignoreUnknown": true,
+    "includes": ["**", "!**/bun.lock", "!**/next-env.d.ts", "!**/patches", "!**/public"]
+  },
+  "formatter": {
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 96
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "trailingCommas": "all",
+      "semicolons": "always"
+    }
+  },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "suspicious": {
+        "noExplicitAny": "off"
+      },
+      "a11y": {
+        "useKeyWithClickEvents": "off"
+      },
+      "preset": "recommended"
+    },
+    "domains": {
+      "react": "recommended",
+      "next": "recommended"
+    }
+  },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["app/(panel)/notes/loading.tsx"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noArrayIndexKey": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "app/(panel)/notes/create/page.tsx",
+        "app/components/create-list-form.tsx",
+        "app/components/milkdown-note-editor.tsx"
+      ],
+      "linter": {
+        "rules": {
+          "a11y": {
+            "noAutofocus": "off"
+          }
+        }
+      }
+    }
+  ]
+}

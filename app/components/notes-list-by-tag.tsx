@@ -27,7 +27,8 @@ export default function NotesListByTag({ tag, title }: NotesListByTagProps) {
           {notes.map((note: any) => (
             <li key={note.id}>
               <button
-                className="w-full text-left px-3 py-2 bg-gray-800 rounded hover:bg-gray-700 transition-colors text-white"
+                type="button"
+                className="w-full text-left px-3 py-2 bg-gray-800 rounded-sm hover:bg-gray-700 transition-colors text-white"
                 onClick={() => setActiveNoteId(note.id)}
               >
                 {note.title}

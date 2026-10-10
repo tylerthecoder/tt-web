@@ -1,16 +1,16 @@
 'use client';
 
-import Link from 'next/link';
-import React, { useMemo, useState } from 'react';
 import {
-  FaEdit,
-  FaExternalLinkAlt,
-  FaEye,
-  FaFileAlt,
-  FaGoogle,
-  FaInfoCircle,
-} from 'react-icons/fa';
-import { isGoogleNoteMetadata, NoteMetadata } from 'tt-services/src/client-index';
+  Pencil as FaEdit,
+  ExternalLink as FaExternalLinkAlt,
+  Eye as FaEye,
+  FileText as FaFileAlt,
+  FileSymlink as FaGoogle,
+  Info as FaInfoCircle,
+} from 'lucide-react';
+import Link from 'next/link';
+import { useMemo, useState } from 'react';
+import { isGoogleNoteMetadata, type NoteMetadata } from 'tt-services/src/client-index';
 
 import { BaseCard } from './base-card';
 import { DeleteNoteButton } from './delete-note-button';
@@ -24,7 +24,7 @@ interface NoteCardProps {
 }
 
 const getActionClassName = (layout: LayoutMode) =>
-  `inline-flex items-center gap-1.5 rounded-md border border-gray-600/90 font-medium text-gray-300 transition-colors hover:border-gray-500 hover:bg-gray-700/70 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 ${
+  `inline-flex items-center gap-1.5 rounded-md border border-gray-600/90 font-medium text-gray-300 transition-colors hover:border-gray-500 hover:bg-gray-700/70 focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 ${
     layout === 'list' ? 'h-7 px-2 text-xs' : 'h-9 px-3 text-sm'
   }`;
 
@@ -68,7 +68,7 @@ export function NoteCard({ note, layout = 'grid' }: NoteCardProps) {
         {visibleTags.map((tag) => (
           <span
             key={tag}
-            className={`truncate rounded bg-gray-700/80 font-medium text-gray-300 ${
+            className={`truncate rounded-sm bg-gray-700/80 font-medium text-gray-300 ${
               layout === 'list'
                 ? 'max-w-[7rem] px-1.5 py-0.5 text-[10px]'
                 : 'max-w-[10rem] px-2 py-1 text-[11px]'
@@ -80,7 +80,7 @@ export function NoteCard({ note, layout = 'grid' }: NoteCardProps) {
         ))}
         {hiddenTagCount > 0 && (
           <span
-            className={`rounded bg-gray-700/60 font-medium text-gray-400 ${
+            className={`rounded-sm bg-gray-700/60 font-medium text-gray-400 ${
               layout === 'list' ? 'px-1.5 py-0.5 text-[10px]' : 'px-2 py-1 text-[11px]'
             }`}
           >
@@ -90,8 +90,9 @@ export function NoteCard({ note, layout = 'grid' }: NoteCardProps) {
       </div>
       {tags.length === 0 && <span className="text-xs text-gray-500">No tags</span>}
       <button
+        type="button"
         onClick={() => setShowJson(true)}
-        className={`ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-md border border-gray-600/90 font-medium text-gray-300 transition-colors hover:border-gray-500 hover:bg-gray-700/70 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 ${
+        className={`ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-md border border-gray-600/90 font-medium text-gray-300 transition-colors hover:border-gray-500 hover:bg-gray-700/70 focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 ${
           layout === 'list' ? 'h-7 px-1.5 text-xs' : 'h-7 px-2 text-xs'
         }`}
         title="View metadata JSON"

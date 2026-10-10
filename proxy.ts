@@ -9,7 +9,7 @@ function isAuthDisabled(): boolean {
   return process.env.AUTH_DISABLED === 'true' || process.env.NODE_ENV === 'development';
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   if (isAuthDisabled() || hasSessionCookieFromRequest(request)) {
     return NextResponse.next();
   }

@@ -1,54 +1,33 @@
+import { resolve } from 'node:path';
 import { $ } from 'bun';
-import * as fs from 'fs';
-import * as path from 'path';
 
-/**
- * Script to switch tt-services dependency back to local linked version
- * Usage: npm run link-services
- */
-
-const PACKAGE_JSON_PATH = path.join(__dirname, '..', 'package.json');
-const LOCAL_LINK_VERSION = 'link:tt-services';
-
-async function linkServices() {
-  try {
-    console.log('🔗 Switching tt-services to local linked version...');
-
-    // Read current package.json
-    const packageJsonContent = fs.readFileSync(PACKAGE_JSON_PATH, 'utf8');
-    const packageJson = JSON.parse(packageJsonContent);
-
-    // Check current version
-    const currentVersion = packageJson.dependencies?.['tt-services'];
-    if (!currentVersion) {
-      console.error('❌ tt-services dependency not found in package.json');
-      process.exit(1);
-    }
-
-    console.log(`📦 Current tt-services version: ${currentVersion}`);
-
-    // Check if already linked
-    if (currentVersion === LOCAL_LINK_VERSION) {
-      console.log('✅ tt-services is already using local linked version');
-      return;
-    }
-
-    // Update to linked version
-    packageJson.dependencies['tt-services'] = LOCAL_LINK_VERSION;
-
-    // Write back to file with proper formatting
-    const updatedContent = JSON.stringify(packageJson, null, 2) + '\n';
-    fs.writeFileSync(PACKAGE_JSON_PATH, updatedContent);
-
-    console.log(`✅ Successfully switched tt-services to: ${LOCAL_LINK_VERSION}`);
-
-    // Run bun install
-    await $`bun install`;
-  } catch (error) {
-    console.error('❌ Error updating package.json:', error);
-    process.exit(1);
-  }
+// Keep the sibling checkout explicit: Bun's global link registry can point elsewhere.
+const root = resolve(import.meta.dir, '..');
+const local = resolve(root, process.argv[2] ?? '../tt-services');
+const patch = resolve(root, 'patches/tt-services.patch');
+const check = await $`git -C ${local} apply --reverse --check ${patch}`.quiet().nothrow();
+if (check.exitCode !== 0) {
+  throw new Error(
+    `Local tt-services needs the compatibility changes in ${patch}. Review and apply that patch in ${local} before linking. No files were changed.`,
+  );
 }
-
-// Run the script
-linkServices();
+const manifestFile = Bun.file(resolve(root, 'package.json'));
+const lockFile = Bun.file(resolve(root, 'bun.lock'));
+const originalManifest = await manifestFile.text();
+const originalLock = await lockFile.text();
+const manifest = JSON.parse(originalManifest);
+manifest.dependencies['tt-services'] = `link:${local}`;
+for (const key of Object.keys(manifest.patchedDependencies ?? {})) {
+  if (key.startsWith('tt-services@')) delete manifest.patchedDependencies[key];
+}
+try {
+  await Bun.write(manifestFile, `${JSON.stringify(manifest, null, 2)}\n`);
+  await $`bun install --ignore-scripts`.cwd(root);
+  await $`bun run typecheck`.cwd(root);
+  console.log(`Linked ${local}. Keep this local manifest and lockfile change out of commits.`);
+} catch (error) {
+  await Bun.write(manifestFile, originalManifest);
+  await Bun.write(lockFile, originalLock);
+  await $`bun install --frozen-lockfile --ignore-scripts`.cwd(root);
+  throw error;
+}

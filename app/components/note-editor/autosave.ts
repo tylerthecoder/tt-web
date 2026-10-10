@@ -24,7 +24,9 @@ export class NoteAutosave {
   };
 
   private notify() {
-    this.listeners.forEach((listener) => listener());
+    this.listeners.forEach((listener) => {
+      listener();
+    });
   }
 
   private store(content: string | null) {

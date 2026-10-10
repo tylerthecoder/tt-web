@@ -1,8 +1,7 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import React, { useState, useTransition } from 'react';
-import { FaSpinner, FaTrash } from 'react-icons/fa';
+import { LoaderCircle as FaSpinner, Trash2 as FaTrash } from 'lucide-react';
+import { useState, useTransition } from 'react';
 
 import { deleteNote as deleteNoteAction } from '../(panel)/actions';
 
@@ -40,8 +39,9 @@ export function DeleteNoteButton({ noteId, title, dense = false }: DeleteNoteBut
   return (
     <>
       <button
+        type="button"
         onClick={handleDeleteClick}
-        className={`inline-flex items-center gap-1.5 rounded-md border border-red-700/90 font-medium text-red-300 transition-colors hover:bg-red-950/60 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:cursor-not-allowed disabled:opacity-60 ${
+        className={`inline-flex items-center gap-1.5 rounded-md border border-red-700/90 font-medium text-red-300 transition-colors hover:bg-red-950/60 focus:outline-hidden focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:cursor-not-allowed disabled:opacity-60 ${
           dense ? 'h-7 px-2 text-xs' : 'h-9 px-3 text-sm'
         }`}
         aria-label="Delete note"
@@ -56,20 +56,22 @@ export function DeleteNoteButton({ noteId, title, dense = false }: DeleteNoteBut
           <div className="bg-gray-800 p-6 rounded-lg max-w-md w-full shadow-xl">
             <h3 className="text-xl font-bold text-red-400 mb-4">Delete Note</h3>
             <p className="text-gray-300 mb-6">
-              Are you sure you want to delete <span className="font-semibold">"{title}"</span>? This
-              action cannot be undone.
+              Are you sure you want to delete <span className="font-semibold">"{title}"</span>?
+              This action cannot be undone.
             </p>
             <div className="flex justify-end gap-3">
               <button
+                type="button"
                 onClick={handleCancelDelete}
-                className="py-2 px-4 border border-gray-600 rounded text-gray-300 hover:bg-gray-700 transition-colors"
+                className="py-2 px-4 border border-gray-600 rounded-sm text-gray-300 hover:bg-gray-700 transition-colors"
                 disabled={isDeleting}
               >
                 Cancel
               </button>
               <button
+                type="button"
                 onClick={handleConfirmDelete}
-                className="py-2 px-4 border border-red-700 bg-red-900/30 rounded text-red-300 hover:bg-red-900 transition-colors flex items-center min-w-[110px] justify-center"
+                className="py-2 px-4 border border-red-700 bg-red-900/30 rounded-sm text-red-300 hover:bg-red-900 transition-colors flex items-center min-w-[110px] justify-center"
                 disabled={isDeleting}
               >
                 {isDeleting ? (

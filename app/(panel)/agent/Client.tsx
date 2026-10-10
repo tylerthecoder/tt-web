@@ -45,9 +45,8 @@ export default function Client({
   const [approvals, setApprovals] = useState<ApprovalPreview[]>([]);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
-  const scrollToBottom = () => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  const messages = chat.messages;
+  const chatId = chat.id;
 
   useEffect(() => {
     startTransition(async () => {
@@ -57,8 +56,9 @@ export default function Client({
   }, [chat.id]);
 
   useEffect(() => {
-    scrollToBottom();
-  }, [chat.messages.length, approvals.length]);
+    if (chatId && (messages.length || approvals.length))
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatId, messages, approvals]);
 
   const onSend = () => {
     if (!input.trim()) return;
@@ -74,7 +74,6 @@ export default function Client({
       }
       const freshList = await listChats();
       setChats(freshList as Chat[]);
-      scrollToBottom();
     });
   };
 
@@ -85,7 +84,6 @@ export default function Client({
       const freshList = await listChats();
       setChats(freshList as Chat[]);
       setApprovals([]);
-      scrollToBottom();
     });
   };
 
@@ -95,7 +93,6 @@ export default function Client({
       if (c) setChat(c as Chat);
       const res = await getPendingApprovals(id);
       setApprovals(res || []);
-      scrollToBottom();
     });
   };
 
@@ -108,7 +105,6 @@ export default function Client({
       } else {
         setApprovals(res.approvals || []);
       }
-      scrollToBottom();
     });
   };
 
@@ -121,7 +117,6 @@ export default function Client({
       } else {
         setApprovals(res.approvals || []);
       }
-      scrollToBottom();
     });
   };
 
@@ -132,8 +127,9 @@ export default function Client({
         <div className="col-span-4 md:col-span-1 h-full min-h-0 flex flex-col">
           <div className="flex gap-2">
             <button
+              type="button"
               onClick={onNewChat}
-              className="flex-1 py-2 px-3 rounded bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-50"
+              className="flex-1 py-2 px-3 rounded-sm bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-50"
               disabled={isPending}
             >
               New chat
@@ -142,9 +138,10 @@ export default function Client({
           <div className="mt-2 flex-1 min-h-0 overflow-y-auto pr-1">
             {chats.map((c: Chat) => (
               <button
+                type="button"
                 key={c.id}
                 onClick={() => onSelectChat(c.id)}
-                className={`w-full text-left px-3 py-2 rounded transition ${c.id === chat.id ? 'bg-blue-600/20 text-blue-200' : 'hover:bg-white/5 text-gray-200'}`}
+                className={`w-full text-left px-3 py-2 rounded-sm transition ${c.id === chat.id ? 'bg-blue-600/20 text-blue-200' : 'hover:bg-white/5 text-gray-200'}`}
               >
                 <div className="truncate font-medium">{c.title || 'Untitled'}</div>
                 <div className="text-xs text-gray-400">
@@ -161,7 +158,7 @@ export default function Client({
             {chat.messages.map((m: ChatMessage) => (
               <div
                 key={m.id}
-                className={`p-3 rounded ${m.role === 'user' ? 'bg-white/5' : 'bg-emerald-500/10'} text-gray-200`}
+                className={`p-3 rounded-sm ${m.role === 'user' ? 'bg-white/5' : 'bg-emerald-500/10'} text-gray-200`}
               >
                 <div className="text-[10px] tracking-wide uppercase text-gray-400 mb-1">
                   {m.role}
@@ -171,24 +168,29 @@ export default function Client({
             ))}
 
             {approvals.length > 0 && (
-              <div className="mt-2 border border-yellow-500/20 rounded p-3 bg-yellow-500/10 text-yellow-100">
+              <div className="mt-2 border border-yellow-500/20 rounded-sm p-3 bg-yellow-500/10 text-yellow-100">
                 <div className="font-semibold mb-2">Tool approval required</div>
                 <div className="space-y-2">
                   {approvals.map((a) => (
-                    <div key={a.index} className="border border-white/10 rounded p-2 bg-black/20">
+                    <div
+                      key={a.index}
+                      className="border border-white/10 rounded-sm p-2 bg-black/20"
+                    >
                       <div className="text-sm font-medium text-gray-100">{a.name}</div>
                       <pre className="text-xs text-gray-300 whitespace-pre-wrap break-words">
                         {JSON.stringify(a.args, null, 2)}
                       </pre>
                       <div className="mt-2 flex gap-2">
                         <button
-                          className="px-3 py-1 rounded bg-green-600 hover:bg-green-500 text-white"
+                          type="button"
+                          className="px-3 py-1 rounded-sm bg-green-600 hover:bg-green-500 text-white"
                           onClick={() => onApprove(a.index)}
                         >
                           Approve
                         </button>
                         <button
-                          className="px-3 py-1 rounded bg-red-600 hover:bg-red-500 text-white"
+                          type="button"
+                          className="px-3 py-1 rounded-sm bg-red-600 hover:bg-red-500 text-white"
                           onClick={() => onReject(a.index)}
                         >
                           Reject
@@ -214,11 +216,12 @@ export default function Client({
               }}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type a message..."
-              className="flex-1 border border-white/10 rounded px-3 py-2 bg-black/40 text-gray-100 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-600/40"
+              className="flex-1 border border-white/10 rounded-sm px-3 py-2 bg-black/40 text-gray-100 placeholder:text-gray-500 focus:outline-hidden focus:ring-2 focus:ring-blue-600/40"
             />
             <button
+              type="button"
               onClick={onSend}
-              className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-50"
+              className="px-4 py-2 rounded-sm bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-50"
               disabled={isPending || input.trim().length === 0}
             >
               Send

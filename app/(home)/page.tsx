@@ -1,6 +1,5 @@
 'use client';
 import { Bubblegum_Sans } from 'next/font/google';
-import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -11,7 +10,7 @@ import { RandomBackground } from '../components/Backgrounds/RandomBackground';
 import { CrazyImage } from '../components/CrazyImage';
 import { NowPlaying } from '../components/NowPlaying';
 import useTypeyText from '../hooks/useTypyText';
-import API, { CurrentSong } from '../services/api';
+import API, { type CurrentSong } from '../services/api';
 
 const bubblegum = Bubblegum_Sans({
   weight: '400',
@@ -20,7 +19,6 @@ const bubblegum = Bubblegum_Sans({
 });
 
 const RESUME_URL = 'https://files.tylertracy.com/resume.pdf';
-const YOUTUBE_URL = 'https://www.youtube.com/channel/UCUdKa40A3qNa1cN2gK9Qb8g';
 const LINKEDIN_URL = 'https://www.linkedin.com/in/tyler-tracy/';
 const GITHUB_URL = 'https://github.com/tylerthecoder';
 const X_URL = 'https://twitter.com/tylertracy321';
@@ -45,11 +43,12 @@ const HomButton = (props: { href: string; iconSrc: string; iconAlt: string; text
   return (
     <Link href={props.href} passHref>
       <button
+        type="button"
         className="
         w-full mb-2
         py-2 px-4 font-semibold border-2 border-white
-        rounded-lg shadow-md text-white bg-gray-400 bg-opacity-70
-        transform scale-100 duration-150 hover:scale-110 hover:bg-opacity-90
+        rounded-lg shadow-md text-white bg-gray-400/70
+        transform scale-100 duration-150 hover:scale-110 hover:bg-gray-400/90
         flex items-center justify-center
       "
       >
@@ -63,17 +62,19 @@ const HomButton = (props: { href: string; iconSrc: string; iconAlt: string; text
 };
 
 const Home = () => {
-  const showBg = true;
   const [currentSong, setCurrentSong] = useState<CurrentSong | null>(null);
   const router = useRouter();
 
-  const fetchData = async () => {
-    const song = await API.getCurrentSong();
-    setCurrentSong(song);
-  };
-
   useEffect(() => {
-    fetchData();
+    let active = true;
+    API.getCurrentSong()
+      .then((song) => {
+        if (active) setCurrentSong(song);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
   }, []);
 
   const handleNameDoubleClick = () => {
@@ -81,19 +82,17 @@ const Home = () => {
   };
 
   return (
-    <div>
-      <Head>
-        <title>Tyler Tracy</title>
-      </Head>
-
+    <div className="relative isolate min-h-screen bg-black">
       <RandomBackground />
 
       <div className="w-full h-full flex md:flex-row flex-col">
-        <div className="md:w-[300px] w-full md:border-r-2 border-white mx-2 px-2">
+        <div className="md:w-[300px] w-full md:border-r-2 border-white md:mx-2 px-2">
           <div className="flex justify-center z-0">
             <CrazyImage src={headshotPic} alt="Tyler's headshot" width={225} height={337} />
           </div>
-          <div className="w-full">{!!currentSong && <NowPlaying currentSong={currentSong} />}</div>
+          <div className="w-full">
+            {!!currentSong && <NowPlaying currentSong={currentSong} />}
+          </div>
           <div className="pt-3 w-full">
             <HomButton
               text="Resume"
@@ -130,7 +129,7 @@ const Home = () => {
           </div>
         </div>
         <div className="md:overflow-y-auto w-full">
-          <div className="flex-grow my-2 max-w-[800px] mx-auto ">
+          <div className="grow my-2 max-w-[800px] mx-auto ">
             <h1
               className={`text-6xl text-white text-center ${bubblegum.className}`}
               onDoubleClick={handleNameDoubleClick}
@@ -145,7 +144,11 @@ const Home = () => {
               <ul>
                 <li>
                   Member of Technical Staff at{' '}
-                  <a href="https://redwoodresearch.org" target="_blank" rel="noopener noreferrer">
+                  <a
+                    href="https://redwoodresearch.org"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     Redwood Research{' '}
                   </a>
                 </li>
@@ -158,7 +161,11 @@ const Home = () => {
               <h2> Projects </h2>
               <ul>
                 <li>
-                  <a href="https://get2post.vercel.app/" target="_blank" rel="noopener noreferrer">
+                  <a
+                    href="https://get2post.vercel.app/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     GET → POST
                   </a>{' '}
                   — lets AI agents with GET-only HTTP tools send POST requests.
@@ -173,14 +180,16 @@ const Home = () => {
                 </li>
                 <li>We should aim to increase understanding in the universe</li>
                 <li>
-                  All software and information that does not pose an existential threat should be
-                  open source and accessible to everyone
+                  All software and information that does not pose an existential threat should
+                  be open source and accessible to everyone
                 </li>
                 <li>
-                  All living creatures capable of experiencing suffering deserve to be treated with
-                  moral consideration.
+                  All living creatures capable of experiencing suffering deserve to be treated
+                  with moral consideration.
                 </li>
-                <li>Things used to be worse, they are better now, and they could be even better</li>
+                <li>
+                  Things used to be worse, they are better now, and they could be even better
+                </li>
               </ul>
 
               <h2> Goals </h2>

@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 
 import { useAnimationFrame } from '../../hooks/useAnimationFrame';
 import { drawCircle } from '../../services/drawingService';
@@ -148,22 +148,18 @@ function draw(planets: Planet[], balls: Ball[], canvas: HTMLCanvasElement) {
 
 export const GravityBackground = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [planets, setPlanets] = useState<Planet[]>([]);
-  const [balls, setBalls] = useState<Ball[]>([]);
+  const scene = useRef<{ planets: Planet[]; balls: Ball[] }>({ planets: [], balls: [] });
 
   useAnimationFrame(() => {
-    if (!canvasRef.current) {
-      return;
-    }
     const canvas = canvasRef.current;
-    if (planets.length === 0 || balls.length === 0) {
-      console.log('making planets and balls', makePlanets(canvas), canvas.width, canvas.height);
-      setPlanets(makePlanets(canvas));
-      setBalls(makeBalls(canvas));
+    if (!canvas) return;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    if (scene.current.planets.length === 0 || scene.current.balls.length === 0) {
+      scene.current = { planets: makePlanets(canvas), balls: makeBalls(canvas) };
     }
+    draw(scene.current.planets, scene.current.balls, canvas);
+  });
 
-    draw(planets, balls, canvas);
-  }, [planets, balls]);
-
-  return <canvas className="w-full h-full" ref={canvasRef}></canvas>;
+  return <canvas className="w-full h-full" data-background="gravity" ref={canvasRef} />;
 };

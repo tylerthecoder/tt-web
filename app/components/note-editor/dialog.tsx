@@ -25,7 +25,8 @@ export function EditorDialog({
     if (open && dialog && !dialog.open) dialog.showModal();
     return () => {
       dialog?.close();
-      if (previousFocus instanceof HTMLElement && previousFocus.isConnected) previousFocus.focus();
+      if (previousFocus instanceof HTMLElement && previousFocus.isConnected)
+        previousFocus.focus();
     };
   }, [open]);
   if (!open) return null;

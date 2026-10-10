@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation';
 import { requireAuth } from '@/utils/auth';
 
 import { createChat, getChat, listChats } from './actions';
-import Client from './Client';
 
 export default async function AiPage() {
   await requireAuth();

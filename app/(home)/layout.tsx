@@ -6,7 +6,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <div className="flex flex-col w-full min-h-screen">
       <NavBar />
-      <div className="flex-grow">{children}</div>
+      <div className="grow">{children}</div>
     </div>
   );
 }

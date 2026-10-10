@@ -3,11 +3,13 @@ import './global.css';
 import { Analytics } from '@vercel/analytics/react';
 import Script from 'next/script';
 
+export const metadata = { title: 'Tyler Tracy' };
+
 const analyticsId = 'G-B5KCWMNFJE';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html>
+    <html lang="en">
       <head>
         <link rel="icon" href="/pi.png" sizes="any" />
       </head>

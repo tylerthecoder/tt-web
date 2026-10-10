@@ -2,8 +2,20 @@
 const initial = new URLSearchParams(location.search).get('content') ?? 'First note\n';
 export const fixture = {
   notes: {
-    one: { id: 'one', title: 'First note', content: initial, tags: ['daily'], published: false },
-    two: { id: 'two', title: 'Second note', content: 'Second note\n', tags: [], published: false },
+    one: {
+      id: 'one',
+      title: 'First note',
+      content: initial,
+      tags: ['daily'],
+      published: false,
+    },
+    two: {
+      id: 'two',
+      title: 'Second note',
+      content: 'Second note\n',
+      tags: [],
+      published: false,
+    },
   } as Record<string, any>,
   writes: [] as { id: string; content: string }[],
   fail: false,

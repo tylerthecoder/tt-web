@@ -31,13 +31,13 @@ export default function Loading() {
               className="bg-gray-800 rounded-lg shadow-md overflow-hidden h-64 flex flex-col animate-pulse"
             >
               <div className="p-4 border-b border-gray-700">
-                <div className="h-6 bg-gray-700 rounded w-3/4 mb-2"></div>
-                <div className="h-4 bg-gray-700 rounded w-1/2"></div>
+                <div className="h-6 bg-gray-700 rounded-sm w-3/4 mb-2"></div>
+                <div className="h-4 bg-gray-700 rounded-sm w-1/2"></div>
               </div>
-              <div className="p-4 flex-grow">
-                <div className="h-4 bg-gray-700 rounded w-full mb-2"></div>
-                <div className="h-4 bg-gray-700 rounded w-3/4 mb-2"></div>
-                <div className="h-4 bg-gray-700 rounded w-1/2 mb-2"></div>
+              <div className="p-4 grow">
+                <div className="h-4 bg-gray-700 rounded-sm w-full mb-2"></div>
+                <div className="h-4 bg-gray-700 rounded-sm w-3/4 mb-2"></div>
+                <div className="h-4 bg-gray-700 rounded-sm w-1/2 mb-2"></div>
                 <div className="mt-3">
                   <div className="flex flex-wrap gap-1 mt-2">
                     {Array(3)
@@ -52,7 +52,7 @@ export default function Loading() {
                 {Array(3)
                   .fill(0)
                   .map((_, j) => (
-                    <div key={j} className="h-8 w-16 bg-gray-700 rounded"></div>
+                    <div key={j} className="h-8 w-16 bg-gray-700 rounded-sm"></div>
                   ))}
               </div>
             </div>

@@ -114,6 +114,7 @@ function LoadedEditor({
       >
         {autosave.status === 'error' ? (
           <button
+            type="button"
             className="underline underline-offset-2 focus-visible:outline focus-visible:outline-2"
             onClick={() => void autosave.flush()}
           >
@@ -155,9 +156,10 @@ function LoadedEditor({
                       onKeyDown={(event) => {
                         if (event.key === 'Escape' && !savingMetadata) cancelTitle();
                       }}
-                      className="min-h-11 min-w-0 flex-1 rounded border border-gray-600 bg-gray-800 px-2 text-base"
+                      className="min-h-11 min-w-0 flex-1 rounded-sm border border-gray-600 bg-gray-800 px-2 text-base"
                     />
                     <button
+                      type="submit"
                       className="editor-button"
                       disabled={savingMetadata || !titleInput.trim()}
                     >
@@ -174,10 +176,14 @@ function LoadedEditor({
                   </form>
                 ) : (
                   <>
-                    <h1 className="min-w-0 truncate text-lg font-medium" title={currentNote.title}>
+                    <h1
+                      className="min-w-0 truncate text-lg font-medium"
+                      title={currentNote.title}
+                    >
                       {currentNote.title}
                     </h1>
                     <button
+                      type="button"
                       className="editor-button shrink-0"
                       onClick={() => setEditingTitle(true)}
                     >
@@ -196,7 +202,8 @@ function LoadedEditor({
           {!hideTitle && (
             <details className="mt-1 text-sm">
               <summary className="min-h-11 cursor-pointer py-3 text-gray-400">
-                Tags & sharing {currentNote.tags?.length ? `(${currentNote.tags.length} tags)` : ''}
+                Tags & sharing{' '}
+                {currentNote.tags?.length ? `(${currentNote.tags.length} tags)` : ''}
               </summary>
               <fieldset
                 disabled={externalBusy || recovery !== null}
@@ -208,6 +215,7 @@ function LoadedEditor({
                   </span>
                 ))}
                 <button
+                  type="button"
                   className="editor-button"
                   onClick={(event) => {
                     event.currentTarget.focus();
@@ -256,15 +264,17 @@ function LoadedEditor({
         <div className="overflow-auto p-4">
           <p className="mb-3">
             This browser has{' '}
-            {recoveries.length === 1 ? 'an unsaved draft' : `${recoveries.length} unsaved drafts`}.
-            Review a draft before restoring it: restoring replaces the server note when saving
+            {recoveries.length === 1
+              ? 'an unsaved draft'
+              : `${recoveries.length} unsaved drafts`}
+            . Review a draft before restoring it: restoring replaces the server note when saving
             succeeds. Other drafts stay on this device.
           </p>
           {recoveries.length > 1 && (
             <label className="mb-3 block">
               Recovery version
               <select
-                className="ml-2 rounded bg-gray-800 p-2"
+                className="ml-2 rounded-sm bg-gray-800 p-2"
                 value={recoveryIndex}
                 onChange={(event) => setRecoveryIndex(Number(event.target.value))}
               >
@@ -286,6 +296,7 @@ function LoadedEditor({
           )}
           <div className="mb-3 flex flex-wrap gap-2">
             <button
+              type="button"
               className="editor-button"
               onClick={() => {
                 setInitialContent(recovery.content);
@@ -297,6 +308,7 @@ function LoadedEditor({
               Restore draft
             </button>
             <button
+              type="button"
               className="editor-button"
               onClick={() => {
                 try {
@@ -310,7 +322,9 @@ function LoadedEditor({
                     );
                     return;
                   }
-                  setRecoveries((drafts) => drafts.filter((draft) => draft.key !== recovery.key));
+                  setRecoveries((drafts) =>
+                    drafts.filter((draft) => draft.key !== recovery.key),
+                  );
                   setRecoveryIndex(0);
                   setRecoveryError(null);
                 } catch {
@@ -325,7 +339,7 @@ function LoadedEditor({
           </div>
           <details>
             <summary className="cursor-pointer py-2">Review recovered Markdown</summary>
-            <pre className="whitespace-pre-wrap break-words rounded bg-gray-800 p-3 text-sm">
+            <pre className="whitespace-pre-wrap break-words rounded-sm bg-gray-800 p-3 text-sm">
               {recovery.content}
             </pre>
           </details>
@@ -370,13 +384,18 @@ export function MilkdownEditor({
     return (
       <div className="p-4" role="alert">
         Could not load this note.{' '}
-        <button className="editor-button" onClick={() => void refetch()}>
+        <button type="button" className="editor-button" onClick={() => void refetch()}>
           Retry
         </button>
       </div>
     );
   if (!note) return <div className="p-4">Note not found.</div>;
   return (
-    <LoadedEditor key={noteId} note={note} hideTitle={hideTitle} showGoogleSync={showGoogleSync} />
+    <LoadedEditor
+      key={noteId}
+      note={note}
+      hideTitle={hideTitle}
+      showGoogleSync={showGoogleSync}
+    />
   );
 }

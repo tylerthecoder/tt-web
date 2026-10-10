@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import type React from 'react';
+import { useState } from 'react';
 
 import { useCreateList } from '@/(panel)/hooks';
 
@@ -30,7 +31,7 @@ export default function CreateListForm({ onSuccess }: CreateListFormProps) {
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full px-3 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-blue-500 focus:outline-none"
+          className="w-full px-3 py-2 bg-gray-700 text-white rounded-sm border border-gray-600 focus:border-blue-500 focus:outline-hidden"
           placeholder="e.g. Groceries"
           autoFocus
         />

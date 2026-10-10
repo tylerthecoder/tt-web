@@ -1,9 +1,16 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { FaBan, FaCheck, FaSearch, FaSpinner, FaTimes } from 'react-icons/fa';
-import { GoogleNote, Note } from 'tt-services/src/client-index.ts';
+import {
+  Ban as FaBan,
+  Check as FaCheck,
+  Search as FaSearch,
+  LoaderCircle as FaSpinner,
+  X as FaTimes,
+} from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import type React from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { GoogleNote, Note } from 'tt-services/src/client-index.ts';
 
 import { useTags } from '@/(panel)/hooks';
 
@@ -25,7 +32,6 @@ interface NotesFilterProps {
 
 export function NotesFilter({ items, setFilteredItems }: NotesFilterProps) {
   const { tags: availableTags, loading: tagsLoading, error: tagsError } = useTags();
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   // Initialize state with proper null checks
@@ -63,7 +69,11 @@ export function NotesFilter({ items, setFilteredItems }: NotesFilterProps) {
 
   // Filter items locally
   const filterItems = useCallback(
-    (items: DisplayItem[], searchText: string, tagFiltersMap: Record<string, TagFilterState>) => {
+    (
+      items: DisplayItem[],
+      searchText: string,
+      tagFiltersMap: Record<string, TagFilterState>,
+    ) => {
       return items.filter((item) => {
         // Get the tags from the item
         let itemTags: string[] = [];
@@ -228,7 +238,7 @@ export function NotesFilter({ items, setFilteredItems }: NotesFilterProps) {
         {/* Search input */}
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <FaSearch className="text-gray-400" />
+            <FaSearch size="1em" className="text-gray-400" />
           </div>
           <input
             id="notes-search-input"
@@ -237,14 +247,15 @@ export function NotesFilter({ items, setFilteredItems }: NotesFilterProps) {
             onChange={handleSearchChange}
             placeholder="Search notes..."
             aria-keyshortcuts="/"
-            className="bg-gray-700 text-white pl-10 pr-10 py-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="bg-gray-700 text-white pl-10 pr-10 py-2 rounded-lg w-full focus:outline-hidden focus:ring-2 focus:ring-blue-500"
           />
           {search && (
             <button
+              type="button"
               onClick={handleClearSearch}
               className="absolute inset-y-0 right-0 pr-3 flex items-center"
             >
-              <FaTimes className="text-gray-400 hover:text-white" />
+              <FaTimes size="1em" className="text-gray-400 hover:text-white" />
             </button>
           )}
         </div>
@@ -258,7 +269,11 @@ export function NotesFilter({ items, setFilteredItems }: NotesFilterProps) {
                 Showing {filteredCount} of {items.length} items
               </span>
               {(search || Object.keys(tagFilters).length > 0) && (
-                <button onClick={resetFilters} className="text-xs text-gray-400 hover:text-white">
+                <button
+                  type="button"
+                  onClick={resetFilters}
+                  className="text-xs text-gray-400 hover:text-white"
+                >
                   Reset all filters
                 </button>
               )}
@@ -268,7 +283,7 @@ export function NotesFilter({ items, setFilteredItems }: NotesFilterProps) {
           <div className="flex flex-wrap gap-2">
             {tagsLoading && (
               <div className="flex items-center text-xs text-gray-400">
-                <FaSpinner className="animate-spin mr-2" />
+                <FaSpinner size="1em" className="animate-spin mr-2" />
                 Loading tags...
               </div>
             )}
@@ -297,7 +312,12 @@ export function NotesFilter({ items, setFilteredItems }: NotesFilterProps) {
                 }
 
                 return (
-                  <button key={tag} onClick={() => toggleTagFilter(tag)} className={tagClasses}>
+                  <button
+                    type="button"
+                    key={tag}
+                    onClick={() => toggleTagFilter(tag)}
+                    className={tagClasses}
+                  >
                     {icon}
                     {tag}
                   </button>

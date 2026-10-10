@@ -1,4 +1,5 @@
 import Image from 'next/image';
+
 // Filter out video files and get only image files
 const images = [
   'PXL_20211210_220446467.jpg',
@@ -37,12 +38,14 @@ const images = [
 
 export default function LovePage() {
   return (
-    <div className="min-h-screen p-8 md:p-8 bg-gradient-to-br from-pink-100 to-pink-200">
+    <div className="min-h-screen p-8 md:p-8 bg-linear-to-br from-pink-100 to-pink-200">
       <div className="text-center mb-12">
         <h1 className="text-4xl md:text-5xl font-bold text-red-600 mb-4 animate-pulse">
           Happy Valentine&apos;s Day!
         </h1>
-        <p className="text-xl md:text-2xl text-red-500">A collection of our memories together ❤️</p>
+        <p className="text-xl md:text-2xl text-red-500">
+          A collection of our memories together ❤️
+        </p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 max-w-7xl mx-auto">

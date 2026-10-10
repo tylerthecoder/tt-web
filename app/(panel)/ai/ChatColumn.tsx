@@ -1,14 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import React, { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useNoteMetadata } from '@/(panel)/hooks';
 
 import {
   approveTool,
   continueAfterApprovals,
-  getPendingApprovals,
+  getConversationStatus,
   rejectTool,
   sendUserMessage,
 } from './actions';
@@ -38,87 +38,139 @@ export default function ChatColumn({ chat }: { chat: Chat }) {
   // Per-message expand state is managed inside ChatMessageView
   const [chatLocal, setChatLocal] = useState<Chat>(chat);
   const [approvals, setApprovals] = useState<ApprovalPreview[]>([]);
-  const [approvalsLoading, setApprovalsLoading] = useState(false);
+  const [approvalsLoading, setApprovalsLoading] = useState(true);
   const [isThinking, setIsThinking] = useState(false);
   const [approvingIndex, setApprovingIndex] = useState<number | null>(null);
   const [rejectingIndex, setRejectingIndex] = useState<number | null>(null);
   const [input, setInput] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [ready, setReady] = useState(false);
+  const mounted = useRef(false);
+  const pendingSend = useRef<{ content: string; previousCount: number } | null>(null);
+  const busy =
+    approvalsLoading || isThinking || approvingIndex !== null || rejectingIndex !== null;
+  const applyResult = useCallback(
+    (result: { chat?: Chat | null; approvals?: ApprovalPreview[]; ready?: boolean }) => {
+      if (!mounted.current) return;
+      if (result.chat) {
+        setChatLocal(result.chat);
+        const draft = pendingSend.current;
+        if (
+          draft &&
+          result.chat.messages
+            .slice(draft.previousCount)
+            .some((message) => message.role === 'user' && message.content === draft.content)
+        ) {
+          setInput('');
+          pendingSend.current = null;
+        }
+      }
+      setApprovals(result.approvals || []);
+      setReady(result.ready ?? false);
+    },
+    [],
+  );
+  const showError = useCallback((error: unknown) => {
+    if (mounted.current) setError(error instanceof Error ? error.message : 'Request failed.');
+  }, []);
 
-  // Sync incoming chat prop to local and fetch approvals
   useEffect(() => {
     let active = true;
-    setChatLocal(chat);
-    setApprovals([]);
+    mounted.current = true;
     setApprovalsLoading(true);
-    // reset handled in message components
-    (async () => {
-      try {
-        const res = await getPendingApprovals(chat.id);
+    getConversationStatus(chat.id)
+      .then((status) => {
         if (!active) return;
-        setApprovals(res || []);
-      } finally {
-        if (active) setApprovalsLoading(false);
-      }
-    })();
+        applyResult(status);
+        setApprovalsLoading(false);
+      })
+      .catch((error) => {
+        if (active) showError(error);
+      });
     return () => {
       active = false;
+      mounted.current = false;
     };
-  }, [chat]);
+  }, [chat.id, applyResult, showError]);
 
+  const messageCount = chatLocal.messages.length;
+  const approvalCount = approvals.length;
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [chatLocal.messages.length]);
+    if (messageCount || approvalCount || isThinking)
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messageCount, approvalCount, isThinking]);
+
+  // A server failure may follow a persisted message or decision. Reload before offering
+  // another send so a retry cannot submit the same draft twice.
+  const recover = async (error: unknown) => {
+    showError(error);
+    try {
+      const status = await getConversationStatus(chatLocal.id);
+      if (!mounted.current) return;
+      applyResult(status);
+      setApprovalsLoading(false);
+    } catch {
+      // Keep the draft and block sends until status can be checked again.
+      if (mounted.current) setApprovalsLoading(true);
+    }
+  };
 
   const onSend = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() || busy || approvals.length || ready) return;
     const content = input.trim();
-    setInput('');
+    pendingSend.current = { content, previousCount: chatLocal.messages.length };
+    setError(null);
     setIsThinking(true);
     try {
       const result = await sendUserMessage(chatLocal.id, content);
-      if (result.done) {
-        setChatLocal(result.chat as Chat);
-        setApprovals([]);
-      } else {
-        setApprovals(result.approvals || []);
-      }
+      if (!mounted.current) return;
+      applyResult(result);
+      setInput('');
+    } catch (error) {
+      await recover(error);
     } finally {
-      setIsThinking(false);
+      if (mounted.current) setIsThinking(false);
     }
   };
 
-  const onApprove = async (index: number) => {
-    setApprovingIndex(index);
+  const onDecision = async (index: number, approved: boolean) => {
+    if (busy) return;
+    setError(null);
+    (approved ? setApprovingIndex : setRejectingIndex)(index);
     try {
-      const res = await approveTool(chatLocal.id, index);
-      const remaining = res.approvals || [];
-      setApprovals(remaining);
-      if (remaining.length === 0) {
+      const result = await (approved ? approveTool : rejectTool)(chatLocal.id, index);
+      if (!mounted.current) return;
+      applyResult(result);
+      if (!result.approvals.length) {
         setIsThinking(true);
-        try {
-          const cont = await continueAfterApprovals(chatLocal.id);
-          if (cont.done && cont.chat) {
-            setChatLocal(cont.chat as Chat);
-            setApprovals([]);
-          } else {
-            setApprovals(cont.approvals || []);
-          }
-        } finally {
-          setIsThinking(false);
-        }
+        applyResult(await continueAfterApprovals(chatLocal.id));
       }
+    } catch (error) {
+      await recover(error);
     } finally {
-      setApprovingIndex(null);
+      if (mounted.current) {
+        setApprovingIndex(null);
+        setRejectingIndex(null);
+        setIsThinking(false);
+      }
     }
   };
 
-  const onReject = async (index: number) => {
-    setRejectingIndex(index);
+  const retry = async () => {
+    if (isThinking || approvingIndex !== null || rejectingIndex !== null) return;
+    setError(null);
+    setIsThinking(true);
     try {
-      const res = await rejectTool(chatLocal.id, index);
-      setApprovals(res.approvals || []);
+      const status = await getConversationStatus(chatLocal.id);
+      if (!mounted.current) return;
+      applyResult(status);
+      setApprovalsLoading(false);
+      if (status.ready && !status.approvals.length)
+        applyResult(await continueAfterApprovals(chatLocal.id));
+    } catch (error) {
+      await recover(error);
     } finally {
-      setRejectingIndex(null);
+      if (mounted.current) setIsThinking(false);
     }
   };
 
@@ -130,14 +182,16 @@ export default function ChatColumn({ chat }: { chat: Chat }) {
         ))}
 
         {isThinking && (
-          <div className="p-3 rounded bg-emerald-500/5 text-gray-300">
-            <div className="text-[10px] tracking-wide uppercase text-gray-500 mb-1">assistant</div>
+          <div className="p-3 rounded-sm bg-emerald-500/5 text-gray-300">
+            <div className="text-[10px] tracking-wide uppercase text-gray-500 mb-1">
+              assistant
+            </div>
             <div className="text-sm animate-pulse">Thinking…</div>
           </div>
         )}
 
         {(approvalsLoading || approvals.length > 0) && (
-          <div className="mt-2 border border-yellow-500/20 rounded p-3 bg-yellow-500/10 text-yellow-100">
+          <div className="mt-2 border border-yellow-500/20 rounded-sm p-3 bg-yellow-500/10 text-yellow-100">
             <div className="font-semibold mb-1">Tool approvals</div>
             <div className="text-xs text-yellow-200/90 mb-2">
               Read-only tools run automatically. Approve changes to continue.
@@ -153,8 +207,9 @@ export default function ChatColumn({ chat }: { chat: Chat }) {
                   <ApprovalItem
                     key={a.index}
                     a={a}
-                    onApprove={() => onApprove(a.index)}
-                    onReject={() => onReject(a.index)}
+                    onApprove={() => onDecision(a.index, true)}
+                    onReject={() => onDecision(a.index, false)}
+                    disabled={busy}
                     isApproving={approvingIndex === a.index}
                     isRejecting={rejectingIndex === a.index}
                   />
@@ -164,11 +219,24 @@ export default function ChatColumn({ chat }: { chat: Chat }) {
           </div>
         )}
 
+        {(error || ready) && (
+          <div role="alert" className="text-red-300">
+            {error}{' '}
+            <button
+              type="button"
+              onClick={retry}
+              disabled={isThinking || approvingIndex !== null || rejectingIndex !== null}
+            >
+              {ready ? 'Resume turn' : 'Refresh status'}
+            </button>
+          </div>
+        )}
         <div ref={bottomRef} />
       </div>
 
       <div className="flex-none border-t border-white/10 p-2 md:p-3 flex gap-2 bg-black/30">
         <input
+          disabled={busy || approvals.length > 0 || ready}
           value={input}
           onKeyDown={(e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
@@ -178,12 +246,13 @@ export default function ChatColumn({ chat }: { chat: Chat }) {
           }}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Type a message..."
-          className="flex-1 border border-white/10 rounded px-3 py-2 bg-black/40 text-gray-100 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-600/40"
+          className="flex-1 border border-white/10 rounded-sm px-3 py-2 bg-black/40 text-gray-100 placeholder:text-gray-500 focus:outline-hidden focus:ring-2 focus:ring-blue-600/40"
         />
         <button
+          type="button"
           onClick={onSend}
-          className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-50"
-          disabled={input.trim().length === 0}
+          className="px-4 py-2 rounded-sm bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-50"
+          disabled={busy || approvals.length > 0 || ready || input.trim().length === 0}
         >
           Send
         </button>
@@ -198,12 +267,14 @@ function ApprovalItem({
   onReject,
   isApproving,
   isRejecting,
+  disabled,
 }: {
   a: ApprovalPreview;
   onApprove: () => void;
   onReject: () => void;
   isApproving?: boolean;
   isRejecting?: boolean;
+  disabled?: boolean;
 }) {
   const isUpdateNote = a.name === 'update_note';
   const noteIdParam =
@@ -292,7 +363,8 @@ function ApprovalItem({
         {(() => {
           const titleChanged = typeof nextTitle === 'string' && nextTitle !== currentTitle;
           const dateChanged = typeof nextDate === 'string' && nextDate !== currentDate;
-          const tagsChanged = proposedTags !== null && (toAdd.length > 0 || toRemove.length > 0);
+          const tagsChanged =
+            proposedTags !== null && (toAdd.length > 0 || toRemove.length > 0);
           return !titleChanged && !dateChanged && !tagsChanged;
         })() && <div className="mt-1 text-xs text-gray-400">No changes</div>}
       </div>
@@ -300,7 +372,7 @@ function ApprovalItem({
   };
 
   return (
-    <div className="border border-white/10 rounded p-2 bg-black/20">
+    <div className="border border-white/10 rounded-sm p-2 bg-black/20">
       <div className="flex items-center gap-2">
         {!isUpdateNote && <div className="text-sm font-medium text-gray-100">{a.name}</div>}
       </div>
@@ -315,22 +387,25 @@ function ApprovalItem({
 
       <div className="mt-2 flex gap-2 items-center">
         <button
-          className="px-2 py-1 text-xs rounded bg-green-600 hover:bg-green-500 text-white disabled:opacity-50"
+          type="button"
+          className="px-2 py-1 text-xs rounded-sm bg-green-600 hover:bg-green-500 text-white disabled:opacity-50"
           onClick={onApprove}
-          disabled={!!isApproving || !!isRejecting}
+          disabled={disabled || !!isApproving || !!isRejecting}
         >
           {isApproving ? 'Approving…' : 'Approve'}
         </button>
         <button
-          className="px-2 py-1 text-xs rounded bg-red-600 hover:bg-red-500 text-white disabled:opacity-50"
+          type="button"
+          className="px-2 py-1 text-xs rounded-sm bg-red-600 hover:bg-red-500 text-white disabled:opacity-50"
           onClick={onReject}
-          disabled={!!isApproving || !!isRejecting}
+          disabled={disabled || !!isApproving || !!isRejecting}
         >
           {isRejecting ? 'Rejecting…' : 'Reject'}
         </button>
         {isUpdateNote && (
           <button
-            className="px-2 py-1 text-[11px] rounded border border-white/10 text-gray-300 hover:bg-white/5"
+            type="button"
+            className="px-2 py-1 text-[11px] rounded-sm border border-white/10 text-gray-300 hover:bg-white/5"
             onClick={() => setViewJson((v) => !v)}
           >
             {viewJson ? 'View text' : 'View JSON'}

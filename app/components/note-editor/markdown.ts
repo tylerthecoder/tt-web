@@ -172,7 +172,9 @@ export function configureNoteMarkdown(ctx: Ctx) {
         ...schema.toMarkdown,
         runner: (state, node) => {
           if (node.content.size) return schema.toMarkdown.runner(state, node);
-          state.addNode('paragraph', [], undefined, { [blankLinesKey]: node.attrs[blankLinesKey] });
+          state.addNode('paragraph', [], undefined, {
+            [blankLinesKey]: node.attrs[blankLinesKey],
+          });
         },
       },
     };

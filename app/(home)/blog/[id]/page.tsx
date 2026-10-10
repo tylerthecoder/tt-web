@@ -1,6 +1,6 @@
 import { format } from 'date-fns'; // Using format for a specific date string
-import { Metadata, ResolvingMetadata } from 'next';
-import { FaCalendarAlt } from 'react-icons/fa';
+import { Calendar as FaCalendarAlt } from 'lucide-react';
+import type { Metadata, ResolvingMetadata } from 'next';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -42,7 +42,7 @@ export default async function Page(props: Props) {
         <h1 className="text-4xl md:text-5xl font-bold mb-4 text-blue-300"> {blog.title} </h1>
         {blog.createdAt && (
           <div className="flex items-center text-gray-400 mb-8 text-sm">
-            <FaCalendarAlt className="mr-2" />
+            <FaCalendarAlt size="1em" className="mr-2" />
             Published on {format(new Date(blog.createdAt), 'MMMM d, yyyy')}
           </div>
         )}

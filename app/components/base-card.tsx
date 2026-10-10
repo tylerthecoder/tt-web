@@ -1,7 +1,7 @@
 'use client';
 
 import { formatDistance } from 'date-fns';
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 import type { LayoutMode } from '@/(panel)/notes/page';
 
@@ -41,7 +41,7 @@ export function BaseCard({
   if (layout === 'grid') {
     return (
       <div
-        className={`group h-full overflow-hidden rounded-lg border border-gray-700/80 bg-gray-800/90 shadow-sm transition-colors hover:border-gray-600 ${accentClasses}`}
+        className={`group h-full overflow-hidden rounded-lg border border-gray-700/80 bg-gray-800/90 shadow-xs transition-colors hover:border-gray-600 ${accentClasses}`}
       >
         <div className="flex h-full flex-col p-4">
           <div className="flex min-h-[104px] items-start gap-3">
@@ -74,7 +74,7 @@ export function BaseCard({
 
   return (
     <div
-      className={`group overflow-hidden rounded-lg border border-gray-700/80 bg-gray-800/90 shadow-sm transition-colors hover:border-gray-600 ${accentClasses}`}
+      className={`group overflow-hidden rounded-lg border border-gray-700/80 bg-gray-800/90 shadow-xs transition-colors hover:border-gray-600 ${accentClasses}`}
     >
       <div className="flex flex-col gap-2 px-3 py-2 md:flex-row md:items-center">
         <div className="flex min-w-0 flex-1 items-center gap-2">
@@ -85,7 +85,7 @@ export function BaseCard({
                 {title}
               </h3>
               {typeLabel && (
-                <span className="hidden shrink-0 rounded bg-gray-700/70 px-1.5 py-0.5 text-[10px] font-medium text-gray-300 sm:inline">
+                <span className="hidden shrink-0 rounded-sm bg-gray-700/70 px-1.5 py-0.5 text-[10px] font-medium text-gray-300 sm:inline">
                   {typeLabel}
                 </span>
               )}

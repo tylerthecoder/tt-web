@@ -1,43 +1,26 @@
 'use client';
 
+import { Menu as FaBars, X as FaTimes } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
-import { FaBars, FaTimes } from 'react-icons/fa';
+import { useEffect, useState } from 'react';
 
 import NavItem from './navitem';
 
-interface NavItem {
+interface NavItemData {
   label: string;
   href: string;
 }
 
 interface NavbarClientProps {
-  navItems: NavItem[];
+  navItems: NavItemData[];
 }
 
 const NavbarClient = ({ navItems }: NavbarClientProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   const pathname = usePathname();
 
-  // Check if viewport is mobile
-  useEffect(() => {
-    const checkIfMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    // Initial check
-    checkIfMobile();
-
-    // Listen for resize events
-    window.addEventListener('resize', checkIfMobile);
-
-    // Clean up
-    return () => window.removeEventListener('resize', checkIfMobile);
-  }, []);
-
-  // Close mobile menu when route changes
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Navigation intentionally closes the menu.
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [pathname]);
@@ -75,8 +58,9 @@ const NavbarClient = ({ navItems }: NavbarClientProps) => {
             Tyler's Things
           </Link>
           <button
+            type="button"
             onClick={toggleMobileMenu}
-            className="text-white focus:outline-none"
+            className="text-white focus:outline-hidden"
             aria-label="Toggle menu"
           >
             {isMobileMenuOpen ? <FaTimes size={24} /> : <FaBars size={24} />}

@@ -1,12 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import React, { Suspense, useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { Suspense, useEffect, useState } from 'react';
 
 function GoogleAuthContent() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -48,19 +47,23 @@ function GoogleAuthContent() {
             </div>
           )}
           <p className="mb-4 text-gray-700">
-            Connect your Google account to access and sync your Google Docs with your notes system.
-            This integration requires access to your Google Drive and Google Docs.
+            Connect your Google account to access and sync your Google Docs with your notes
+            system. This integration requires access to your Google Drive and Google Docs.
           </p>
         </div>
         <div className="p-6 bg-gray-50 flex justify-between">
           <Link href="/">
-            <button className="py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+            <button
+              type="button"
+              className="py-2 px-4 border border-gray-300 rounded-md shadow-xs text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+            >
               Cancel
             </button>
           </Link>
           <button
+            type="button"
             onClick={handleLogin}
-            className="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+            className="py-2 px-4 border border-transparent rounded-md shadow-xs text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
           >
             Connect with Google
           </button>

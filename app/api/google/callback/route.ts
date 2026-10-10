@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 
 import { isPreviewOrigin, signSessionHandoff } from '@/utils/auth';
 import { getTT } from '@/utils/utils';
@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
 
     if (error) {
       console.error('Google auth error:', error);
-      return NextResponse.redirect(new URL('/login?error=' + error, url.origin));
+      return NextResponse.redirect(new URL(`/login?error=${error}`, url.origin));
     }
 
     if (!code) {
@@ -39,7 +39,9 @@ export async function GET(req: NextRequest) {
     const adminEmail = process.env.ADMIN_EMAIL;
     if (!adminEmail) {
       console.error('ADMIN_EMAIL environment variable not set');
-      return NextResponse.redirect(new URL('/login?error=admin_email_not_configured', url.origin));
+      return NextResponse.redirect(
+        new URL('/login?error=admin_email_not_configured', url.origin),
+      );
     }
 
     if (!userEmail) {
@@ -73,7 +75,9 @@ export async function GET(req: NextRequest) {
         }
         if (!isPreviewOrigin(returnOrigin)) {
           console.error('Invalid returnOrigin in state');
-          return NextResponse.redirect(new URL('/login?error=invalid_return_origin', url.origin));
+          return NextResponse.redirect(
+            new URL('/login?error=invalid_return_origin', url.origin),
+          );
         }
 
         // Send the user back to the preview environment with signed params

@@ -1,24 +1,24 @@
 import { useEffect, useRef } from 'react';
 
 import { useAnimationFrame } from '../../hooks/useAnimationFrame';
-import { drawCircle, Vector } from '../../services/drawingService';
+import { drawCircle, type Vector } from '../../services/drawingService';
 
 const maxY = Math.sqrt(3) / 2;
 const points: Array<{ x: number; y: number }> = [{ x: 0, y: 0 }];
 
 const getNextPoint = (currentPoint: Vector): Vector => {
   const c = Math.floor(Math.random() * 3);
-  if (c == 0) {
+  if (c === 0) {
     return {
       x: 0.5 * currentPoint.x,
       y: 0.5 * currentPoint.y,
     };
-  } else if (c == 1) {
+  } else if (c === 1) {
     return {
       x: 0.5 * currentPoint.x + 0.25,
       y: 0.5 * currentPoint.y + Math.sqrt(3) / 4,
     };
-  } else if (c == 2) {
+  } else if (c === 2) {
     return {
       x: 0.5 * currentPoint.x + 0.5,
       y: 0.5 * currentPoint.y,
@@ -70,7 +70,7 @@ export function SierpinskiBackground() {
     if (canvasRef.current) {
       loop(canvasRef.current);
     }
-  }, []);
+  });
 
   useEffect(() => {
     const listener = () => {
@@ -89,5 +89,5 @@ export function SierpinskiBackground() {
     drawAll(canvas);
   });
 
-  return <canvas ref={canvasRef}></canvas>;
+  return <canvas data-background="sierpinski" ref={canvasRef} />;
 }

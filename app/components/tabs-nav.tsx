@@ -1,18 +1,18 @@
 'use client';
 
+import {
+  CalendarDays as FaCalendarDay,
+  Clock as FaClock,
+  FileText as FaFileAlt,
+  List as FaList,
+  ListTodo as FaListAlt,
+  Bot as FaRobot,
+  StickyNote as FaStickyNote,
+  TreePine as FaTree,
+} from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo } from 'react';
-import {
-  FaCalendarDay,
-  FaClock,
-  FaFileAlt,
-  FaList,
-  FaListAlt,
-  FaRobot,
-  FaStickyNote,
-  FaTree,
-} from 'react-icons/fa';
 
 interface Tab {
   id: string;
@@ -27,7 +27,7 @@ const tabs: Tab[] = [
   {
     id: 'daily',
     label: 'Daily',
-    icon: <FaCalendarDay />,
+    icon: <FaCalendarDay size="1em" />,
     href: '/daily',
     hotkey: 'd',
     isActive: (pathname) => pathname.startsWith('/daily'),
@@ -35,7 +35,7 @@ const tabs: Tab[] = [
   {
     id: 'todos',
     label: 'Todos',
-    icon: <FaListAlt />,
+    icon: <FaListAlt size="1em" />,
     href: '/todos',
     hotkey: 't',
     isActive: (pathname) => pathname.startsWith('/todos'),
@@ -43,7 +43,7 @@ const tabs: Tab[] = [
   {
     id: 'lists',
     label: 'Lists',
-    icon: <FaList />,
+    icon: <FaList size="1em" />,
     href: '/lists',
     hotkey: 'l',
     isActive: (pathname) => pathname.startsWith('/lists') || pathname.startsWith('/list/'),
@@ -51,7 +51,7 @@ const tabs: Tab[] = [
   {
     id: 'jots',
     label: 'Jots',
-    icon: <FaStickyNote />,
+    icon: <FaStickyNote size="1em" />,
     href: '/jots',
     hotkey: 'j',
     isActive: (pathname) => pathname.startsWith('/jots'),
@@ -59,7 +59,7 @@ const tabs: Tab[] = [
   {
     id: 'notes',
     label: 'Notes',
-    icon: <FaFileAlt />,
+    icon: <FaFileAlt size="1em" />,
     href: '/notes',
     hotkey: 'n',
     isActive: (pathname) => pathname.startsWith('/notes') || pathname.startsWith('/note/'),
@@ -67,7 +67,7 @@ const tabs: Tab[] = [
   {
     id: 'time',
     label: 'Time',
-    icon: <FaClock />,
+    icon: <FaClock size="1em" />,
     href: '/time',
     hotkey: 'm',
     isActive: (pathname) => pathname.startsWith('/time'),
@@ -75,7 +75,7 @@ const tabs: Tab[] = [
   {
     id: 'redwood',
     label: 'Redwood',
-    icon: <FaTree />,
+    icon: <FaTree size="1em" />,
     href: '/b/redwood',
     hotkey: 'r',
     isActive: (pathname) => pathname.startsWith('/b/redwood'),
@@ -83,7 +83,7 @@ const tabs: Tab[] = [
   {
     id: 'ai',
     label: 'AI Chat',
-    icon: <FaRobot />,
+    icon: <FaRobot size="1em" />,
     href: '/ai',
     hotkey: 'a',
     isActive: (pathname) => pathname.startsWith('/ai'),
@@ -101,13 +101,19 @@ export function TabsNav() {
   }, [pathname]);
 
   useEffect(() => {
-    tabs.forEach((t) => router.prefetch?.(t.href));
+    tabs.forEach((t) => {
+      router.prefetch(t.href);
+    });
   }, [router]);
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
       const target = event.target as HTMLElement;
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)
+      if (
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.isContentEditable
+      )
         return;
       // Ignore when any modifier keys are pressed to avoid overriding browser/system shortcuts
       if (event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return;
@@ -127,7 +133,7 @@ export function TabsNav() {
   }, [handleKeyDown]);
 
   return (
-    <div className="border-b border-gray-700 overflow-x-auto flex-shrink-0">
+    <div className="border-b border-gray-700 overflow-x-auto shrink-0">
       <div className="flex min-w-max md:min-w-0">
         {tabs.map((tab) => (
           <Link
