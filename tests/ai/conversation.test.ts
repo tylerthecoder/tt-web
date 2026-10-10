@@ -215,6 +215,57 @@ describe('AI persistence and recovery', () => {
     );
     expect((await f.engine().status('chat')).ready).toBe(false);
   });
+  test('an old uncertain write does not hide later replies or new approvals', async () => {
+    const f = fixture([
+      response([update('first')]),
+      answer,
+      response([
+        { type: 'tool-call', toolCallId: 'read', toolName: 'get_note', input: '{"id":"note"}' },
+      ]),
+      response([{ type: 'text', text: 'Here is the current note.' }]),
+      response([update('second')]),
+      answer,
+    ]);
+    const sent = await f.engine().send('chat', 'Update');
+    await f.engine().decide('chat', sent.approvals[0].index, true);
+    const updateNote = f.services.notes.updateNote;
+    f.services.notes.updateNote = async () => {
+      throw new Error('connection lost');
+    };
+    await f.engine().resume('chat');
+    f.services.notes.updateNote = updateNote;
+
+    const read = await f.engine().send('chat', 'Read the note so I can check it');
+    expect(read.chat?.messages.at(-1)?.content).toBe('Here is the current note.');
+    const proposal = await f.engine().send('chat', 'Make this new change');
+    expect(proposal.approvals).toHaveLength(1);
+    expect(proposal.chat?.messages.at(-1)?.content).toBe('Make this new change');
+    await f.engine().decide('chat', proposal.approvals[0].index, true);
+    const completed = await f.engine().resume('chat');
+    expect(completed.chat?.messages.at(-1)?.content).toBe('Done.');
+    expect(f.writes).toEqual([{ id: 'note', update: { title: 'second' } }]);
+    expect((f.chat().state as { writes: Record<string, unknown> }).writes.first).toEqual({
+      status: 'started',
+    });
+  });
+  test('retrying a failed continuation still warns and never repeats its uncertain write', async () => {
+    const f = fixture([response([update('first')])]);
+    const sent = await f.engine().send('chat', 'Update');
+    await f.engine().decide('chat', sent.approvals[0].index, true);
+    let attempted = 0;
+    f.services.notes.updateNote = async () => {
+      attempted++;
+      throw new Error('connection lost');
+    };
+    f.model.doGenerate = async () => {
+      throw new Error('provider unavailable');
+    };
+    await expect(f.engine().resume('chat')).rejects.toThrow('provider unavailable');
+    f.model.doGenerate = async () => answer;
+    const retried = await f.engine().resume('chat');
+    expect(attempted).toBe(1);
+    expect(retried.chat?.messages.at(-1)?.content).toContain('could not be confirmed');
+  });
   test('receipt save rejection does not poison subsequent saves', async () => {
     const f = fixture([response([update('first')]), answer]);
     const sent = await f.engine().send('chat', 'Update');

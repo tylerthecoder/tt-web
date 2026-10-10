@@ -36,7 +36,9 @@ export default function ChatMessageView({ message }: { message: ChatMessage }) {
           </pre>
         ) : null
       ) : (
-        <div className="whitespace-pre-wrap leading-relaxed">{message.content}</div>
+        <div className="whitespace-pre-wrap wrap-anywhere leading-relaxed">
+          {message.content}
+        </div>
       )}
     </div>
   );

@@ -40,6 +40,37 @@ test('a stale Mongo commit fails instead of falling back to an unfenced write', 
   expect(calls).toBe(1);
 });
 
+test('completing an Agent run removes its saved approvals and appends the reply atomically', async () => {
+  const document: Record<string, any> = {
+    _id: chatId,
+    state: 'serialized-agent-state-with-pending-approval',
+    messages: [],
+  };
+  const calls: Array<{ filter: any; update: any }> = [];
+  const chats = new ChatsService({
+    async findOneAndUpdate(filter: any, update: any) {
+      calls.push({ filter, update });
+      // Model Mongo's ignoreUndefined option: an explicit $unset must clear state.
+      for (const [key, value] of Object.entries(update.$set ?? {})) {
+        if (value !== undefined) document[key] = value;
+      }
+      for (const key of Object.keys(update.$unset ?? {})) delete document[key];
+      document.messages.push(...(update.$push?.messages.$each ?? []));
+      return structuredClone(document);
+    },
+  } as unknown as ConstructorParameters<typeof ChatsService>[0]);
+  const chat = await chats.commitRun(chatId, 'owner', undefined, [
+    { role: 'assistant', content: 'Finished' },
+  ]);
+  expect(calls).toHaveLength(1);
+  expect(calls[0].filter['runLease.token']).toBe('owner');
+  expect(calls[0].filter['runLease.expiresAt'].$gt).toBe(calls[0].update.$set.updatedAt);
+  expect(calls[0].update.$unset).toEqual({ state: '' });
+  expect(calls[0].update.$set).not.toHaveProperty('state');
+  expect(chat).not.toHaveProperty('state');
+  expect(chat.messages.map((message) => message.content)).toEqual(['Finished']);
+});
+
 test('Mongo renewal requires a live token and release only removes its own token', async () => {
   const calls: Array<{ filter: any; update: any }> = [];
   const chats = new ChatsService({

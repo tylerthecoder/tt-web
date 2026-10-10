@@ -117,6 +117,7 @@ export function createConversation(services: Services, model: LanguageModel, lea
       return { chat: await services.chats.getChatById(id), done: true, approvals: [] };
     const messages = [...state.messages];
     if (state.decisions.length) messages.push({ role: 'tool', content: state.decisions });
+    const attemptedWrites = new Set<string>();
     const tools = {
       get_note: tool({
         description: 'Read a note by ID.',
@@ -138,6 +139,7 @@ export function createConversation(services: Services, model: LanguageModel, lea
         inputSchema: updateSchema,
         execute: ({ noteId, ...update }, { toolCallId }) =>
           serializeWrite(noteId, async () => {
+            attemptedWrites.add(toolCallId);
             const previous = state.writes[toolCallId];
             if (previous?.status === 'done') return previous.result;
             if (previous)
@@ -182,8 +184,9 @@ export function createConversation(services: Services, model: LanguageModel, lea
         : [],
     );
     state.ready = false;
-    const interruptedWrite = Object.values(state.writes).some(
-      (write) => write.status === 'started',
+    // Keep historical receipts to prevent replay, but only warn about this continuation.
+    const interruptedWrite = [...attemptedWrites].some(
+      (toolCallId) => state.writes[toolCallId]?.status === 'started',
     );
     const warning =
       'A note update could not be confirmed. It may have been applied. Check the note before approving another change; this chat will not repeat that update automatically.';

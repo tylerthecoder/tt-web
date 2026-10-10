@@ -8,12 +8,30 @@ export const chats: Record<
 );
 const ready = new Set(mode === 'reload' ? ['one'] : []);
 let failStatus = false;
+let statusRequests = 0;
+let failedOnce = false;
 export async function getConversationStatus(id: string) {
+  statusRequests++;
+  if (mode === 'stale-initial-status' && statusRequests === 1) {
+    const chat = structuredClone(chats[id]);
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    return { chat, approvals: [], ready: false };
+  }
+  if (new URLSearchParams(location.search).get('status') === 'unavailable') {
+    throw new Error('Status unavailable');
+  }
+  if (new URLSearchParams(location.search).get('status') === 'fail-once' && !failedOnce) {
+    failedOnce = true;
+    throw new Error('Status unavailable');
+  }
   if (failStatus) {
     failStatus = false;
     throw new Error('Status unavailable');
   }
-  return { chat: structuredClone(chats[id]), approvals: [], ready: ready.has(id) };
+  const approvals = new URLSearchParams(location.search).has('approval')
+    ? [{ index: 0, name: 'update_note', args: { noteId: 'example-note', title: 'New title' } }]
+    : [];
+  return { chat: structuredClone(chats[id]), approvals, ready: ready.has(id) };
 }
 export async function sendUserMessage(id: string, content: string) {
   if (mode === 'reject') throw new Error('Request not accepted');

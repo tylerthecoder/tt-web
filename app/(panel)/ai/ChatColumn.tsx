@@ -38,7 +38,7 @@ export default function ChatColumn({ chat }: { chat: Chat }) {
   // Per-message expand state is managed inside ChatMessageView
   const [chatLocal, setChatLocal] = useState<Chat>(chat);
   const [approvals, setApprovals] = useState<ApprovalPreview[]>([]);
-  const [approvalsLoading, setApprovalsLoading] = useState(false);
+  const [approvalsLoading, setApprovalsLoading] = useState(true);
   const [isThinking, setIsThinking] = useState(false);
   const [approvingIndex, setApprovingIndex] = useState<number | null>(null);
   const [rejectingIndex, setRejectingIndex] = useState<number | null>(null);
@@ -75,15 +75,20 @@ export default function ChatColumn({ chat }: { chat: Chat }) {
   }, []);
 
   useEffect(() => {
+    let active = true;
     mounted.current = true;
     setApprovalsLoading(true);
     getConversationStatus(chat.id)
-      .then(applyResult)
-      .catch(showError)
-      .finally(() => {
-        if (mounted.current) setApprovalsLoading(false);
+      .then((status) => {
+        if (!active) return;
+        applyResult(status);
+        setApprovalsLoading(false);
+      })
+      .catch((error) => {
+        if (active) showError(error);
       });
     return () => {
+      active = false;
       mounted.current = false;
     };
   }, [chat.id, applyResult, showError]);
@@ -101,6 +106,7 @@ export default function ChatColumn({ chat }: { chat: Chat }) {
       const status = await getConversationStatus(chatLocal.id);
       if (!mounted.current) return;
       applyResult(status);
+      setApprovalsLoading(false);
     } catch {
       // Keep the draft and block sends until status can be checked again.
       if (mounted.current) setApprovalsLoading(true);

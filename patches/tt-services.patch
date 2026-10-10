@@ -28,7 +28,7 @@ diff --git a/src/services/ChatsService.ts b/src/services/ChatsService.ts
  }
  
  export type CreatableChat = Omit<Chat, 'id' | 'createdAt' | 'updatedAt' | 'messages'> & {
-@@ -112,6 +113,56 @@
+@@ -112,6 +113,58 @@
      return convertChat(result);
    }
  
@@ -66,7 +66,9 @@ diff --git a/src/services/ChatsService.ts b/src/services/ChatsService.ts
 +    const result = await this.chatsCollection.findOneAndUpdate(
 +      { _id: new ObjectId(chatId), 'runLease.token': token,
 +        'runLease.expiresAt': { $gt: now } },
-+      { $set: { state, updatedAt: now },
++      { ...(state === undefined
++          ? { $set: { updatedAt: now }, $unset: { state: '' } }
++          : { $set: { state, updatedAt: now } }),
 +        ...(added.length ? { $push: { messages: { $each: added } } } : {}),
 +      },
 +      { returnDocument: 'after' },
