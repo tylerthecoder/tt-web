@@ -1,34 +1,46 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { isPreviewHost } from '@/utils/auth';
+import {
+  createOAuthAttempt,
+  isLoginOrigin,
+  OAUTH_TTL_SECONDS,
+  oauthCookieName,
+  privateAuthResponse,
+} from '@/utils/oauth';
 import { getTT } from '@/utils/utils';
 
 export async function GET(req: NextRequest) {
+  const url = new URL(req.url);
+  if (!isLoginOrigin(url)) {
+    return privateAuthResponse(
+      NextResponse.json(
+        { error: 'Login is only available on the production site or localhost.' },
+        { status: 403 },
+      ),
+    );
+  }
   try {
+    if (!process.env.ADMIN_EMAIL?.trim()) throw new Error('Admin email is not configured');
     const tt = await getTT();
-
-    const currentUrl = new URL(req.url);
-
-    if (isPreviewHost(currentUrl.hostname)) {
-      const redirectUrl = 'https://www.tylertracy.com/api/google/callback';
-      const returnUrl = `${currentUrl.protocol}//${currentUrl.hostname}/api/google/callback`;
-      const statePayload = { returnOrigin: returnUrl };
-      const state = Buffer.from(JSON.stringify(statePayload)).toString('base64url');
-      const authUrl = tt.google.getAuthUrl(redirectUrl, state);
-      console.log('Redirect URL', redirectUrl);
-      console.log('Return URL', returnUrl);
-      console.log('Auth URL', authUrl);
-      return NextResponse.redirect(authUrl);
-    }
-
-    const redirectUrl = `${currentUrl.origin}/api/google/callback`;
-    const authUrl = tt.google.getAuthUrl(redirectUrl);
-    return NextResponse.redirect(authUrl);
-  } catch (error) {
-    console.error('Error initiating Google auth:', error);
-    return NextResponse.json(
-      { error: 'Failed to initiate Google authentication' },
-      { status: 500 },
+    const attempt = createOAuthAttempt();
+    const authUrl = new URL(
+      tt.google.getAuthUrl(`${url.origin}/api/google/callback`, attempt.state),
+    );
+    authUrl.searchParams.set('code_challenge', attempt.challenge);
+    authUrl.searchParams.set('code_challenge_method', 'S256');
+    const response = NextResponse.redirect(authUrl);
+    response.cookies.set(oauthCookieName(), attempt.cookie, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: OAUTH_TTL_SECONDS,
+      path: '/',
+    });
+    return privateAuthResponse(response);
+  } catch {
+    console.error('Failed to initiate Google authentication');
+    return privateAuthResponse(
+      NextResponse.json({ error: 'Failed to initiate Google authentication' }, { status: 500 }),
     );
   }
 }

@@ -7,6 +7,7 @@ export default async function Page() {
 
   async function revalidate() {
     'use server';
+    await requireAuth();
     console.log('Revalidating blogs');
     revalidateTag('blog');
   }

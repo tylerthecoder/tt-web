@@ -2,12 +2,13 @@
 
 import { getTT } from '@/utils/utils';
 
-import { getGoogleUserId } from '../../utils/auth';
+import { getGoogleUserId, requireAuth } from '../../utils/auth';
 
 /**
  * Server action to track a Google Doc with our notes system
  */
 export async function trackGoogleDoc(docId: string) {
+  await requireAuth();
   try {
     const userId = await getGoogleUserId();
     if (!userId) {
@@ -34,6 +35,7 @@ export async function trackGoogleDoc(docId: string) {
  * Fetch a Google Drive file's metadata by id for the current user
  */
 export async function getGoogleDriveFileById(docId: string) {
+  await requireAuth();
   try {
     const userId = await getGoogleUserId();
     if (!userId) {

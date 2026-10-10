@@ -1,111 +1,58 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { isPreviewOrigin, signSessionHandoff } from '@/utils/auth';
+import { isAdminEmail } from '@/utils/auth-policy';
+import {
+  clearOAuthAttempt,
+  isLoginOrigin,
+  oauthCookieName,
+  validateOAuthAttempt,
+} from '@/utils/oauth';
 import { getTT } from '@/utils/utils';
 
 export async function GET(req: NextRequest) {
+  const url = new URL(req.url);
+  const fail = (reason: string) =>
+    clearOAuthAttempt(NextResponse.redirect(new URL(`/login?error=${reason}`, url.origin)));
+
+  if (!isLoginOrigin(url)) return fail('invalid_origin');
+  const verifier = validateOAuthAttempt(
+    url.searchParams.get('state'),
+    req.cookies.get(oauthCookieName())?.value,
+  );
+  if (!verifier) return fail('invalid_state');
+  if (url.searchParams.has('error')) return fail('access_denied');
+  const code = url.searchParams.get('code');
+  if (!code) return fail('no_code');
+  const adminEmail = process.env.ADMIN_EMAIL?.trim();
+  if (!adminEmail) return fail('admin_email_not_configured');
+
   try {
-    const url = new URL(req.url);
-    const code = url.searchParams.get('code');
-    const error = url.searchParams.get('error');
-    const state = url.searchParams.get('state');
-
-    if (error) {
-      console.error('Google auth error:', error);
-      return NextResponse.redirect(new URL('/login?error=' + error, url.origin));
-    }
-
-    if (!code) {
-      console.error('No code parameter received');
-      return NextResponse.redirect(new URL('/login?error=no_code', url.origin));
-    }
-
     const tt = await getTT();
+    // Authorize this exchange's identity before storing credentials. Never look
+    // identity up again through a shared, mutable OAuth client.
+    const token = await tt.google.getTokens(code, `${url.origin}/api/google/callback`, {
+      expectedEmail: adminEmail,
+      codeVerifier: verifier,
+    });
+    if (!isAdminEmail(token.userId)) return fail('unauthorized_email');
 
-    const redirectUrl = `${url.origin}/api/google/callback`;
-
-    console.log('Code', code);
-    console.log('Redirect URL', redirectUrl);
-    console.log('State', state);
-
-    // Exchange the code for tokens
-    const token = await tt.google.getTokens(code, redirectUrl);
-
-    // Get user info to check email
-    const userInfo = await tt.google.getUserInfo(token.userId);
-    const userEmail = userInfo?.email;
-
-    // Check if this is the admin email
-    const adminEmail = process.env.ADMIN_EMAIL;
-    if (!adminEmail) {
-      console.error('ADMIN_EMAIL environment variable not set');
-      return NextResponse.redirect(new URL('/login?error=admin_email_not_configured', url.origin));
-    }
-
-    if (!userEmail) {
-      console.error('Could not get user email from Google');
-      return NextResponse.redirect(new URL('/login?error=no_email', url.origin));
-    }
-
-    if (userEmail !== adminEmail) {
-      console.error(`Unauthorized email attempted login: ${userEmail}`);
-      return NextResponse.redirect(new URL('/login?error=unauthorized_email', url.origin));
-    }
-
-    // Create DB-backed session
     const session = await tt.sessions.createSession({
       userId: token.userId,
-      userEmail,
+      userEmail: token.userId,
       userAgent: req.headers.get('user-agent') || undefined,
-      ip: req.headers.get('x-forwarded-for') || undefined,
     });
-
-    // If state contains a preview domain, redirect back there via a bridge endpoint
-    if (state) {
-      try {
-        const decoded = JSON.parse(Buffer.from(state, 'base64url').toString('utf8')) as {
-          returnOrigin?: string;
-        };
-        const returnOrigin = decoded?.returnOrigin;
-        if (!returnOrigin) {
-          console.error('No returnOrigin in state');
-          return NextResponse.redirect(new URL('/login?error=no_return_origin', url.origin));
-        }
-        if (!isPreviewOrigin(returnOrigin)) {
-          console.error('Invalid returnOrigin in state');
-          return NextResponse.redirect(new URL('/login?error=invalid_return_origin', url.origin));
-        }
-
-        // Send the user back to the preview environment with signed params
-        const bridgeUrl = new URL('/api/google/bridge', returnOrigin);
-
-        const ts = Date.now().toString();
-        const sid = session.sessionId;
-        const sig = signSessionHandoff(sid, ts);
-        bridgeUrl.searchParams.set('sid', sid);
-        bridgeUrl.searchParams.set('ts', ts);
-        bridgeUrl.searchParams.set('sig', sig);
-
-        return NextResponse.redirect(bridgeUrl);
-      } catch (e) {
-        console.warn('Failed to parse state:', e);
-      }
-    }
-
-    // Otherwise, set opaque cookie on prod and redirect to panel
-    const finalRedirect = new URL('/panel', url.origin);
-    const response = NextResponse.redirect(finalRedirect);
+    const response = NextResponse.redirect(new URL('/panel', url.origin));
     response.cookies.set('tt_session', session.sessionId, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 30 * 24 * 60 * 60, // 30 days
+      expires: session.expiresAt,
       path: '/',
     });
-
-    return response;
-  } catch (error) {
-    console.error('Error in Google callback:', error);
-    return NextResponse.redirect(new URL('/login?error=callback_failed', req.url));
+    return clearOAuthAttempt(response);
+  } catch {
+    // Provider exceptions can contain codes and credentials.
+    console.error('Google authentication callback failed');
+    return fail('callback_failed');
   }
 }

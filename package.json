@@ -5,7 +5,7 @@
     "@milkdown/ctx": "7.22.2",
     "@milkdown/kit": "7.22.2",
     "@milkdown/react": "7.22.2",
-    "@next/bundle-analyzer": "^15.5.18",
+    "@next/bundle-analyzer": "15.5.27",
     "@tailwindcss/typography": "^0.5.16",
     "@tanstack/react-query": "^5.51.1",
     "@vercel/analytics": "^1.5.0",
@@ -21,7 +21,7 @@
     "lucide-react": "^0.525.0",
     "mdast-util-to-markdown": "^2.1.2",
     "mongodb": "^6.18.0",
-    "next": "^15.5.18",
+    "next": "15.5.27",
     "pino": "^9.8.0",
     "pino-pretty": "^13.1.1",
     "postcss": "^8.5.6",
@@ -58,7 +58,7 @@
     "@types/react-dom": "^18.3.0",
     "@types/react-modal": "^3.16.3",
     "eslint": "^8.57.0",
-    "eslint-config-next": "^15.5.18",
+    "eslint-config-next": "15.5.27",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "prettier": "^3.6.2",
@@ -83,7 +83,11 @@
     "start:prod": "bun install && bun run build && bun run start",
     "typecheck": "tsc --noEmit",
     "test:editor": "bun test tests/editor/autosave.test.ts tests/editor/recovery.test.ts tests/editor/google-doc-link.test.ts tests/editor-markdown.test.ts",
-    "test:editor:browser": "playwright test"
+    "test:editor:browser": "playwright test",
+    "test:auth": "bun test tests/auth"
   },
-  "version": "1.0.0"
+  "version": "1.0.0",
+  "patchedDependencies": {
+    "tt-services@github:tylerthecoder/tt-services#f0f3a1f": "patches/tt-services-google-auth.patch"
+  }
 }

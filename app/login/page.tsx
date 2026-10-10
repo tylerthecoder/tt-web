@@ -19,6 +19,9 @@ function LoginContent() {
     const errorParam = searchParams?.get('error');
     if (errorParam) {
       switch (errorParam) {
+        case 'invalid_state':
+          setError('This sign-in attempt is no longer valid. Please try signing in again.');
+          break;
         case 'no_code':
           setError('No authorization code received from Google');
           break;
@@ -42,9 +45,7 @@ function LoginContent() {
 
   const handleGoogleSignIn = async () => {
     try {
-      // Include the current origin as return target (API will encode into state)
-      const returnUrl = encodeURIComponent(window.location.origin);
-      window.location.href = `/api/google/auth?return=${returnUrl}`;
+      window.location.href = '/api/google/auth';
     } catch (err) {
       console.error('Failed to initiate Google login:', err);
       setError('Failed to start Google authentication. Please try again.');

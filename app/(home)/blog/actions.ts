@@ -7,13 +7,13 @@ import markdownToHtml from './utils';
 export async function getBlogs() {
   const tylersThings = await getTT();
   const blogs = await tylersThings.notes.getPublishedNotes();
-  return blogs;
+  return blogs.filter((blog) => blog.published === true && !blog.deleted);
 }
 
 export async function getBlogMetadata(id: string) {
   const tylersThings = await getTT();
   const blog = await tylersThings.notes.getNoteMetadataById(id);
-  if (!blog) {
+  if (!blog || blog.published !== true || blog.deleted) {
     throw new Error(`Blog with id ${id} not found`);
   }
   return blog;
@@ -22,11 +22,8 @@ export async function getBlogMetadata(id: string) {
 export async function getBlog(id: string) {
   const tylersThings = await getTT();
   const blog = await tylersThings.notes.getNoteById(id);
-  if (!blog) {
+  if (!blog || blog.published !== true || blog.deleted) {
     throw new Error(`Blog with id ${id} not found`);
-  }
-  if (!blog.published) {
-    throw new Error(`Blog with id ${id} is not published`);
   }
   return blog;
 }
